@@ -1,0 +1,370 @@
+{
+  "xLen": 5,
+  "yLen": 5,
+  "zLen": 5,
+  "mapName": "Official Map 2",
+  "availableBlocks": [100, 102],
+  "playground": [
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null, null, {
+        "type": 104,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "face": "floor",
+          "facing": "north",
+          "powered": false
+        }
+      }],
+      [{
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, null, null, null],
+      [null, null, null, null, null],
+      [null, null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null, null],
+      [null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, null, null],
+      [null, null, null, null, null],
+      [null, null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [{
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, null],
+      [null, null, null, null, null],
+      [null, null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null],
+      [null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null],
+      [null, null, null, null, null],
+      [null, null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [{
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }],
+      [null, null, null, null, null],
+      [null, null, null, null, null]
+    ]
+  ], 
+  "validation": {
+    "leverLocations": [[0, 1, 4]], 
+    "lampLocations": [[0, 2, 0], [1, 2, 1], [2, 2, 0], [2, 2, 2], [3, 2, 1], [3, 2, 3], [4, 2, 0], [4, 2, 2], [4, 2, 4]], 
+    "boolFuncs": [[[1]], [[1]], [[1]], [[1]], [[1]], [[1]], [[1]], [[1]], [[1]]], 
+    "timeout": 500
+  }
+}

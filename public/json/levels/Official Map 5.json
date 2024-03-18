@@ -1,0 +1,1074 @@
+{
+  "xLen": 13,
+  "yLen": 7,
+  "zLen": 4,
+  "mapName": "Official Map 5",
+  "availableBlocks": [],
+  "playground": [
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "west"
+        }
+      }, null, null],
+      [null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null, null],
+      [null, null, null, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "west"
+        }
+      }, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "north"
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "south"
+        }
+      }, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "up"
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 15,
+          "source": true
+        }
+      }, null],
+      [null, null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "south"
+        }
+      }, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "up"
+        }
+      }, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 2,
+          "north": 0
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 2,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [{
+        "type": 104,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "face": "wall",
+          "facing": "north",
+          "powered": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, {
+        "type": 103,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false
+        }
+      }],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }],
+      [null, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "south"
+        }
+      }],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "south"
+        }
+      }],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "west"
+        }
+      }, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 2,
+          "north": 0
+        }
+      }, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null],
+      [null, null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 1,
+          "west": 1,
+          "north": 1
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 15,
+          "source": true
+        }
+      }, null],
+      [null, null, null, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "west"
+        }
+      }, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, {
+        "type": 102,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "delay": 1,
+          "facing": "west",
+          "locked": false,
+          "powered": true
+        }
+      }, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "lit": false,
+          "facing": "north"
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 0,
+          "west": 1,
+          "north": 0
+        }
+      }, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "south"
+        }
+      }, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "up"
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 15,
+          "source": true
+        }
+      }, null],
+      [null, null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 14,
+          "source": true,
+          "east": 1,
+          "south": 1,
+          "west": 1,
+          "north": 1
+        }
+      }, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "south"
+        }
+      }, null],
+      [null, {
+        "type": 101,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "lit": true,
+          "facing": "up"
+        }
+      }, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 1,
+          "west": 1,
+          "north": 1
+        }
+      }, null, null],
+      [null, null, null, null],
+      [null, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, null, null],
+      [null, {
+        "type": 100,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": true,
+          "east": 1,
+          "south": 1,
+          "west": 1,
+          "north": 1
+        }
+      }, null, null],
+      [null, null, null, null]
+    ],
+    [
+      [{
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }, {
+        "type": 1,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false
+        }
+      }],
+      [null, {
+        "type": 104,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "face": "wall",
+          "facing": "east",
+          "powered": false
+        }
+      }, null, null],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, {
+        "type": 104,
+        "breakable": false,
+        "states": {
+          "power": 0,
+          "source": false,
+          "face": "wall",
+          "facing": "east",
+          "powered": false
+        }
+      }, null, null],
+      [null, null, null, null],
+      [null, null, null, null]
+    ]
+  ]
+}
