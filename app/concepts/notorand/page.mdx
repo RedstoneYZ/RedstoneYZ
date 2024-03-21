@@ -14,9 +14,9 @@ import XorGate from "@/public/images/tutorials/notorand/xor-gate.png";
 ## NOT Gate
 **非閘**（NOT Gate）是個只有一個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「輸入是否等於 0」，NOT Gate 的真值表會是：
 
-{/* <Table content={tableData.notGate} /> */}
+{/* TODO: <Table content={tableData.notGate} /> */}
 
-<div className="rs-prop"><b>真值表</b>：一種把所有輸入的可能、以及每組輸入組合所對應的輸出全部列出來的表。</div>
+<div className="rs-prop">**真值表**：一種把所有輸入的可能、以及每組輸入組合所對應的輸出全部列出來的表。</div>
 
 從結果上來看，會發現 NOT Gate 在做的事情就是把 0 變成 1、1 變成 0，輸出都是輸入的否定狀態，這也是 NOT Gate 之所以被稱為 NOT Gate 的原因。
 
@@ -25,29 +25,29 @@ import XorGate from "@/public/images/tutorials/notorand/xor-gate.png";
 <Image src={NotGate} alt="紅石電路中的 NOT Gate" width={500}/>
 
 ## OR Gate
-<b>或閘</b>（OR Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「輸入 A 或輸入 B 其中一個是 1」，OR Gate 的真值表會是：
+**或閘**（OR Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「輸入 A 或輸入 B 其中一個是 1」，OR Gate 的真值表會是：
 
-{/* <Table content={tableData.orGate} /> */}
+{/* TODO: <Table content={tableData.orGate} /> */}
 
-其實 OR Gate 的規則可以換句話說：「輸入 A <b>或</b>輸入 B 其中一個是 1」，從這個角度來看，就可以很明顯地看出為什麼 OR Gate 被叫做 OR Gate 了。
+其實 OR Gate 的規則可以換句話說：「輸入 A **或**輸入 B 其中一個是 1」，從這個角度來看，就可以很明顯地看出為什麼 OR Gate 被叫做 OR Gate 了。
 
 在紅石電路中，要製作出 OR Gate 並不需要紅石粉以外的方塊，只需要把兩個輸入端用紅石粉連起來就可以了：
 <Image src={OrGate} alt="紅石電路中的 OR Gate" width={500}/>
 
 ## AND Gate
-<b>與閘</b>（AND Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「兩個輸入端是否都是 1」，AND Gate 的真值表會是：
+**與閘**（AND Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「兩個輸入端是否都是 1」，AND Gate 的真值表會是：
 
-{/* <Table content={tableData.andGate} /> */}
+{/* TODO: <Table content={tableData.andGate} /> */}
 
-就跟 OR Gate 差不多，AND Gate 的規則也可以換句話說：「輸入 A <b>與</b>輸入 B 都是 1」，如此一來 AND Gate 的命名來源也是顯而易見的。
+就跟 OR Gate 差不多，AND Gate 的規則也可以換句話說：「輸入 A **與**輸入 B 都是 1」，如此一來 AND Gate 的命名來源也是顯而易見的。
 
 在紅石電路中，要製作出 AND Gate 相對 NOT、OR Gate 而言比較複雜，會需要三個可充能方塊與三個紅石火把，並排列成下面的形式：
 <Image src={AndGate} alt="紅石電路中的 AND Gate" width={500}/>
 
 ## XOR Gate
-<b>異或閘</b>（XOR Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「兩個輸入端是否不相等」，XOR Gate 的真值表會是：
+**異或閘**（XOR Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「兩個輸入端是否不相等」，XOR Gate 的真值表會是：
 
-{/* <Table content={tableData.xorGate} /> */}
+{/* TODO: <Table content={tableData.xorGate} /> */}
 
 乍看之下，XOR Gate 似乎沒什麼特別的規律，但如果把 XOR Gate 看成是二進位的加法，輸入 A 與輸入 B 分別當成加數與被加數，輸出就可以當成和的個位數。事實上，在我們稍後將介紹的加法器中，正是利用了 XOR Gate 製作出來的。
 
@@ -59,4 +59,4 @@ import XorGate from "@/public/images/tutorials/notorand/xor-gate.png";
 就像在玩 Minecraft 一樣，你可以使用滑鼠滾輪來切換方塊，左鍵來破壞方塊，右鍵來放置方塊，對控制器按下右鍵時可以啟動控制器，點亮相鄰的紅石粉。
 當你把線路都接好時，可以按下下方的「檢查地圖」按鈕來檢查你的答案是否正確！
 
-{/* <Canvas canvasHeight={500} canvasWidth={500} checkable={true} preLoadData={Official_Map_4}></Canvas> */}
+{/* TODO: <Canvas canvasHeight={500} canvasWidth={500} checkable={true} preLoadData={Official_Map_4}></Canvas> */}
