@@ -1,8 +1,11 @@
+import Canvas from "@/components/Canvas";
 import Image from "@/components/Image";
 import Connection from "@/public/images/tutorials/transmit/connection.png";
 import PowerLevel from "@/public/images/tutorials/transmit/power-level.png";
 import DustAdjust from "@/public/images/tutorials/transmit/dust-adjust.png";
 import Power from "@/public/images/tutorials/transmit/power.png";
+
+import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
 
 # 明與暗的旅程．訊號傳遞
 在上一章中，我們獲得了電力的來源是電源（嗯？好像很廢話？），也知道了被啟動的電源其實就是強充能方塊，可以觸發附近的紅石元件。在這一章中，我們將會介紹如何把產生出的電力送到你想要的任何地方，廢話不多說，就直接開始吧！
@@ -47,5 +50,6 @@ import Power from "@/public/images/tutorials/transmit/power.png";
 在下面的模擬 Minecraft 中，你會需要利用鐵方塊與紅石粉把所有紅石燈串聯起來，讓角落的控制器啟動時，所有紅石燈都會被點亮。
 就像在玩 Minecraft 一樣，你可以使用滑鼠滾輪來切換方塊，左鍵來破壞方塊，右鍵來放置方塊，對控制器按下右鍵時可以啟動控制器，點亮相鄰的紅石粉。
 當你把所有紅石燈都接好時，可以按下下方的「檢查地圖」按鈕來檢查你的答案是否正確！
-{/* TODO: <Canvas canvasHeight={500} canvasWidth={500} checkable={true} preLoadData={Official_Map_1}> */}
+
+<Canvas canvasHeight={500} canvasWidth={500} checkable={true} preLoadData={Official_Map_1} />
 
