@@ -1,9 +1,9 @@
 import Engine from "../Engine";
-import Playground from "../Playground";
+import Controller from "../controllers/Controller";
 import { Vector3, Vector6 } from "../typings/types";
 
 abstract class Renderer {
-  public playground: Playground;
+  public controller: Controller;
   public dimensions: Vector3;
 
   public engine: Engine;
@@ -13,10 +13,10 @@ abstract class Renderer {
   abstract startRendering(): void;
   abstract getTarget(_canvasX: number, _canvasY: number): Vector6 | null;
 
-  constructor(playground: Playground, dimensions: Vector3) {
-    this.playground = playground;
+  constructor(controller: Controller, dimensions: Vector3) {
+    this.controller = controller;
     this.dimensions = dimensions;
-    this.engine = playground.engine;
+    this.engine = controller.engine;
   }
 
   /**
@@ -112,9 +112,9 @@ abstract class Renderer {
   }
 
   protected get _worldMatrix(): Float32Array {
-    const { theta, phi } = this.playground.angles;
-    const c1 = Math.cos(theta), s1 = Math.sin(theta);
-    const c2 = Math.cos(phi), s2 = Math.sin(phi);
+    const { yaw, pitch } = this.controller.player.facing;
+    const c1 = Math.cos(yaw), s1 = Math.sin(yaw);
+    const c2 = Math.cos(pitch), s2 = Math.sin(pitch);
 
     return new Float32Array([
        c1,  s1 * s2,  c2 * s1, 0, 

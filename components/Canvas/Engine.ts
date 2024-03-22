@@ -36,9 +36,9 @@ class Engine {
     );
   }
 
-  static spawn({ xLen, yLen, zLen, mapName, playground, validation }: MapData): Engine {
+  static spawn({ xLen, yLen, zLen, mapName, blocks, validation }: MapData): Engine {
     const engine = new Engine({ xLen, yLen, zLen, mapName, validation });
-    playground.forEach((layer, i) => {
+    blocks.forEach((layer, i) => {
       layer.forEach((line, j) => {
         line.forEach((block, k) => {
           engine._pg[i][j][k] = block ? Block.spawn({ ...block, x: i, y: j, z: k, engine }) : new AirBlock({ x: i, y: j, z: k, engine });
@@ -59,7 +59,7 @@ class Engine {
       yLen: engine.yLen, 
       zLen: engine.zLen, 
       mapName: engine.mapName, 
-      playground: engine._pg.map(layer => {
+      blocks: engine._pg.map(layer => {
         return layer.map(line => {
           return line.map(block => block.type === BlockType.AirBlock ? null : Block.extract(block));
         })

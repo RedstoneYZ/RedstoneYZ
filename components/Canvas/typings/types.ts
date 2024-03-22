@@ -17,17 +17,12 @@ export type CanvasProps = {
 })
 
 
-export interface PlaygroundOptions {
+export interface ControllerOptions {
   xLen: number;
   yLen: number;
   zLen: number;
   mapName: string;
   preLoadData?: MapData;
-}
-
-export interface PlaygroundAngles {
-  theta: number;
-  phi: number;
 }
 
 
@@ -56,7 +51,7 @@ export interface MapData {
   yLen: number;
   zLen: number;
   mapName: string;
-  playground: (BlockData | null)[][][];
+  blocks: (BlockData | null)[][][];
   validation?: ValidationData;
   availableBlocks?: BlockType[];
 }

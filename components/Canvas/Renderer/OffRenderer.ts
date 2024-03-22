@@ -1,4 +1,4 @@
-import Playground from "../Playground";
+import Controller from "../controllers/Controller";
 import { Vector3, Vector6 } from "../typings/types";
 import DisplayRenderer from "./DisplayRenderer";
 import Renderer from "./Renderer";
@@ -6,8 +6,8 @@ import Renderer from "./Renderer";
 class OffRenderer extends Renderer {
   public mainRenderer: DisplayRenderer;
 
-  constructor(playground: Playground, dimensions: Vector3, mainRenderer: DisplayRenderer) {
-    super(playground, dimensions);
+  constructor(controller: Controller, dimensions: Vector3, mainRenderer: DisplayRenderer) {
+    super(controller, dimensions);
 
     this.mainRenderer = mainRenderer;
   }
@@ -49,7 +49,7 @@ class OffRenderer extends Renderer {
 
       gl.drawElements(gl.TRIANGLES, vertices.length >> 2, gl.UNSIGNED_SHORT, 0);
 
-      if (this.playground.alive) {
+      if (this.controller.alive) {
         requestAnimationFrame(draw);
       }
     }

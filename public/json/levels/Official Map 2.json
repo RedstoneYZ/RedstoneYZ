@@ -4,7 +4,7 @@
   "zLen": 5,
   "mapName": "Official Map 2",
   "availableBlocks": [100, 102],
-  "playground": [
+  "blocks": [
     [
       [{
         "type": 1,

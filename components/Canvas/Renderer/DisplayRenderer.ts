@@ -1,4 +1,4 @@
-import Playground from "../Playground";
+import Controller from "../controllers/Controller";
 import { Block } from "../core";
 import { Maps } from "../core/utils";
 import { BlockType, SixSides, Vector3, Vector6 } from "../typings/types";
@@ -12,8 +12,8 @@ class DisplayRenderer extends Renderer {
   private _devMode: boolean;
   private _offRenderer: OffRenderer;
 
-  constructor(playground: Playground, dimensions: Vector3) {
-    super(playground, dimensions);
+  constructor(controller: Controller, dimensions: Vector3) {
+    super(controller, dimensions);
 
     this.images = new Map();
     this.indices = Array.from(
@@ -25,7 +25,7 @@ class DisplayRenderer extends Renderer {
     ).flat();
 
     this._devMode = false;
-    this._offRenderer = new OffRenderer(playground, dimensions, this);
+    this._offRenderer = new OffRenderer(controller, dimensions, this);
   }
 
   initialize(canvas: HTMLCanvasElement): void {
@@ -113,7 +113,7 @@ class DisplayRenderer extends Renderer {
         this._resetNeedRender();
       }
 
-      if (this.playground.alive) {
+      if (this.controller.alive) {
         requestAnimationFrame(draw);
       }
     }
@@ -183,11 +183,11 @@ class DisplayRenderer extends Renderer {
   }
 
   get _needRender() {
-    return this.playground.needRender || this.engine.needRender;
+    return this.controller.needRender || this.engine.needRender;
   }
 
   _resetNeedRender() {
-    this.playground.needRender = false;
+    this.controller.needRender = false;
     this.engine.needRender = false;
   }
 

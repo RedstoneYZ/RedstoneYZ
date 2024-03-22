@@ -1,17 +1,16 @@
-import Engine from "./Engine";
-import Renderer from "./Renderer";
+import Engine from "../Engine";
+import Renderer from "../Renderer";
 
-import { BlockType, FourFacings, PlaygroundAngles, PlaygroundOptions } from "./typings/types";
-import blockNameTable from "./core/utils/blockNameTable";
+import { BlockType, FourFacings, ControllerOptions } from "../typings/types";
+import blockNameTable from "../core/utils/blockNameTable";
 
 /**
- * 3D 渲染的邏輯實作
+ * The interface of the engine
  */
-class Playground {
-  public angles: PlaygroundAngles;
+class Controller {
+  public player: Player;
 
-  public hotbar: BlockType[];
-  public hotbarNames: string[];
+  public hotbar: HotbarItem[];
   public hotbarIndex: number;
 
   public engine: Engine;
@@ -20,12 +19,12 @@ class Playground {
   public needRender: boolean;
   public alive: boolean;
 
-  constructor({ xLen, yLen, zLen, mapName, preLoadData }: PlaygroundOptions) {
-    this.angles = { theta: 0, phi: 0 };
+  constructor({ xLen, yLen, zLen, mapName, preLoadData }: ControllerOptions) {
+    this.player = { facing: { direction: 'south', yaw: 0, pitch: 0 } };
 
-    this.hotbar = preLoadData?.availableBlocks ??
-      [BlockType.AirBlock, BlockType.IronBlock, BlockType.GlassBlock, BlockType.RedstoneDust, BlockType.RedstoneTorch, BlockType.RedstoneRepeater, BlockType.RedstoneComparator, BlockType.RedstoneLamp, BlockType.Lever];
-    this.hotbarNames = this.hotbar.map(t => blockNameTable[t]);
+    this.hotbar = this.getHotbar(preLoadData?.availableBlocks ??
+      [BlockType.AirBlock, BlockType.IronBlock, BlockType.GlassBlock, BlockType.RedstoneDust, BlockType.RedstoneTorch, BlockType.RedstoneRepeater, BlockType.RedstoneComparator, BlockType.RedstoneLamp, BlockType.Lever]
+    );
     this.hotbarIndex = 0;
 
     this.engine = preLoadData ? Engine.spawn(preLoadData) : new Engine({ xLen, yLen, zLen, mapName });
@@ -36,7 +35,7 @@ class Playground {
   }
 
   get currentBlockName() {
-    return this.hotbarNames[this.hotbarIndex];
+    return this.hotbar[this.hotbarIndex].name;
   }
 
   /**
@@ -60,15 +59,14 @@ class Playground {
    */
   adjustAngles(cursorX: number, cursorY: number, init: boolean = false): void {
     if (!init) {
-      this.angles = {
-        theta: this.angles.theta + (this._prevRefX - cursorX) * 0.0087, 
-        phi: Math.max(Math.min(this.angles.phi + (this._prevRefY - cursorY) * 0.0087, Math.PI / 2), -(Math.PI / 2))
-      };
-      if (this.angles.theta < 0) {
-        this.angles.theta += Math.PI * 2;
+      const facing = this.player.facing;
+      facing.yaw = facing.yaw + (this._prevRefX - cursorX) * 0.0087, 
+      facing.pitch = Math.max(Math.min(facing.pitch + (this._prevRefY - cursorY) * 0.0087, Math.PI / 2), -(Math.PI / 2))
+      if (facing.yaw < -Math.PI) {
+        facing.yaw += Math.PI * 2;
       }
-      if (Math.PI * 2 < this.angles.theta) {
-        this.angles.theta -= Math.PI * 2;
+      if (Math.PI < facing.yaw) {
+        facing.yaw -= Math.PI * 2;
       }
     }
 
@@ -115,10 +113,10 @@ class Playground {
     if (!target) return;
 
     const [x, y, z, ...normDir] = target;
-    const facingArray: FourFacings[] = ['north', 'west', 'south', 'east', 'north'];
-    const facing = facingArray[Math.round(this.angles.theta * 2 / Math.PI)];
-    
-    this.engine.addTask(['rightClick', [x, y, z, shiftDown, normDir, facing, this.hotbar[this.hotbarIndex] ?? BlockType.AirBlock], 0]);
+    const facingArray: FourFacings[] = ['south', 'east', 'north', 'west', 'south'];
+    const facing = facingArray[Math.round(this.player.facing.pitch * 2 / Math.PI)];
+
+    this.engine.addTask(['rightClick', [x, y, z, shiftDown, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock], 0]);
     this.needRender = true;
   }
 
@@ -129,6 +127,28 @@ class Playground {
     this.alive = false;
     this.engine.destroy();
   }
+
+  private getHotbar(items: BlockType[]): HotbarItem[] {
+    return items.map(block => {
+      return { block, name: blockNameTable[block] }
+    });
+  }
 }
 
-export default Playground;
+interface HotbarItem {
+  block: BlockType;
+  name: string;
+};
+
+// TODO: make it a class
+interface Player {
+  facing: PlayerFacing;
+}
+
+interface PlayerFacing {
+  direction: 'north' | 'east' | 'south' | 'west';
+  yaw: number;
+  pitch: number;
+}
+
+export default Controller;
