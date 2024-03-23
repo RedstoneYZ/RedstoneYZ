@@ -1,8 +1,8 @@
-import Image from "@/components/Image";
-import Repeat from "@/public/images/tutorials/repeater/repeat.png";
-import Diode from "@/public/images/tutorials/repeater/diode.png";
-import Delay from "@/public/images/tutorials/repeater/delay.png";
-import Lock from "@/public/images/tutorials/repeater/lock.png";
+---
+title: 強棒接力．紅石中繼器
+date: '2024-03-23'
+draft: false
+---
 
 # 強棒接力．紅石中繼器
 ## 訊號不夠了！
@@ -10,13 +10,13 @@ import Lock from "@/public/images/tutorials/repeater/lock.png";
 
 ## 紅石中繼器
 **紅石中繼器**（Redstone Repeater）顧名思義，是用來中繼訊號的，當中繼器接收到後方的訊號時，會把訊號強度提高到 15 後再往下傳遞，從下圖紅石粉的顏色就可以發現，中繼器把左方微小的訊號放大，繼續向右傳遞：
-<Image src={Repeat} alt="紅石中繼器接續訊號" width={500}/>
+![紅石中繼器接續訊號](/static/images/tutorials/repeater/repeat.png)
 
 對紅石中繼器有了基本的認識以後，就可以來詳細討論它的特性了。紅石中繼器一共有三個不同的特性，分別是訊號傳遞、訊號延遲與訊號鎖定。
 
 ### 訊號傳遞
 因為紅石中繼器是傳輸元件，最重要的特性當然是用來傳遞訊號了。但與紅石粉不同的是，中繼器只能單向傳遞訊號，如果仔細看中繼器的材質，會發現中繼器的中央有一個三角形的箭頭，那代表著中繼器的指向，暗示中繼器只能從後方接收訊號，且只能將訊號向前方傳遞，如下圖所示，反向連接的中繼器（右方）無法傳遞訊號。
-<Image src={Diode} alt="紅石中繼器只能單向傳輸訊號" width={500}/>
+![紅石中繼器只能單向傳輸訊號](/static/images/tutorials/repeater/diode.png)
 
 以下符合條件的方塊如果位於中繼器後方，則中繼器會被啟動，向前傳送訊號：
 
@@ -31,12 +31,12 @@ import Lock from "@/public/images/tutorials/repeater/lock.png";
 
 ### 訊號延遲
 單個中繼器在傳遞訊號時會有 1 到 4 紅石刻的延遲，延遲的時長可以透過對中繼器點擊右鍵來調整，也可以直接從外觀判別，如下圖所示，從左到右的延遲分別為 1、2、3、4 紅石刻。
-<Image src={Delay} alt="不同延遲的外觀" width={500}/>
+![不同延遲的外觀](/static/images/tutorials/repeater/delay.png)
 當中繼器接收到紅石訊號時，需要等待相對應的延遲時間才能將訊號延續下去。如果中繼器接收到短於自身延遲的正脈衝，中繼器會將此脈衝延長到與自身的延遲時間相同；而如果中繼器接收到短於自身延遲的負脈衝，中繼器會直接忽略此脈衝。
 
 ### 訊號鎖定
 當一個中繼器被另一個啟動的中繼器從左右任一側輸入訊號時，它的狀態會被鎖定，被鎖定的中繼器無法透過後方的輸入來調整其狀態，直到側邊的訊號解除。下左圖的中繼器被鎖定在啟動狀態，因此就算後方輸入被關閉，中繼器還是啟動著；下右圖則是另一個相反的情形。
-<Image src={Lock} alt="被鎖定的紅石中繼器" width={500}/>
+![被鎖定的紅石中繼器](/static/images/tutorials/repeater/lock.png)
 
 ## 隨堂小考
 在下面的模擬 Minecraft 中，你會需要利用紅石中繼器與紅石粉把所有紅石燈串聯起來，讓角落的控制器啟動時，所有紅石燈都會被點亮。
