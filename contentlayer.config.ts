@@ -40,7 +40,6 @@ const computedFields: ComputedFields = {
  */
 function createTagCount(allBlogs: ContentLayerBlog[]) {
   const tagCount: Record<string, number> = {}
-  console.log(allBlogs)
   allBlogs.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
@@ -139,9 +138,11 @@ export default makeSource({
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
     ],
   },
-  onSuccess: async (importData) => {
-    const { allBlogs } = await importData()
-    createTagCount(allBlogs)
-    createSearchIndex(allBlogs)
-  },
+  // onSuccess: async (importData) => {
+  //   const { allBlogs } = await importData()
+  //   console.log("All Blogs")
+  //   console.log(allBlogs)
+  //   createTagCount(allBlogs)
+  //   createSearchIndex(allBlogs)
+  // },
 })
