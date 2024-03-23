@@ -8,7 +8,7 @@ summary: 邏輯閘非或與的介紹
 
 ```
 import Image from "@/components/Image";
-import NotGate from "@/public/images/tutorials/notorand/not-gate.png";
+import NotGate from "@/public/static/images/tutorials/notorand/not-gate.png";
 import OrGate from "@/public/images/tutorials/notorand/or-gate.png";
 import AndGate from "@/public/images/tutorials/notorand/and-gate.png";
 import XorGate from "@/public/images/tutorials/notorand/xor-gate.png";
@@ -22,9 +22,9 @@ import XorGate from "@/public/images/tutorials/notorand/xor-gate.png";
 
 ## NOT Gate
 **非閘**（NOT Gate）是個只有一個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「輸入是否等於 0」，NOT Gate 的真值表會是：
-
+```
 {/* <Table content={tableData.notGate} /> */}
-
+```
 
 <div className="rs-prop"><b>真值表</b>：一種把所有輸入的可能、以及每組輸入組合所對應的輸出全部列出來的表。</div>
 
@@ -32,7 +32,9 @@ import XorGate from "@/public/images/tutorials/notorand/xor-gate.png";
 
 在紅石電路中，因為紅石火把有「訊號反轉」的特性，所以要製作出一個 NOT Gate 只需要一個可充能方塊與一個紅石火把就可以了：
 
-```<Image src={NotGate} alt="紅石電路中的 NOT Gate" width={500}/>```
+<Image src='/static/images/tutorials/notorand/not-gate.png' alt="紅石電路中的 NOT Gate" width='600' height='1000'/>
+
+![notorand](/static/images/tutorials/notorand/not-gate.png)
 
 ## OR Gate
 <b>或閘</b>（OR Gate）是個有兩個輸入端、一個輸出端的邏輯閘，這個邏輯閘的規則是「輸入 A 或輸入 B 其中一個是 1」，OR Gate 的真值表會是：

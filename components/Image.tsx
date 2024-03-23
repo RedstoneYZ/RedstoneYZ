@@ -1,5 +1,19 @@
-import NextImage, { ImageProps } from 'next/image'
+import NextImage from "next/image";
 
-const Image = ({ ...rest }: ImageProps) => <NextImage {...rest} />
+export default function Image({ src, alt, width, height }: ImageProps) {
+  return (
+    <NextImage
+      src={src}
+      alt={alt ?? ""}
+      width={width}
+      height={height}
+    />
+  );
+}
 
-export default Image
+export interface ImageProps extends React.PropsWithChildren {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+}
