@@ -121,9 +121,20 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }))
 
+export const Singlepage = defineDocumentType(() => ({
+  name: 'Singlepage',
+  filePathPattern: 'singlepage/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    name: { type: 'string', required: true },
+    layout: { type: 'string' },
+  },
+  computedFields,
+}))
+
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors],
+  documentTypes: [Blog, Authors, Singlepage],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
