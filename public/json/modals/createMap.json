@@ -1,0 +1,21 @@
+{
+  "action": "createMap", 
+  "title": "建立地圖",
+  "items": [{
+    "type": "normal", 
+    "title": "地圖名稱", 
+    "placeholder": "請輸入地圖名稱"
+  }, {
+    "type": "normal", 
+    "title": "X 軸長度", 
+    "placeholder": "請輸入 X 軸長度"
+  }, {
+    "type": "normal", 
+    "title": "Y 軸長度", 
+    "placeholder": "請輸入 Y 軸長度"
+  }, {
+    "type": "normal", 
+    "title": "Z 軸長度", 
+    "placeholder": "請輸入 Z 軸長度"
+  }]
+}

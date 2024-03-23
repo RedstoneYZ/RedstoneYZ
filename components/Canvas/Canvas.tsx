@@ -8,13 +8,16 @@ import { useEffect, useRef, useState } from "react";
 import Engine from "./Engine";
 import Controller from "./controllers/Controller";
 
-import { CanvasProps } from "./typings/types";
-import "@/styles/canvas.css";
+import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
+import { CanvasProps, MapData } from "./typings/types";
 
 const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
   const [shiftDown, setShiftDown] = useState(false);
   const [controller, setController] = useState<Controller>();
   const [currentBlock, setCurrentBlock] = useState('');
+
+  // @ts-ignore
+  props.preLoadData = Official_Map_1
 
   const { current: xLen } = useRef('xLen' in props ? props.xLen : props.preLoadData.xLen);
   const { current: yLen } = useRef('xLen' in props ? props.yLen : props.preLoadData.yLen);
