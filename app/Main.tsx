@@ -21,7 +21,7 @@ export default function Home({ posts }) {
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             {siteMetadata.description}
           </p>
-          <MDXLayoutRenderer code={homepage.body.code} components={components} />
+          <MDXLayoutRenderer code={homepage.body.code} components={components} toc={homepage.toc}/>
         </div>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!posts.length && 'No posts found.'}
