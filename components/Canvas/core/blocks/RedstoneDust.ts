@@ -116,7 +116,8 @@ class RedstoneDust extends Block {
       if (!block) return;
 
       // 相鄰方塊是強充能方塊則充能製相同等級
-      let { strong, power } = block.powerTowardsWire(Maps.ReverseDir[dir]);
+      const { strong } = block.powerTowardsWire(Maps.ReverseDir[dir]);
+      let { power } = block.powerTowardsWire(Maps.ReverseDir[dir]);
       if (strong) {
         // 如果是紅石粉，訊號要遞減
         if (block.type === BlockType.RedstoneDust) {

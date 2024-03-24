@@ -149,7 +149,7 @@ function parseComponents({ elements, outlines, face, facing, prerotation }: Comp
     ['ceiling', [getRotationMatrix({ origin: [8, 8, 8], axis: "x", angle: -90 })]]
   ] : [['floor', []]];
 
-  let data: Partial<Record<ThreeFaces, Record<FourFacings, WebGLData>>> = {};
+  const data: Partial<Record<ThreeFaces, Record<FourFacings, WebGLData>>> = {};
 
   do {
     const [f, rotates] = faces.shift()!;
@@ -304,7 +304,8 @@ function getRotationMatrix(rotation?: RawRotationData): Rotation {
     }
   }
 
-  let { origin: [p = 0, q = 0, r = 0] = [0, 0, 0], axis = "x", angle = 0 } = rotation;
+  let { origin: [p = 0, q = 0, r = 0] = [0, 0, 0] } = rotation;
+  const { axis = "x", angle = 0 } = rotation;
 
   const c = Math.cos(angle / 180 * Math.PI);
   const s = Math.sin(angle / 180 * Math.PI);
