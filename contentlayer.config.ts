@@ -149,11 +149,9 @@ export default makeSource({
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
     ],
   },
-  // onSuccess: async (importData) => {
-  //   const { allBlogs } = await importData()
-  //   console.log("All Blogs")
-  //   console.log(allBlogs)
-  //   createTagCount(allBlogs)
-  //   createSearchIndex(allBlogs)
-  // },
+  onSuccess: async (importData) => {
+    const { allBlogs } = await importData()
+    createTagCount(allBlogs)
+    createSearchIndex(allBlogs)
+  },
 })
