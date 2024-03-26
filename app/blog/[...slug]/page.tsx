@@ -106,6 +106,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     }
   })
 
+  // @ts-ignore
   const Layout = layouts[post.layout || defaultLayout]
 
   return (
