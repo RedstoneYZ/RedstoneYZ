@@ -8,7 +8,7 @@ import { Blog, Singlepage, allSinglepages } from 'contentlayer/generated'
 import { components } from '@/components/MDXComponents'
 import { CoreContent } from 'pliny/utils/contentlayer'
 
-const MAX_DISPLAY = 5
+const MAX_DISPLAY = 3
 
 export default function Home({ posts }: { posts: CoreContent<Blog>[] }) {
   const homepage = allSinglepages.find((p) => p.slug === 'homepage') as Singlepage
@@ -87,11 +87,11 @@ export default function Home({ posts }: { posts: CoreContent<Blog>[] }) {
           </Link>
         </div>
       )}
-      {siteMetadata.newsletter?.provider && (
+      {/*siteMetadata.newsletter?.provider && (
         <div className="flex items-center justify-center pt-4">
           <NewsletterForm />
         </div>
-      )}
+      )*/}
     </>
   )
 }
