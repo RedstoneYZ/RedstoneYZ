@@ -129,7 +129,7 @@ class RedstoneRepeater extends Block {
   private get currentPowered() {
     const [bx, by, bz] = this._backCoords;
 
-    let block = this.engine.block(bx, by, bz);
+    const block = this.engine.block(bx, by, bz);
     return !!block?.powerTowardsWire(this.states.facing).power;
   }
 

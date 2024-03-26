@@ -21,8 +21,6 @@ class Target extends FullBlock {
     this.textures = target.textures;
     this.outlines = target.outlines;
   }
-
-  hitBy(_projectile: any) {}
 }
 
 export default Target;
