@@ -4,12 +4,13 @@ import siteMetadata from '@/data/siteMetadata'
 import { formatDate } from 'pliny/utils/formatDate'
 import NewsletterForm from 'pliny/ui/NewsletterForm'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { Singlepage, allSinglepages } from 'contentlayer/generated'
+import { Blog, Singlepage, allSinglepages } from 'contentlayer/generated'
 import { components } from '@/components/MDXComponents'
+import { CoreContent } from 'pliny/utils/contentlayer'
 
 const MAX_DISPLAY = 5
 
-export default function Home({ posts }) {
+export default function Home({ posts }: { posts: CoreContent<Blog>[] }) {
   const homepage = allSinglepages.find((p) => p.slug === 'homepage') as Singlepage
   return (
     <>
