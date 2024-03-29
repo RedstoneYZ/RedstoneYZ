@@ -1,6 +1,7 @@
 import { NewBlock, Maps } from "../utils";
-import { BlockData, BlockOptions, BlockSpawnOptions, BlockStates, BlockType, Blocks, PowerTransmission, SixSides, WebGLTextureData } from "../../types";
-import Engine from "../../Engine";
+import { BlockData, BlockOptions, BlockSpawnOptions, BlockStates, BlockType, Blocks, PowerTransmission, SixSides } from "../types";
+import Engine from "../Engine";
+import { BlockModelPath } from "../../view/types";
 
 /**
  * 代表一個方塊
@@ -30,10 +31,8 @@ abstract class Block {
   public redstoneAutoConnect: "full" | "line" | "none";
 
   public abstract type: BlockType;
+  public abstract model: BlockModelPath;
   public abstract states: BlockStates;
-
-  public abstract get textures(): WebGLTextureData[];
-  public abstract get outlines(): number[];
 
   constructor(options: BlockOptions) {
     this.x = options.x;
@@ -120,7 +119,6 @@ abstract class Block {
 
   /**
    * 根據 Post Placement Update 的來源方向更新自身狀態
-   * @abstract
    */
   PPUpdate() {
     if (this.supportingBlock === null || this.supportingBlock?.type === BlockType.AirBlock) {

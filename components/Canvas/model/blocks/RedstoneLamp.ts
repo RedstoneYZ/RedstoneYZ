@@ -1,32 +1,22 @@
 import { Maps } from "../utils";
 import FullBlock from "./FullBlock";
-import { redstone_lamp, redstone_lamp_on } from "@/public/json/blocks";
-import { BlockOptions, BlockType, RedstoneLampStates, WebGLData } from "../../types";
+import { BlockOptions, BlockType, RedstoneLampStates } from "../types";
+import { BlockModelPath } from "../../view/types";
 
-
-/**
- * 代表一個紅石燈
- */
 class RedstoneLamp extends FullBlock {
   public type: BlockType.RedstoneLamp;
+  public model: BlockModelPath.RedstoneLamp;
   public states: RedstoneLampStates;
 
   constructor(options: BlockOptions) {
     super(options);
 
     this.type = BlockType.RedstoneLamp;
+    this.model = BlockModelPath.RedstoneLamp;
     this.states = { power: 0, source: false, lit: false };
   }
 
-  get textures() {
-    return _model[+this.states.lit].textures;
-  }
-
-  get outlines() {
-    return _model[+this.states.lit].outlines;
-  }
-
-  PPUpdate() {
+  override PPUpdate() {
     super.PPUpdate();
 
     if (this._shouldLit()) {
@@ -54,10 +44,8 @@ class RedstoneLamp extends FullBlock {
       const block = this.engine.block(this.x + x, this.y + y, this.z + z);
       return block?.states.power;
     });
-    if (litByPower) return true;
+    return litByPower;
   }
 }
 
 export default RedstoneLamp;
-
-const _model: [WebGLData, WebGLData] = [redstone_lamp, redstone_lamp_on];

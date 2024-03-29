@@ -1,25 +1,18 @@
 import FullBlock from "./FullBlock";
-import { target } from "@/public/json/blocks";
-import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../types";
+import { BlockOptions, BlockStates, BlockType } from "../types";
+import { BlockModelPath } from "../../view/types";
 
-/**
- * 代表一個鐵方塊，即不透明的單位方塊
- */
 class Target extends FullBlock {
   public type: BlockType.Target;
+  public model: BlockModelPath.Target;
   public states: BlockStates;
-
-  public textures: WebGLTextureData[];
-  public outlines: number[];
 
   constructor(options: BlockOptions) {
     super({ redstoneAutoConnect: 'full', ...options });
 
     this.type = BlockType.Target;
+    this.model = BlockModelPath.Target;
     this.states = { power: 0, source: false };
-
-    this.textures = target.textures;
-    this.outlines = target.outlines;
   }
 }
 

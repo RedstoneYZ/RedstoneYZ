@@ -1,36 +1,24 @@
-import { redstone_wall_torch_off, redstone_wall_torch } from "@/public/json/blocks";
-import { BlockOptions, FourFacings, RedstoneWallTorchStates, SixSides, Vector3, WebGLData } from "../../types";
+import { BlockOptions, FourFacings, RedstoneWallTorchStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import RedstoneTorchBase from "./RedstoneTorchBase";
+import { BlockModelPath } from "../../view/types";
 
 class RedstoneWallTorch extends RedstoneTorchBase {
-  public states: RedstoneWallTorchStates;
+  public model: BlockModelPath.RedstoneWallTorch;
+  public override states: RedstoneWallTorchStates;
 
   constructor(options: BlockOptions) {
     super({ needSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
 
+    this.model = BlockModelPath.RedstoneWallTorch;
     this.states = { power: 0, source: true, lit: true, facing: 'north' };
-
     this.setFacing(options.normDir, options.facingDir);
   }
 
-  get power() {
-    return this.states.lit ? 15 : 0;
-  }
-
-  get supportingBlock() {
+  override get supportingBlock() {
     const [x, y, z] = this.supportingBlockCoords;
     return this.engine.block(x, y, z);
   }
-
-  get textures() {
-    return _model[+this.states.lit][this.states.facing].textures;
-  }
-
-  get outlines() {
-    return _model[+this.states.lit][this.states.facing].outlines;
-  }
-
 
   private supportingBlockCoords: Vector3 = [this.x, this.y, this.z + 1];
 
@@ -50,6 +38,3 @@ class RedstoneWallTorch extends RedstoneTorchBase {
 }
 
 export default RedstoneWallTorch;
-
-const _model: [Record<FourFacings, WebGLData>, Record<FourFacings, WebGLData>] = 
-  [redstone_wall_torch_off, redstone_wall_torch];

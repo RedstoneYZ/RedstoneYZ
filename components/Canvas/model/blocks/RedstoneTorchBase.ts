@@ -1,4 +1,4 @@
-import { BlockOptions, BlockType, RedstoneTorchBaseStates, SixSides } from "../../types";
+import { BlockOptions, BlockType, RedstoneTorchBaseStates, SixSides } from "../types";
 import Block from "./Block";
 
 abstract class RedstoneTorchBase extends Block {
@@ -12,24 +12,24 @@ abstract class RedstoneTorchBase extends Block {
     this.states = { power: 0, source: true, lit: true };
   }
 
-  get power() {
+  override get power() {
     return this.states.lit ? 15 : 0;
   }
 
-  powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
+  override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
     return direction === 'up' && this.states.lit ?
       { strong: true, power: 15 } :
       { strong: false, power: 0 };
   }
 
-  powerTowardsWire(): { strong: boolean, power: number } {
+  override powerTowardsWire(): { strong: boolean, power: number } {
     return { strong: this.states.lit, power: this.states.lit ? 15 : 0 };
   }
 
   /**
    * 根據 Post Placement Update 的來源方向更新自身狀態
    */
-  PPUpdate() {
+  override PPUpdate() {
     super.PPUpdate();
     
     const attachedBlock = this.supportingBlock;

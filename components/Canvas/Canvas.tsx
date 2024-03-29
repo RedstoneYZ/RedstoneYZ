@@ -5,11 +5,10 @@ import { useEffect, useRef, useState } from "react";
 // import Button from "../Button";
 // import Message from "../Message";
 
-import Engine from "./Engine";
 import Controller from "./controller/Controller";
 
 import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
-import { CanvasProps, MapData } from "./types";
+import { CanvasProps } from "./model/types";
 
 const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
   const [shiftDown, setShiftDown] = useState(false);
@@ -93,18 +92,18 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     setCurrentBlock(controller?.currentBlockName ?? '');
   }
 
-  async function handleCheckMap() {
-    if (!controller) return;
+  // async function handleCheckMap() {
+  //   if (!controller) return;
 
-    if (await Engine.validate(controller.engine)) {
-      console.log('Pass');
-      // Message.send({ content: '恭喜你通過檢查！', type: 'success' });
-    }
-    else {
-      console.log('Fail');
-      // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
-    }
-  }
+  //   if (await Engine.validate(controller.engine)) {
+  //     console.log('Pass');
+  //     // Message.send({ content: '恭喜你通過檢查！', type: 'success' });
+  //   }
+  //   else {
+  //     console.log('Fail');
+  //     // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
+  //   }
+  // }
   
   return (
     <div className="canvas-wrapper">

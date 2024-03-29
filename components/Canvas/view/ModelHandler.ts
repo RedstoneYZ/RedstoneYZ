@@ -1,4 +1,4 @@
-import { SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../types";
+import { SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
 import { BlockModelPath, BlockModel, BlockModelFace } from "./types";
 
 export default class ModelHandler {
@@ -7,7 +7,13 @@ export default class ModelHandler {
 
   constructor() {
     this.rawData = {};
-    this.modelCache = {};
+    this.modelCache = {
+      [BlockModelPath.Air]: {
+        ambientocclusion: false, 
+        faces: [], 
+        outlines: []
+      }
+    };
   }
 
   async getModel(path: BlockModelPath): Promise<BlockModel> {

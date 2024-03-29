@@ -1,6 +1,6 @@
-import Engine from "../Engine";
+import Engine from "../model/Engine";
 import Controller from "../controller/Controller";
-import { Vector3, Vector6 } from "../types";
+import { Vector3, Vector6 } from "../model/types";
 
 abstract class Renderer {
   public controller: Controller;
@@ -35,11 +35,12 @@ abstract class Renderer {
       throw new Error('The canvas has not been initialized.');
     }
 
-    const gl = this.gl = this.canvas.getContext('webgl', { alpha: false }) ?? undefined;
+    const gl = this.canvas.getContext('webgl', { alpha: false });
     if (!gl) {
       throw new Error('Your browser does not support webgl canvas.');
     }
 
+    this.gl = gl;
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 

@@ -1,60 +1,37 @@
-import {
-  repeater_1tick_locked, repeater_1tick_on_locked, repeater_1tick_on, repeater_1tick, 
-  repeater_2tick_locked, repeater_2tick_on_locked, repeater_2tick_on, repeater_2tick, 
-  repeater_3tick_locked, repeater_3tick_on_locked, repeater_3tick_on, repeater_3tick, 
-  repeater_4tick_locked, repeater_4tick_on_locked, repeater_4tick_on, repeater_4tick
-} from "@/public/json/blocks";
-import { BlockOptions, BlockType, FourFacings, RedstoneRepeaterStates, SixSides, Vector3, WebGLData } from "../../types";
+import { BlockOptions, BlockType, FourFacings, RedstoneRepeaterStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
+import { BlockModelPath } from "../../view/types";
 
-/**
- * 代表一個紅石中繼器
- */
 class RedstoneRepeater extends Block {
   public type: BlockType.RedstoneRepeater;
+  public model: BlockModelPath.Repeater1tickOnLocked;
   public states: RedstoneRepeaterStates;
 
   constructor(options: BlockOptions) {
     super({ needBottomSupport: true, transparent: true, redstoneAutoConnect: 'line', ...options });
     
     this.type = BlockType.RedstoneRepeater;
+    this.model = BlockModelPath.Repeater1tickOnLocked;
     this.states = { power: 0, source: false, delay: 1, facing: 'north', locked: false, powered: false };
-
     this.setFacing(options.normDir, options.facingDir);
   }
 
-  get power() {
+  override get power() {
     return 0;
   }
 
-  get supportingBlock() {
+  override get supportingBlock() {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
 
-  get textures() {
-    const index = 
-      (this.states.powered ? 8 : 0) +
-      (this.states.locked ? 4 : 0) +
-      this.states.delay - 1;
-    return _model[index][this.states.facing].textures;
-  }
-
-  get outlines() {
-    const index = 
-      (this.states.powered ? 8 : 0) +
-      (this.states.locked ? 4 : 0) +
-      this.states.delay - 1;
-    return _model[index][this.states.facing].outlines;
-  }
-
-  powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
+  overridepowerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
     return this.states.powered && direction === this.states.facing ?
       { strong: true, power: 15 } :
       { strong: false, power: 0 };
   }
 
-  powerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
+  overridepowerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
     return this.states.powered && direction === this.states.facing ?
       { strong: true, power: 15 } :
       { strong: false, power: 0 };
@@ -69,7 +46,7 @@ class RedstoneRepeater extends Block {
   }
 
   // temprarily take PP and NC update as the same
-  PPUpdate() {
+  overridePPUpdate() {
     super.PPUpdate();
 
     const powered = this.currentPowered;
@@ -152,10 +129,3 @@ class RedstoneRepeater extends Block {
 }
 
 export default RedstoneRepeater;
-
-const _model: Record<FourFacings, WebGLData>[] = [
-  repeater_1tick,           repeater_2tick,           repeater_3tick,           repeater_4tick, 
-  repeater_1tick_locked,    repeater_2tick_locked,    repeater_3tick_locked,    repeater_4tick_locked, 
-  repeater_1tick_on,        repeater_2tick_on,        repeater_3tick_on,        repeater_4tick_on, 
-  repeater_1tick_on_locked, repeater_2tick_on_locked, repeater_3tick_on_locked, repeater_4tick_on_locked
-];

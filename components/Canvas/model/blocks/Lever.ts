@@ -1,43 +1,32 @@
-import { lever, lever_on } from "@/public/json/blocks";
-import { BlockOptions, BlockType, FourFacings, LeverStates, SixSides, ThreeFaces, Vector3, WebGLData } from "../../types";
+import { BlockModelPath } from "../../view/types";
+import { BlockOptions, BlockType, FourFacings, LeverStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
-/**
- * 代表一個控制桿
- */
 class Lever extends Block {
   public type: BlockType.Lever;
-  public blockName: string;
+  public model: BlockModelPath.Lever;
   public states: LeverStates;
 
   constructor(options: BlockOptions) {
     super({ transparent: true, needSupport: true, redstoneAutoConnect: 'full', ...options });
 
     this.type = BlockType.Lever;
-    this.blockName = '控制桿';
+    this.model = BlockModelPath.Lever;
     this.states = { power: 0, source: false, face: 'wall', facing: 'north', powered: false };
     this.setFacing(options.normDir, options.facingDir);
   }
 
-  get power() {
+  override get power() {
     return this.states.powered ? 15 : 0;
   }
 
-  get supportingBlock() {
+  override get supportingBlock() {
     const [x, y, z] = this.supportingBlockCoords;
     return this.engine.block(x, y, z);
   }
 
-  get textures() {
-    return _model[+this.states.powered][this.states.face][this.states.facing].textures;
-  }
-
-  get outlines() {
-    return _model[+this.states.powered][this.states.face][this.states.facing].outlines;
-  }
-
-  powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
+  override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
     return (
       (this.states.face === 'ceiling' && direction === 'up') ||
       (this.states.face === 'floor' && direction === 'down') ||
@@ -47,7 +36,7 @@ class Lever extends Block {
     { strong: false, power: 0 };
   }
 
-  powerTowardsWire(): { strong: boolean, power: number } {
+  override powerTowardsWire(): { strong: boolean, power: number } {
     return { strong: this.states.powered, power: this.states.powered ? 15 : 0 };
   }
 
@@ -88,5 +77,3 @@ class Lever extends Block {
 }
 
 export default Lever;
-
-const _model: [Record<ThreeFaces, Record<FourFacings, WebGLData>>, Record<ThreeFaces, Record<FourFacings, WebGLData>>] = [lever, lever_on];

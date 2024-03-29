@@ -1,8 +1,8 @@
-import Engine from "../Engine";
+import Engine from "../model/Engine";
 import Renderer from "../view";
 
-import { BlockType, FourFacings, ControllerOptions } from "../types";
-import blockNameTable from "../core/utils/blockNameTable";
+import { BlockType, FourFacings, ControllerOptions } from "../model/types";
+import blockNameTable from "../model/utils/blockNameTable";
 
 /**
  * The interface of the engine
@@ -23,7 +23,7 @@ class Controller {
     this.player = { facing: { direction: 'south', yaw: 0, pitch: 0 } };
 
     this.hotbar = this.getHotbar(preLoadData?.availableBlocks ??
-      [BlockType.AirBlock, BlockType.IronBlock, BlockType.GlassBlock, BlockType.RedstoneDust, BlockType.RedstoneTorch, BlockType.RedstoneRepeater, BlockType.RedstoneComparator, BlockType.RedstoneLamp, BlockType.Lever]
+      [BlockType.AirBlock, BlockType.IronBlock, BlockType.Glass, BlockType.RedstoneDust, BlockType.RedstoneTorch, BlockType.RedstoneRepeater, BlockType.RedstoneComparator, BlockType.RedstoneLamp, BlockType.Lever]
     );
     this.hotbarIndex = 0;
 

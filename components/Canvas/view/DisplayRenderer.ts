@@ -1,7 +1,7 @@
 import Controller from "../controller/Controller";
-import { Block } from "../core";
-import { Maps } from "../core/utils";
-import { BlockType, SixSides, Vector3, Vector6 } from "../types";
+import { Block } from "../model";
+import { Maps } from "../model/utils";
+import { BlockType, SixSides, Vector3, Vector6 } from "../model/types";
 import ModelHandler from "./ModelHandler";
 import OffRenderer from "./OffRenderer";
 import Renderer from "./Renderer";
@@ -32,7 +32,7 @@ class DisplayRenderer extends Renderer {
     this._models = new ModelHandler();
   }
 
-  initialize(canvas: HTMLCanvasElement): void {
+  override initialize(canvas: HTMLCanvasElement): void {
     ['iron_block', 'comparator', 'comparator_on', 'cobblestone', 'lever_on', 'lever', 'redstone_dust_dot', 'redstone_dust_line0', 'redstone_dust_line1', 'redstone_dust_overlay', 'redstone_lamp', 'redstone_lamp_on', 'glass', 'repeater', 'smooth_stone', 'repeater_on', 'redstone_torch', 'redstone_torch_off', 'bedrock', 'target_top', 'target_side'].forEach(src => {
       const image = new Image();
       image.src = `/static/images/textures/${src}.png`;
@@ -135,14 +135,14 @@ class DisplayRenderer extends Renderer {
       for (let j = 0; j < this.dimensions[1]; j++) {
         for (let k = 0; k < this.dimensions[2]; k++) {
           const block = this.engine.block(i, j, k);
-          if (!block?.textures) continue;
+          if (!block?.model) continue;
 
           const x = i - this.dimensions[0] / 2;
           const y = j - this.dimensions[1] / 2;
           const z = k - this.dimensions[2] / 2;
           const color = 'color' in block ? block.color.map(a => a / 255) : [1, 1, 1];
 
-          const model = await this._models.getModel(BlockModelPath.IronBlock);
+          const model = await this._models.getModel(block.model);
           model.faces.forEach(face => {
             if (this._shouldRender(block, face.cullface)) {
               let storage = map.get(face.texture);
@@ -169,14 +169,14 @@ class DisplayRenderer extends Renderer {
   }
 
   private _shouldRender(block: Block, dir: SixSides) {
-    if (block.type !== BlockType.IronBlock && block.type !== BlockType.GlassBlock) return true;
+    if (block.type !== BlockType.IronBlock && block.type !== BlockType.Glass) return true;
 
     const [x, y, z] = Maps.P6DMap[dir];
     const adjacentBlock = this.engine.block(block.x + x, block.y + y, block.z + z);
     if (!adjacentBlock) return true;
 
-    if (block.type === BlockType.GlassBlock) return !adjacentBlock.fullBlock;
-    return !adjacentBlock.fullBlock || adjacentBlock.type === BlockType.AirBlock || adjacentBlock.type === BlockType.GlassBlock;
+    if (block.type === BlockType.Glass) return !adjacentBlock.fullBlock;
+    return !adjacentBlock.fullBlock || adjacentBlock.type === BlockType.AirBlock || adjacentBlock.type === BlockType.Glass;
   }
 
   get _needRender() {
@@ -188,7 +188,7 @@ class DisplayRenderer extends Renderer {
     this.engine.needRender = false;
   }
 
-  _vertexShaderSource = `
+  override _vertexShaderSource = `
     precision mediump float;
     
     attribute vec3 vertPosition;
@@ -210,7 +210,7 @@ class DisplayRenderer extends Renderer {
     }
   `;
 
-  _fragmentShaderSource = `
+  override _fragmentShaderSource = `
     precision mediump float;
 
     uniform sampler2D sampler;

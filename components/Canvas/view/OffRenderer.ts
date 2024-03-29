@@ -1,5 +1,5 @@
 import Controller from "../controller/Controller";
-import { Vector3, Vector6 } from "../types";
+import { Vector3, Vector6 } from "../model/types";
 import DisplayRenderer from "./DisplayRenderer";
 import Renderer from "./Renderer";
 
@@ -101,7 +101,7 @@ class OffRenderer extends Renderer {
     return result;
   }
 
-  _vertexShaderSource = `
+  override _vertexShaderSource = `
     precision mediump float;
     
     attribute vec3 vertPosition;
@@ -117,7 +117,7 @@ class OffRenderer extends Renderer {
     }
   `;
 
-  _fragmentShaderSource = `
+  override _fragmentShaderSource = `
     precision mediump float;
 
     varying vec3 fragSurface;

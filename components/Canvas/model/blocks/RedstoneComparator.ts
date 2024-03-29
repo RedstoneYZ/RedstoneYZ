@@ -1,15 +1,11 @@
-import {
-  comparator_on_subtract, comparator_on, comparator_subtract, comparator
-} from "@/public/json/blocks";
-import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3, WebGLData } from "../../types";
+import { BlockModelPath } from "../../view/types";
+import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
-/**
- * 代表一個紅石比較器
- */
 class RedstoneComparator extends Block {
   public type: BlockType.RedstoneComparator;
+  public model: BlockModelPath.Comparator;
   public states: RedstoneComparatorStates;
 
   constructor(options: BlockOptions) {
@@ -21,29 +17,21 @@ class RedstoneComparator extends Block {
     this.setFacing(options.normDir, options.facingDir);
   }
 
-  get power() {
+  override get power() {
     return 0;
   }
 
-  get supportingBlock() {
+  override get supportingBlock() {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
 
-  get textures() {
-    return _model[this.states.mode][this.states.powered ? 1 : 0][this.states.facing].textures;
-  }
-
-  get outlines() {
-    return _model[this.states.mode][this.states.powered ? 1 : 0][this.states.facing].outlines;
-  }
-
-  powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
+  override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
     return this.states.powered && direction === this.states.facing ?
       { strong: true, power: this.states.power } :
       { strong: false, power: 0 };
   }
 
-  powerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
+  override powerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
     return this.states.powered && direction === this.states.facing ?
       { strong: true, power: this.states.power } :
       { strong: false, power: 0 };
@@ -58,7 +46,7 @@ class RedstoneComparator extends Block {
   }
 
   // temprarily take PP and NC update as the same
-  PPUpdate() {
+  override PPUpdate() {
     super.PPUpdate();
 
     const newPower = this.currentPower;
@@ -142,11 +130,3 @@ class RedstoneComparator extends Block {
 }
 
 export default RedstoneComparator;
-
-const _model: {
-  compare: [Record<FourFacings, WebGLData>, Record<FourFacings, WebGLData>], 
-  subtract: [Record<FourFacings, WebGLData>, Record<FourFacings, WebGLData>]
-} = {
-  compare: [comparator, comparator_on], 
-  subtract: [comparator_subtract, comparator_on_subtract]
-};

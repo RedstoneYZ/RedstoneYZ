@@ -1,27 +1,21 @@
-import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../types";
+import { BlockOptions, BlockStates, BlockType } from "../types";
+import { BlockModelPath } from "../../view/types";
 import Block from "./Block";
 
-/**
- * 代表一個空氣方塊
- */
 class AirBlock extends Block {
   public type: BlockType.AirBlock;
+  public model: BlockModelPath.Air;
   public states: BlockStates;
-
-  public textures: WebGLTextureData[];
-  public outlines: number[];
 
   constructor(options: BlockOptions) {
     super({ transparent: true, ...options });
 
     this.type = BlockType.AirBlock;
+    this.model = BlockModelPath.Air;
     this.states = { power: 0, source: false };
-
-    this.textures = [];
-    this.outlines = [];
   }
 
-  PPUpdate() {}
+  override PPUpdate() {}
 }
 
 export default AirBlock;

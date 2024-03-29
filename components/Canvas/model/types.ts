@@ -1,5 +1,5 @@
 import Engine from "./Engine";
-import { AirBlock, GlassBlock, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./core";
+import { AirBlock, Glass, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./blocks";
 
 export type CanvasProps = {
   canvasWidth: number;
@@ -27,7 +27,7 @@ export interface EngineOptions {
   yLen: number;
   zLen: number;
   mapName: string;
-  validation?: ValidationData;
+  validation?: ValidationData | undefined;
 }
 
 export type EngineTaskParams = {
@@ -70,7 +70,7 @@ export interface ValidationData {
 export enum BlockType {
   AirBlock = 0, 
   IronBlock = 1, 
-  GlassBlock = 2, 
+  Glass = 2, 
   RedstoneDust = 100, 
   RedstoneTorch = 101, 
   RedstoneRepeater = 102,
@@ -81,7 +81,7 @@ export enum BlockType {
 }
 
 
-export type Blocks = AirBlock | GlassBlock | IronBlock | Lever | RedstoneComparator | RedstoneDust | RedstoneLamp | RedstoneRepeater | RedstoneTorch | RedstoneWallTorch | Target;
+export type Blocks = AirBlock | Glass | IronBlock | Lever | RedstoneComparator | RedstoneDust | RedstoneLamp | RedstoneRepeater | RedstoneTorch | RedstoneWallTorch | Target;
 
 export type BlockConstructor = new (options: BlockOptions) => Blocks;
 
@@ -210,18 +210,11 @@ export interface RedstoneTargetStates extends BlockStates {
   power: number;
 }
 
-
-export type WebGLTextureData = Record<SixSides, { source: string, vertices: number[] }>;
-
-export interface WebGLData {
-  textures: WebGLTextureData[];
-  outlines: number[];
-}
-
 export type Vector2 = [number, number];
 export type Vector3 = [number, number, number];
 export type Vector4 = [number, number, number, number];
 export type Vector6 = [number, number, number, number, number, number];
+export type Vector9 = [number, number, number, number, number, number, number, number, number];
 
 export type SixSides = "east" | "west" | "up" | "down" | "south" | "north";
 export type FourFacings = "east" | "west" | "south" | "north";

@@ -1,4 +1,4 @@
-import { SixSides, Vector2, Vector3 } from "../types";
+import { SixSides, Vector2, Vector3 } from "../model/types";
 
 export interface BlockModel {
   ambientocclusion: boolean;
@@ -17,7 +17,9 @@ export interface BlockModelFace {
 }
 
 export enum BlockModelPath {
-  // cube
+  Air = "air",
+
+  // cubes
   Block          = "block",
   Cube           = "cube", 
   CubeAll        = "cube_all", 
