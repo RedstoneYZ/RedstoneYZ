@@ -121,9 +121,20 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }))
 
+export const Singlepage = defineDocumentType(() => ({
+  name: 'Singlepage',
+  filePathPattern: 'singlepage/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    name: { type: 'string', required: true },
+    layout: { type: 'string' },
+  },
+  computedFields,
+}))
+
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors],
+  documentTypes: [Blog, Authors, Singlepage],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
@@ -138,11 +149,9 @@ export default makeSource({
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
     ],
   },
-  // onSuccess: async (importData) => {
-  //   const { allBlogs } = await importData()
-  //   console.log("All Blogs")
-  //   console.log(allBlogs)
-  //   createTagCount(allBlogs)
-  //   createSearchIndex(allBlogs)
-  // },
+  onSuccess: async (importData) => {
+    const { allBlogs } = await importData()
+    createTagCount(allBlogs)
+    createSearchIndex(allBlogs)
+  },
 })
