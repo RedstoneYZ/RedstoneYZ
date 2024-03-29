@@ -1,8 +1,6 @@
 import Engine from "./Engine";
 import { AirBlock, GlassBlock, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./core";
 
-export type VauleOf<T> = T[keyof T];
-
 export type CanvasProps = {
   canvasWidth: number;
   canvasHeight: number;
@@ -16,7 +14,6 @@ export type CanvasProps = {
   preLoadData: MapData;
 })
 
-
 export interface ControllerOptions {
   xLen: number;
   yLen: number;
@@ -24,7 +21,6 @@ export interface ControllerOptions {
   mapName: string;
   preLoadData?: MapData;
 }
-
 
 export interface EngineOptions {
   xLen: number;
@@ -215,129 +211,12 @@ export interface RedstoneTargetStates extends BlockStates {
 }
 
 
-export interface RawBlockData {
-  /** 此方塊需參考的母模型的名稱 */
-  parent?: string;
-
-  /** 此方塊的材質列表 */
-  textures?: { [name: string]: string };
-
-  /** 所有模型箱的資訊 */
-  elements?: RawBlockElementData[];
-
-  /** 所有特殊互動箱的資訊 */
-  outlines?: RawBlockOutlineData[];
-
-  /** 此方塊是否能夠三面附著 */
-  face?: boolean;
-
-  /** 此方塊是否為四向方塊 */
-  facing?: boolean;
-
-  /** 預設要先沿 y 軸旋轉 90 度的次數 */
-  prerotation?: number;
-}
-
-/** 被展開後的方塊資料 */
-export type FullBlockData =
-  Omit<RawBlockData, "parent" | "textures"> & 
-  { elements: RawBlockElementData[], textures: { [name: string]: string } };
-
-/** 方塊的模型箱資料 */
-export interface RawBlockElementData {
-  /** 模型箱的西/下/北側座標 */
-  from: number[];
-
-  /** 模型箱的東/上/南側座標 */
-  to: number[];
-
-  /** 實際繪出前需要的旋轉 */
-  rotation?: RawRotationData;
-
-  /** 每個面的材質 */
-  faces: Partial<Record<SixSides, RawFaceData>>;
-}
-
-/** 方塊的互動箱資料 */
-export interface RawBlockOutlineData {
-  /** 互動箱的西/下/北側座標 */
-  from: number[];
-
-  /** 互動箱的東/上/南側座標 */
-  to: number[];
-}
-
-/** 用來描述沿著座標軸方向的旋轉 */
-export interface RawRotationData {
-  /** 旋轉的中心點 */
-  origin: number[];
-
-  /** 旋轉座標軸 */
-  axis: string;
-
-  /** 逆時針旋轉角度 */
-  angle: number;
-}
-
-/** 用來描述一個長方形面的材質 */
-export interface RawFaceData {
-  /** 指定材質上的左/上/右/下側座標 */
-  uv?: number[];
-
-  /** 要套用的材質 */
-  texture: string;
-
-  /** 在套用材質前要先將其順時針旋轉的角度 */
-  rotation?: number;
-}
-
-/** 方塊中所有的繪圖必要元件 */
-export interface Components {
-  /** 處理後的所有模型箱的資訊 */
-  elements: ComponentsElement[];
-
-  /** 處理後的所有特殊互動箱的資訊 */
-  outlines: Vector3[][];
-
-  /** 此方塊是否能夠三面附著 */
-  face: boolean;
-
-  /** 此方塊是否為四向方塊 */
-  facing: boolean;
-
-  /** 預設要先沿 y 軸旋轉 90 度的次數 */
-  prerotation: number;
-}
-
-/** 模型箱的資訊 */
-export interface ComponentsElement {
-  /** 此模型箱八個頂點的資訊 */
-  vertices: Vector3[];
-
-  /** 旋轉後的三軸單位向量 */
-  normals: Record<SixSides, Vector3>;
-
-  /** 每個面的材質 */
-  faces: Partial<Record<SixSides, FaceData>>;
-}
-
-/** 用來描述一個長方形面的材質 */
-export interface FaceData {
-  /** 四個頂點對應在圖片上的像素座標 */
-  texCoord: [Vector2, Vector2, Vector2, Vector2];
-
-  /** 要套用的材質 */
-  texture: string;
-}
-
 export type WebGLTextureData = Record<SixSides, { source: string, vertices: number[] }>;
 
 export interface WebGLData {
   textures: WebGLTextureData[];
   outlines: number[];
 }
-
-export type Rotation = (vec: Vector4) => Vector3;
 
 export type Vector2 = [number, number];
 export type Vector3 = [number, number, number];
@@ -346,5 +225,5 @@ export type Vector6 = [number, number, number, number, number, number];
 
 export type SixSides = "east" | "west" | "up" | "down" | "south" | "north";
 export type FourFacings = "east" | "west" | "south" | "north";
-export type ThreeFaces = "ceiling" | "wall" | "floor" | "north";
+export type ThreeFaces = "ceiling" | "wall" | "floor";
 export type ThreeAxes = "x" | "y" | "z";

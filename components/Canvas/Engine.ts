@@ -1,4 +1,4 @@
-import { sleep, strictEqual } from "../../utils";
+import { sleep, strictEqual } from "./core/utils";
 import { AirBlock, Block, IronBlock, Lever, NewBlock, RedstoneLamp } from "./core";
 import blockNameTable from "./core/utils/blockNameTable";
 import { BlockType, Blocks, EngineOptions, EngineTask, FourFacings, MapData, ValidationData, Vector3 } from "./types";

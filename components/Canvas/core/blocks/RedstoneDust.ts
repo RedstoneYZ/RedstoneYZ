@@ -3,7 +3,7 @@ import {
 } from "@/public/json/blocks";
 import { Maps } from "../utils";
 import Block from "./Block";
-import { strictEqual } from "../../../../utils";
+import { strictEqual } from "../../core/utils";
 import { BlockOptions, BlockType, FourFacings, RedstoneDustStates, SixSides, WebGLTextureData } from "../../types";
 
 /**

@@ -1,9 +1,7 @@
 import Maps from "./Maps";
 import NewBlock from "./NewBlock";
-import parseTexture from "./parseTexture";
 
-export {
-  Maps, 
-  NewBlock, 
-  parseTexture
-};
+import sleep from "./sleep";
+import strictEqual from "./strictEqual";
+
+export { Maps, NewBlock, sleep, strictEqual };
