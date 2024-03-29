@@ -1,5 +1,5 @@
-import Controller from "../controllers/Controller";
-import { Vector3, Vector6 } from "../typings/types";
+import Controller from "../controller/Controller";
+import { Vector3, Vector6 } from "../types";
 import DisplayRenderer from "./DisplayRenderer";
 import Renderer from "./Renderer";
 

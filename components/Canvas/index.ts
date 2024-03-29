@@ -1,5 +1,5 @@
 import Canvas from "./Canvas";
-import { BlockType } from "./typings/types";
+import { BlockType } from "./types";
 
 export default Canvas;
 export { BlockType };

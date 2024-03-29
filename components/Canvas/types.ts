@@ -1,5 +1,5 @@
-import Engine from "../Engine";
-import { AirBlock, GlassBlock, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "../core";
+import Engine from "./Engine";
+import { AirBlock, GlassBlock, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./core";
 
 export type VauleOf<T> = T[keyof T];
 

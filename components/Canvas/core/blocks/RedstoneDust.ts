@@ -4,7 +4,7 @@ import {
 import { Maps } from "../utils";
 import Block from "./Block";
 import { strictEqual } from "../../../../utils";
-import { BlockOptions, BlockType, FourFacings, RedstoneDustStates, SixSides, WebGLTextureData } from "../../typings/types";
+import { BlockOptions, BlockType, FourFacings, RedstoneDustStates, SixSides, WebGLTextureData } from "../../types";
 
 /**
  * 代表一個紅石粉方塊

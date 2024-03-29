@@ -1,5 +1,5 @@
 import { NewBlock, Maps } from "../utils";
-import { BlockData, BlockOptions, BlockSpawnOptions, BlockStates, BlockType, Blocks, PowerTransmission, SixSides, WebGLTextureData } from "../../typings/types";
+import { BlockData, BlockOptions, BlockSpawnOptions, BlockStates, BlockType, Blocks, PowerTransmission, SixSides, WebGLTextureData } from "../../types";
 import Engine from "../../Engine";
 
 /**

@@ -1,4 +1,4 @@
-import { Components, ComponentsElement, FaceData, FourFacings, FullBlockData, RawBlockData, RawBlockElementData, RawRotationData, Rotation, SixSides, ThreeFaces, Vector2, Vector3, WebGLData, WebGLTextureData } from "../../typings/types";
+import { Components, ComponentsElement, FaceData, FourFacings, FullBlockData, RawBlockData, RawBlockElementData, RawRotationData, Rotation, SixSides, ThreeFaces, Vector2, Vector3, WebGLData, WebGLTextureData } from "../../types";
 
 /**
  * 將指定方塊的模型資料解析成方便使用的形式

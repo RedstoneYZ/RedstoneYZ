@@ -1,6 +1,6 @@
 import FullBlock from "./FullBlock";
 import { iron_block } from "@/public/json/blocks";
-import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../typings/types";
+import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../types";
 
 /**
  * 代表一個鐵方塊，即不透明的單位方塊

@@ -1,4 +1,4 @@
-import { BlockType } from "../../typings/types";
+import { BlockType } from "../../types";
 
 const blockNameTable: { [K in BlockType]: string } = {
   [BlockType.AirBlock]: '空氣', 

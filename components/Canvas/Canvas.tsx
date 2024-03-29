@@ -6,10 +6,10 @@ import { useEffect, useRef, useState } from "react";
 // import Message from "../Message";
 
 import Engine from "./Engine";
-import Controller from "./controllers/Controller";
+import Controller from "./controller/Controller";
 
 import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
-import { CanvasProps, MapData } from "./typings/types";
+import { CanvasProps, MapData } from "./types";
 
 const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
   const [shiftDown, setShiftDown] = useState(false);

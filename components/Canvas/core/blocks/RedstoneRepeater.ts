@@ -4,7 +4,7 @@ import {
   repeater_3tick_locked, repeater_3tick_on_locked, repeater_3tick_on, repeater_3tick, 
   repeater_4tick_locked, repeater_4tick_on_locked, repeater_4tick_on, repeater_4tick
 } from "@/public/json/blocks";
-import { BlockOptions, BlockType, FourFacings, RedstoneRepeaterStates, SixSides, Vector3, WebGLData } from "../../typings/types";
+import { BlockOptions, BlockType, FourFacings, RedstoneRepeaterStates, SixSides, Vector3, WebGLData } from "../../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 

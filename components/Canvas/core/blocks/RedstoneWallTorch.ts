@@ -1,5 +1,5 @@
 import { redstone_wall_torch_off, redstone_wall_torch } from "@/public/json/blocks";
-import { BlockOptions, FourFacings, RedstoneWallTorchStates, SixSides, Vector3, WebGLData } from "../../typings/types";
+import { BlockOptions, FourFacings, RedstoneWallTorchStates, SixSides, Vector3, WebGLData } from "../../types";
 import { Maps } from "../utils";
 import RedstoneTorchBase from "./RedstoneTorchBase";
 

@@ -1,9 +1,11 @@
-import Controller from "../controllers/Controller";
+import Controller from "../controller/Controller";
 import { Block } from "../core";
 import { Maps } from "../core/utils";
-import { BlockType, SixSides, Vector3, Vector6 } from "../typings/types";
+import { BlockType, SixSides, Vector3, Vector6 } from "../types";
+import ModelHandler from "./ModelHandler";
 import OffRenderer from "./OffRenderer";
 import Renderer from "./Renderer";
+import { BlockModelPath } from "./types";
 
 class DisplayRenderer extends Renderer {
   public images: Map<string, HTMLImageElement>;
@@ -11,6 +13,7 @@ class DisplayRenderer extends Renderer {
   
   private _devMode: boolean;
   private _offRenderer: OffRenderer;
+  private _models: ModelHandler;
 
   constructor(controller: Controller, dimensions: Vector3) {
     super(controller, dimensions);
@@ -26,6 +29,7 @@ class DisplayRenderer extends Renderer {
 
     this._devMode = false;
     this._offRenderer = new OffRenderer(controller, dimensions, this);
+    this._models = new ModelHandler();
   }
 
   initialize(canvas: HTMLCanvasElement): void {
@@ -77,7 +81,6 @@ class DisplayRenderer extends Renderer {
     gl.uniform3f(lightColorUniformLocation, 0.8, 0.8, 0.4);
     gl.uniform3f(lightDirectionUniformLocation, 1.0, 2.0, 3.0);
 
-
     const positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
     const texCoordAttribLocation = gl.getAttribLocation(program, 'vertTexCoord');
     const normalAttribLocation = gl.getAttribLocation(program, 'vertNormal');
@@ -88,14 +91,15 @@ class DisplayRenderer extends Renderer {
     gl.enableVertexAttribArray(normalAttribLocation);
     gl.enableVertexAttribArray(colorMaskAttribLocation);
     
-    const draw = () => {
+    const draw = async () => {
       if (this._needRender) {
         gl.uniformMatrix4fv(matWorldUniformLocation, false, this._worldMatrix);
 
         gl.clearColor(1, 0.96, 0.66, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
-        for (const [image, { vertices }] of this._getBlockVertices()) {
+        const data = await this._getBlockVertices();
+        for (const [image, vertices] of data) {
           this._setupBuffer(gl, vertices, this.indices);
       
           gl.vertexAttribPointer(positionAttribLocation, 3, gl.FLOAT, false, 11 * Float32Array.BYTES_PER_ELEMENT, 0);
@@ -125,8 +129,8 @@ class DisplayRenderer extends Renderer {
     return this._offRenderer.getTarget(canvasX, canvasY);
   }
 
-  private _getBlockVertices(): Map<string, { vertices: number[], counter: number }> {
-    const map = new Map();
+  private async _getBlockVertices(): Promise<Map<BlockModelPath, number[]>> {
+    const map = new Map<BlockModelPath, number[]>();
     for (let i = 0; i < this.dimensions[0]; i++) {
       for (let j = 0; j < this.dimensions[1]; j++) {
         for (let k = 0; k < this.dimensions[2]; k++) {
@@ -138,31 +142,24 @@ class DisplayRenderer extends Renderer {
           const z = k - this.dimensions[2] / 2;
           const color = 'color' in block ? block.color.map(a => a / 255) : [1, 1, 1];
 
-          block.textures.forEach(texture => {
-            for (const [dirName, data] of Object.entries(texture)) {
-              if (!data || !this._shouldRender(block, dirName as SixSides)) continue;
-              
-              let storage = map.get(data.source);
+          const model = await this._models.getModel(BlockModelPath.IronBlock);
+          model.faces.forEach(face => {
+            if (this._shouldRender(block, face.cullface)) {
+              let storage = map.get(face.texture);
               if (!storage) {
-                storage = { vertices: [], counter: 0 };
-                map.set(data.source, storage);
+                storage = [];
+                map.set(face.texture, storage);
               }
 
-              const v = data.vertices;
-              for (let i = 0; i < v.length; i += 8) {
-                storage.vertices.push(
-                  v[i] + x, 
-                  v[i+1] + y, 
-                  v[i+2] + z, 
-                  v[i+3], 
-                  v[i+4], 
-                  v[i+5], 
-                  v[i+6], 
-                  v[i+7], 
+              for (let i = 0; i < 4; ++i) {
+                const { corners: c, texCords: t, normal: n } = face;
+                storage.push(
+                  c[i][0] + x, c[i][1] + y, c[i][2] + z, 
+                  t[i][0], t[i][1], 
+                  n[0], n[1], n[2], 
                   ...color
                 );
               }
-              storage.counter++;
             }
           });
         }

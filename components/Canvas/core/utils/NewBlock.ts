@@ -1,4 +1,4 @@
-import { BlockOptions, BlockStates, BlockType, Blocks, FourFacings, SixSides } from "../../typings/types";
+import { BlockOptions, BlockStates, BlockType, Blocks, FourFacings, SixSides } from "../../types";
 import { AirBlock, IronBlock, GlassBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "../blocks";
 
 /**

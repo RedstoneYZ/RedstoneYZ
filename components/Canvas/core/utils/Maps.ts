@@ -1,4 +1,4 @@
-import { FourFacings, SixSides } from "../../typings/types";
+import { FourFacings, SixSides } from "../../types";
 
 class Maps extends null {
   static ReverseDir = Object.freeze({

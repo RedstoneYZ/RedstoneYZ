@@ -1,7 +1,7 @@
 import {
   comparator_on_subtract, comparator_on, comparator_subtract, comparator
 } from "@/public/json/blocks";
-import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3, WebGLData } from "../../typings/types";
+import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3, WebGLData } from "../../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 

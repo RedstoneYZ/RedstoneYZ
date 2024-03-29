@@ -1,6 +1,6 @@
 import FullBlock from "./FullBlock";
 import { glass } from "@/public/json/blocks";
-import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../typings/types";
+import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../types";
 
 /**
  * 代表一個玻璃方塊，即透明的單位方塊

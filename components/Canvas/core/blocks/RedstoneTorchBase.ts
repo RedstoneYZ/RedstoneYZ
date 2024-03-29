@@ -1,4 +1,4 @@
-import { BlockOptions, BlockType, RedstoneTorchBaseStates, SixSides } from "../../typings/types";
+import { BlockOptions, BlockType, RedstoneTorchBaseStates, SixSides } from "../../types";
 import Block from "./Block";
 
 abstract class RedstoneTorchBase extends Block {

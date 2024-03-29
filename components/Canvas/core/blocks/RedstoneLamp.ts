@@ -1,7 +1,7 @@
 import { Maps } from "../utils";
 import FullBlock from "./FullBlock";
 import { redstone_lamp, redstone_lamp_on } from "@/public/json/blocks";
-import { BlockOptions, BlockType, RedstoneLampStates, WebGLData } from "../../typings/types";
+import { BlockOptions, BlockType, RedstoneLampStates, WebGLData } from "../../types";
 
 
 /**

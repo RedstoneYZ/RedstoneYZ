@@ -1,7 +1,7 @@
 import Engine from "../Engine";
-import Renderer from "../Renderer";
+import Renderer from "../view";
 
-import { BlockType, FourFacings, ControllerOptions } from "../typings/types";
+import { BlockType, FourFacings, ControllerOptions } from "../types";
 import blockNameTable from "../core/utils/blockNameTable";
 
 /**

@@ -1,4 +1,4 @@
-import { BlockOptions } from "../../typings/types";
+import { BlockOptions } from "../../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 

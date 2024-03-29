@@ -1,6 +1,6 @@
 import Engine from "../Engine";
-import Controller from "../controllers/Controller";
-import { Vector3, Vector6 } from "../typings/types";
+import Controller from "../controller/Controller";
+import { Vector3, Vector6 } from "../types";
 
 abstract class Renderer {
   public controller: Controller;

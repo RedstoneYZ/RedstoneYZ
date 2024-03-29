@@ -1,5 +1,5 @@
 import { redstone_torch_off, redstone_torch } from "@/public/json/blocks";
-import { BlockOptions, RedstoneTorchStates, WebGLData } from "../../typings/types";
+import { BlockOptions, RedstoneTorchStates, WebGLData } from "../../types";
 import RedstoneTorchBase from "./RedstoneTorchBase";
 
 class RedstoneTorch extends RedstoneTorchBase {

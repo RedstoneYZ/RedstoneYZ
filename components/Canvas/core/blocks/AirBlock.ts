@@ -1,4 +1,4 @@
-import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../typings/types";
+import { BlockOptions, BlockStates, BlockType, WebGLTextureData } from "../../types";
 import Block from "./Block";
 
 /**

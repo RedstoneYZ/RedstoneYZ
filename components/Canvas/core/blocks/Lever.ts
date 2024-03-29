@@ -1,5 +1,5 @@
 import { lever, lever_on } from "@/public/json/blocks";
-import { BlockOptions, BlockType, FourFacings, LeverStates, SixSides, ThreeFaces, Vector3, WebGLData } from "../../typings/types";
+import { BlockOptions, BlockType, FourFacings, LeverStates, SixSides, ThreeFaces, Vector3, WebGLData } from "../../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
