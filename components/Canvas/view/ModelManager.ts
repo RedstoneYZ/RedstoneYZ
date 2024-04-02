@@ -35,8 +35,8 @@ export default class ModelManager {
       .map(async bs => {
         const rotateX = this.getRotationMatrix({ origin: [8, 8, 8], axis: "x", angle: bs.x });
         const rotateY = this.getRotationMatrix({ origin: [8, 8, 8], axis: "y", angle: bs.y });
-        const rotate0 = (vec: Vector3) => rotateY([...rotateX([...vec, 0]), 0]);
-        const rotate1 = (vec: Vector3) => rotateY([...rotateX([...vec, 1]), 1]);
+        const rotate0 = (vec: Vector3) => rotateX([...rotateY([...vec, 0]), 0]);
+        const rotate1 = (vec: Vector3) => rotateX([...rotateY([...vec, 1]), 1]);
 
         const model = await this.getModel(bs.model);
         const faces: BlockModelFace[] = model.faces.map(face => ({
@@ -94,10 +94,10 @@ export default class ModelManager {
       result.ambientocclusion &&= parentData.ambientocclusion ?? true;
 
       if (parentData.textures) {
-        result.textures = { ...parentData.textures, ...result.textures };
+        result.textures = deepCopy({ ...parentData.textures, ...result.textures });
       }
       if (parentData.elements) {
-        result.elements = parentData.elements;
+        result.elements = deepCopy(parentData.elements);
       }
 
       parent = parentData.parent;
@@ -270,6 +270,10 @@ export default class ModelManager {
     north: [[6, 4, 0, 2], [0, 0, -1]], 
     down: [[1, 0, 4, 5], [0, -1, 0]]
   } as const;
+}
+
+function deepCopy<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
 }
 
 type FullModel = Required<Omit<RawBlockModel, 'parent' | 'display'>>;

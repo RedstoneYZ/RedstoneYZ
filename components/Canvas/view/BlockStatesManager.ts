@@ -22,13 +22,12 @@ export default class BlockStatesManager {
         }
       }
       else {
-        for (const state in rule.when) {
-          if (`${states[state as keyof BlockStates]}` !== rule.when[state]) break;
+        if (Object.entries(rule.when).every(([k, v]) => `${states[k as keyof BlockStates]}` === v)) {
+          if (blockStates.singleMatch) {
+            return [rule.apply];
+          }
+          result.push(rule.apply);
         }
-        if (blockStates.singleMatch) {
-          return [rule.apply];
-        }
-        result.push(rule.apply);
       }
     }
     return result;
@@ -51,12 +50,12 @@ export default class BlockStatesManager {
     if ('variants' in rawStates) return {
       singleMatch: true, 
       rules: Object.entries(rawStates.variants).map(([key, _value]) => {
-        const value = 'length' in _value ? _value : [_value];
-        return {
-          when: Object.fromEntries(key.split(',').map(a => a.split('='))),
-          apply: this.makeRequired(value)
-        };
-      })
+          const value = 'length' in _value ? _value : [_value];
+          return {
+            when: key.length ? Object.fromEntries(key.split(',').map(a => a.split('='))) : {},
+            apply: this.makeRequired(value)
+          };
+        })
     }
 
     return {
