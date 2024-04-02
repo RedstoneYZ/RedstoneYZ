@@ -1,18 +1,15 @@
 import { Maps } from "../utils";
 import FullBlock from "./FullBlock";
 import { BlockOptions, BlockType, RedstoneLampStates } from "../types";
-import { BlockModelPath } from "../../view/types";
 
 class RedstoneLamp extends FullBlock {
   public type: BlockType.RedstoneLamp;
-  public model: BlockModelPath.RedstoneLamp;
   public states: RedstoneLampStates;
 
   constructor(options: BlockOptions) {
     super(options);
 
     this.type = BlockType.RedstoneLamp;
-    this.model = BlockModelPath.RedstoneLamp;
     this.states = { power: 0, source: false, lit: false };
   }
 

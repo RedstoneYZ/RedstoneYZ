@@ -2,13 +2,12 @@ import { BlockOptions, BlockType, RedstoneTorchBaseStates, SixSides } from "../t
 import Block from "./Block";
 
 abstract class RedstoneTorchBase extends Block {
-  public type: BlockType.RedstoneTorch;
+  public type: BlockType.RedstoneTorch | BlockType.RedstoneWallTorch;
   public states: RedstoneTorchBaseStates;
 
   constructor(options: BlockOptions) {
     super({ needSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
 
-    this.type = BlockType.RedstoneTorch;
     this.states = { power: 0, source: true, lit: true };
   }
 

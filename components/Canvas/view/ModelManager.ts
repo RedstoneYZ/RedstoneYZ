@@ -1,14 +1,17 @@
-import { SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
-import { BlockModelPath, BlockModel, BlockModelFace } from "./types";
+import { BlockStates, SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
+import BlockStatesManager from "./BlockStatesManager";
+import { BlockModel, BlockModelFace } from "./types";
 
-export default class ModelHandler {
-  private rawData: { [key: string]: RawBlockModel };
+export default class ModelManager {
+  private blockStatesManager: BlockStatesManager;
+  private rawModelCache: { [key: string]: RawBlockModel };
   private modelCache: { [key: string]: BlockModel };
 
   constructor() {
-    this.rawData = {};
+    this.blockStatesManager = new BlockStatesManager();
+    this.rawModelCache = {};
     this.modelCache = {
-      [BlockModelPath.Air]: {
+      ["air"]: {
         ambientocclusion: false, 
         faces: [], 
         outlines: []
@@ -16,26 +19,61 @@ export default class ModelHandler {
     };
   }
 
-  async getModel(path: BlockModelPath): Promise<BlockModel> {
+  async get(path: string, states: BlockStates): Promise<BlockModel[]> {
+    const result = (await this.blockStatesManager.get(path, states))
+      .map(pack => {
+        if (pack.length === 1) return pack[0];
+        let rand = Math.random() * pack.reduce((a, c) => a + c.weight, 0);
+        for (const item of pack) {
+          rand -= item.weight;
+          if (rand <= 0) {
+            return item;
+          }
+        }
+        return pack[0];
+      })
+      .map(async bs => {
+        const rotateX = this.getRotationMatrix({ origin: [8, 8, 8], axis: "x", angle: bs.x });
+        const rotateY = this.getRotationMatrix({ origin: [8, 8, 8], axis: "y", angle: bs.y });
+        const rotate0 = (vec: Vector3) => rotateY([...rotateX([...vec, 0]), 0]);
+        const rotate1 = (vec: Vector3) => rotateY([...rotateX([...vec, 1]), 1]);
+
+        const model = await this.getModel(bs.model);
+        const faces: BlockModelFace[] = model.faces.map(face => ({
+          corners: face.corners.map(rotate1) as [Vector3, Vector3, Vector3, Vector3], 
+          texCords: face.texCords, // TODO
+          normal: rotate0(face.normal),
+          shade: face.shade,
+          texture: face.texture,
+          cullface: face.cullface, // TODO
+          tintindex: face.tintindex,
+        }));
+        const outlines: Vector3[][] = model.outlines.map(outline => outline.map(rotate1));
+        return { ambientocclusion: model.ambientocclusion, faces, outlines };
+      });
+    return Promise.all(result);
+  }
+
+  private async getModel(path: string): Promise<BlockModel> {
     if (path in this.modelCache) {
       return this.modelCache[path]!;
     }
-
-    const model = await this.loadRawData(path);
-    return this.parseTexture(model);
+    else {
+      const raw_model = await this.loadRawModel(path);
+      return this.modelCache[path] = await this.parseModel(raw_model);
+    }
   }
 
-  private async loadRawData(path: string): Promise<RawBlockModel> {
-    if (path in this.rawData) {
-      return this.rawData[path]!;
+  private async loadRawModel(path: string): Promise<RawBlockModel> {
+    if (path in this.rawModelCache) {
+      return this.rawModelCache[path]!;
     }
 
-    // the parameter of import() should be explicit string
     const model = require(`../../../public/json/blocks/${path}.json`) as RawBlockModel;
-    return this.rawData[path] = model;
+    return this.rawModelCache[path] = model;
   }
 
-  private async parseTexture(rawModel: RawBlockModel): Promise<BlockModel> {
+  private async parseModel(rawModel: RawBlockModel): Promise<BlockModel> {
     const _1 = await this.unfoldModel(rawModel);
     const _2 = this.propagateTexture(_1);
     const _3 = this.clearElement(_2);
@@ -51,7 +89,7 @@ export default class ModelHandler {
 
     let parent = rawModel.parent;
     while (parent) {
-      const parentData = await this.loadRawData(this.parsePath(parent));
+      const parentData = await this.loadRawModel(this.parsePath(parent));
 
       result.ambientocclusion &&= parentData.ambientocclusion ?? true;
 
@@ -89,7 +127,7 @@ export default class ModelHandler {
       for (const key in faces) {
         const face = faces[key as SixSides]!;
         if (face.texture.startsWith('#')) {
-          face.texture = model.textures[face.texture.substring(1)] as BlockModelPath;
+          face.texture = model.textures[face.texture.substring(1)];
         }
       }
     }
@@ -244,8 +282,8 @@ type Rotation = (vec: Vector4) => Vector3;
 interface RawBlockModel {
   parent?: string;
   ambientocclusion?: boolean;
-  display?: never;
-  textures?: { [key: string]: string };
+  display?: never; // currently not used
+  textures?: { [texture: string]: string };
   elements?: RawBlockModelElement[]
 }
 
@@ -265,7 +303,7 @@ interface RawBlockModelElementRotation {
 }
 
 interface RawBlockModelElementFace {
-  texture: BlockModelPath;
+  texture: string;
   uv?: Vector4;
   cullface?: SixSides;
   rotation?: number;

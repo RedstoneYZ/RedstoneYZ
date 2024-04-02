@@ -1,7 +1,6 @@
 import { NewBlock, Maps } from "../utils";
 import { BlockData, BlockOptions, BlockSpawnOptions, BlockStates, BlockType, Blocks, PowerTransmission, SixSides } from "../types";
 import Engine from "../Engine";
-import { BlockModelPath } from "../../view/types";
 
 /**
  * 代表一個方塊
@@ -31,7 +30,6 @@ abstract class Block {
   public redstoneAutoConnect: "full" | "line" | "none";
 
   public abstract type: BlockType;
-  public abstract model: BlockModelPath;
   public abstract states: BlockStates;
 
   constructor(options: BlockOptions) {

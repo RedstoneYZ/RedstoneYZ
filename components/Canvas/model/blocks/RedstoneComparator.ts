@@ -1,11 +1,9 @@
-import { BlockModelPath } from "../../view/types";
 import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
 class RedstoneComparator extends Block {
   public type: BlockType.RedstoneComparator;
-  public model: BlockModelPath.Comparator;
   public states: RedstoneComparatorStates;
 
   constructor(options: BlockOptions) {

@@ -1,18 +1,15 @@
 import { BlockOptions, BlockType, FourFacings, RedstoneRepeaterStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
-import { BlockModelPath } from "../../view/types";
 
 class RedstoneRepeater extends Block {
   public type: BlockType.RedstoneRepeater;
-  public model: BlockModelPath.Repeater1tickOnLocked;
   public states: RedstoneRepeaterStates;
 
   constructor(options: BlockOptions) {
     super({ needBottomSupport: true, transparent: true, redstoneAutoConnect: 'line', ...options });
     
     this.type = BlockType.RedstoneRepeater;
-    this.model = BlockModelPath.Repeater1tickOnLocked;
     this.states = { power: 0, source: false, delay: 1, facing: 'north', locked: false, powered: false };
     this.setFacing(options.normDir, options.facingDir);
   }

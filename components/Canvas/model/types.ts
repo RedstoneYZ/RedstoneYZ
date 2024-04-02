@@ -68,16 +68,17 @@ export interface ValidationData {
 
 
 export enum BlockType {
-  AirBlock = 0, 
-  IronBlock = 1, 
-  Glass = 2, 
-  RedstoneDust = 100, 
-  RedstoneTorch = 101, 
-  RedstoneRepeater = 102,
-  RedstoneLamp = 103, 
-  Lever = 104,
-  RedstoneComparator = 105, 
-  Target = 106
+  AirBlock           = "air", 
+  IronBlock          = "iron_block", 
+  Glass              = "glass", 
+  RedstoneDust       = "redstone_wire", 
+  RedstoneTorch      = "redstone_torch", 
+  RedstoneWallTorch  = "redstone_wall_torch", 
+  RedstoneRepeater   = "repeater",
+  RedstoneLamp       = "redstone_lamp", 
+  Lever              = "lever",
+  RedstoneComparator = "comparator", 
+  Target             = "target"
 }
 
 

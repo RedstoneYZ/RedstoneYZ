@@ -2,11 +2,9 @@ import { Maps } from "../utils";
 import Block from "./Block";
 import { strictEqual } from "../../model/utils";
 import { BlockOptions, BlockType, FourFacings, RedstoneDustStates, SixSides } from "../types";
-import { BlockModelPath } from "../../view/types";
 
 class RedstoneDust extends Block {
   public type: BlockType.RedstoneDust;
-  public model: BlockModelPath.RedstoneDustDot;
   public states: RedstoneDustStates;
 
   public crossMode: boolean;
@@ -15,7 +13,6 @@ class RedstoneDust extends Block {
     super({ needBottomSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
 
     this.type = BlockType.RedstoneDust;
-    this.model = BlockModelPath.RedstoneDustDot;
     this.states = { power: 0, source: false, east: 1, south: 1, west: 1, north: 1 };
     this.crossMode = true;
   }

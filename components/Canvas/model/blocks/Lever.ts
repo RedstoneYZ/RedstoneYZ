@@ -1,18 +1,15 @@
-import { BlockModelPath } from "../../view/types";
 import { BlockOptions, BlockType, FourFacings, LeverStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
 class Lever extends Block {
   public type: BlockType.Lever;
-  public model: BlockModelPath.Lever;
   public states: LeverStates;
 
   constructor(options: BlockOptions) {
     super({ transparent: true, needSupport: true, redstoneAutoConnect: 'full', ...options });
 
     this.type = BlockType.Lever;
-    this.model = BlockModelPath.Lever;
     this.states = { power: 0, source: false, face: 'wall', facing: 'north', powered: false };
     this.setFacing(options.normDir, options.facingDir);
   }

@@ -2,10 +2,9 @@ import Controller from "../controller/Controller";
 import { Block } from "../model";
 import { Maps } from "../model/utils";
 import { BlockType, SixSides, Vector3, Vector6 } from "../model/types";
-import ModelHandler from "./ModelHandler";
+import ModelHandler from "./ModelManager";
 import OffRenderer from "./OffRenderer";
 import Renderer from "./Renderer";
-import { BlockModelPath } from "./types";
 
 class DisplayRenderer extends Renderer {
   public images: Map<string, HTMLImageElement>;
@@ -129,39 +128,41 @@ class DisplayRenderer extends Renderer {
     return this._offRenderer.getTarget(canvasX, canvasY);
   }
 
-  private async _getBlockVertices(): Promise<Map<BlockModelPath, number[]>> {
-    const map = new Map<BlockModelPath, number[]>();
+  private async _getBlockVertices(): Promise<Map<string, number[]>> {
+    const map = new Map<string, number[]>();
     for (let i = 0; i < this.dimensions[0]; i++) {
       for (let j = 0; j < this.dimensions[1]; j++) {
         for (let k = 0; k < this.dimensions[2]; k++) {
           const block = this.engine.block(i, j, k);
-          if (!block?.model) continue;
+          if (!block || block.type === BlockType.AirBlock) continue;
 
           const x = i - this.dimensions[0] / 2;
           const y = j - this.dimensions[1] / 2;
           const z = k - this.dimensions[2] / 2;
           const color = 'color' in block ? block.color.map(a => a / 255) : [1, 1, 1];
 
-          const model = await this._models.getModel(block.model);
-          model.faces.forEach(face => {
-            if (this._shouldRender(block, face.cullface)) {
-              let storage = map.get(face.texture);
-              if (!storage) {
-                storage = [];
-                map.set(face.texture, storage);
+          const models = await this._models.get(block.type, block.states);
+          models.forEach(model => {
+            model.faces.forEach(face => {
+              if (this._shouldRender(block, face.cullface)) {
+                let storage = map.get(face.texture);
+                if (!storage) {
+                  storage = [];
+                  map.set(face.texture, storage);
+                }
+  
+                for (let i = 0; i < 4; ++i) {
+                  const { corners: c, texCords: t, normal: n } = face;
+                  storage.push(
+                    c[i][0] + x, c[i][1] + y, c[i][2] + z, 
+                    t[i][0], t[i][1], 
+                    n[0], n[1], n[2], 
+                    ...color
+                  );
+                }
               }
-
-              for (let i = 0; i < 4; ++i) {
-                const { corners: c, texCords: t, normal: n } = face;
-                storage.push(
-                  c[i][0] + x, c[i][1] + y, c[i][2] + z, 
-                  t[i][0], t[i][1], 
-                  n[0], n[1], n[2], 
-                  ...color
-                );
-              }
-            }
-          });
+            });
+          })
         }
       }  
     }

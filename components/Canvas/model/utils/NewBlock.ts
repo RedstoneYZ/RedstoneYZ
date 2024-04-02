@@ -11,7 +11,7 @@ function NewBlock<T extends BlockStates>(
   type: BlockType, options: Omit<BlockOptions, 'normDir' | 'facingDir'>, states: T
 ): Blocks;
 function NewBlock<T extends BlockStates>(type: BlockType, options: BlockOptions, states?: T): Blocks {
-  if (type === BlockType.RedstoneTorch) {
+  if (type === BlockType.RedstoneTorch || type === BlockType.RedstoneWallTorch) {
     if (options.normDir && options.facingDir) {
       return options.normDir === 'up' || options.normDir === 'down' ?
         new RedstoneTorch(options) : new RedstoneWallTorch(options);

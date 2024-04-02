@@ -1,16 +1,14 @@
-import { BlockOptions, FourFacings, RedstoneWallTorchStates, SixSides, Vector3 } from "../types";
+import { BlockOptions, BlockType, FourFacings, RedstoneWallTorchStates, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import RedstoneTorchBase from "./RedstoneTorchBase";
-import { BlockModelPath } from "../../view/types";
 
 class RedstoneWallTorch extends RedstoneTorchBase {
-  public model: BlockModelPath.RedstoneWallTorch;
   public override states: RedstoneWallTorchStates;
 
   constructor(options: BlockOptions) {
     super({ needSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
 
-    this.model = BlockModelPath.RedstoneWallTorch;
+    this.type = BlockType.RedstoneWallTorch;
     this.states = { power: 0, source: true, lit: true, facing: 'north' };
     this.setFacing(options.normDir, options.facingDir);
   }
