@@ -28,14 +28,14 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const pg = new Controller({ xLen, yLen, zLen, mapName, preLoadData });
+    const ctrl = new Controller({ xLen, yLen, zLen, mapName, preLoadData });
     if (canvasRef.current) {
-      pg.initialize(canvasRef.current);
-      setController(pg);
-      setCurrentBlock(pg.currentBlockName);
+      ctrl.initialize(canvasRef.current);
+      setController(ctrl);
+      setCurrentBlock(ctrl.currentBlockName);
     }
 
-    return () => pg.destroy();
+    return () => ctrl.destroy();
   }, [xLen, yLen, zLen, mapName, preLoadData]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLCanvasElement>) {

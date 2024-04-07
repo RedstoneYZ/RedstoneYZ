@@ -276,8 +276,7 @@ class Engine {
     block = this.block(x, y, z);
 
     // 不能超出範圍，且原位置必須為空
-    if (!block || block.type !== 0) return;
-
+    if (!block || block.type !== BlockType.AirBlock) return;
 
     const face =
       normDir[0] ? (normDir[0] === 1 ? 'east' : 'west') :

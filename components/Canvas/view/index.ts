@@ -1,3 +1,3 @@
-import Renderer from "./DisplayRenderer";
+import Renderer from "./Renderer";
 
 export default Renderer;
