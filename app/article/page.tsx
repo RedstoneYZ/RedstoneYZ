@@ -1,14 +1,14 @@
-import ListLayout from '@/layouts/ListLayoutWithTags'
+import ListLayout from '@/layouts/ListLayoutWithTreeStructure'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
+import { allArticles } from 'contentlayer/generated'
 import { genPageMetadata } from 'app/seo'
 
 const POSTS_PER_PAGE = 5
 
-export const metadata = genPageMetadata({ title: 'Blog' })
+export const metadata = genPageMetadata({ title: 'Article' })
 
-export default function BlogPage() {
-  const posts = allCoreContent(sortPosts(allBlogs))
+export default function ArticlePage() {
+  const posts = allCoreContent(sortPosts(allArticles))
   const pageNumber = 1
   const initialDisplayPosts = posts.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
@@ -24,7 +24,7 @@ export default function BlogPage() {
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
-      title="All Posts"
+      title="所有文章"
     />
   )
 }
