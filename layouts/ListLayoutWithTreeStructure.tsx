@@ -10,7 +10,7 @@ import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
-import articleHierarchy from '@/data/articleHierarchy.json'
+import articleHierarchy from '@/app/articleHierarchy.json'
 
 interface PaginationProps {
   totalPages: number
@@ -92,10 +92,12 @@ export default function ListLayoutWithTags({
   )
 }
 
+type ArticleData = { [key: string]: ArticleData | string };
+
 function ArticleTable({
   data, parent, title
 }: {
-  data: any, 
+  data: ArticleData, 
   parent: string, 
   title: string
 }) {
@@ -104,7 +106,7 @@ function ArticleTable({
   return (
     <ul>
       {
-        'index.mdx' in data ? 
+        'index.mdx' in data && typeof data["index.mdx"] === "string" ? 
           <Link
             href={parent}
             className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"

@@ -1,7 +1,7 @@
 import fs from "fs";
 
 fs.writeFileSync(
-  "./data/articleHierarchy.json", 
+  "./app/articleHierarchy.json", 
   JSON.stringify(readData("./data/article/", "article"), null, 2)
 );
 
