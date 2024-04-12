@@ -31,10 +31,10 @@ class Renderer {
 
     this.images = new Map();
     this.indices = new Uint16Array(Array.from(
-      { length: 8192 }, 
+      { length: 4096 }, 
       (_, i) => {
         i <<= 2;
-        return [i, i + 1, i + 2, i, i + 2, i + 3];
+        return [i, i + 1, i + 2, i + 3, 65535];
       }
     ).flat());
 
@@ -57,7 +57,7 @@ class Renderer {
 
     const draw = async () => {
       if (!this._data) {
-        throw new Error('Failed to initialize the webgl context.');
+        throw new Error('Failed to initialize the webgl2 context.');
       }
 
       if (this._needRender) {
@@ -73,7 +73,7 @@ class Renderer {
           const img = this.images.get(image);
           if (img) {
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-            gl.drawElements(gl.TRIANGLES, vertices.length / 22 * 3, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
           }
         }
 
