@@ -5,21 +5,21 @@ import { usePathname } from 'next/navigation'
 import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog } from 'contentlayer/generated'
+import type { Article } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
-import blogHierarchy from '@/data/blogHierarchy.json'
+import articleHierarchy from '@/data/articleHierarchy.json'
 
 interface PaginationProps {
   totalPages: number
   currentPage: number
 }
 interface ListLayoutProps {
-  posts: CoreContent<Blog>[]
+  posts: CoreContent<Article>[]
   title: string
-  initialDisplayPosts?: CoreContent<Blog>[]
+  initialDisplayPosts?: CoreContent<Article>[]
   pagination?: PaginationProps
 }
 
@@ -84,7 +84,7 @@ export default function ListLayoutWithTags({
       </div>
       <div className="flex sm:space-x-24">
         <div className="px-6 py-4 hidden h-full max-h-screen min-w-[310px] max-w-[310px] flex-wrap overflow-auto rounded bg-gray-50 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
-          <ArticleTable data={blogHierarchy} parent='/blog/' title={title}></ArticleTable>
+          <ArticleTable data={articleHierarchy} parent='/article/' title={title}></ArticleTable>
         </div>
         <RightPanel displayPosts={displayPosts} pagination={pagination}></RightPanel>
       </div>
@@ -111,12 +111,12 @@ function ArticleTable({
           >
             {data["index.mdx"]}
           </Link> : 
-        parent === "/blog/" ? 
-          pathname.startsWith('/blog') ? (
+        parent === "/article/" ? 
+          pathname.startsWith('/article') ? (
             <h3 className="font-bold text-primary-500">{title}</h3>
           ) : (
             <Link
-              href={`/blog`}
+              href={`/article`}
               className="font-bold text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
             >
               {title}
@@ -145,7 +145,7 @@ function ArticleTable({
 function RightPanel({
   displayPosts, pagination
 }: {
-  displayPosts: CoreContent<Blog>[],
+  displayPosts: CoreContent<Article>[],
   pagination?: PaginationProps
 }) {
   return (

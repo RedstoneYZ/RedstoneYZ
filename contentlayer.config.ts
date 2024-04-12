@@ -15,7 +15,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypePrismPlus from 'rehype-prism-plus'
 import siteMetadata from './data/siteMetadata'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
-import { Blog as ContentLayerBlog } from 'contentlayer/generated'
+import { Article as ContentlayerArticle } from 'contentlayer/generated'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -36,11 +36,11 @@ const computedFields: ComputedFields = {
 }
 
 /**
- * Count the occurrences of all tags across blog posts and write to json file
+ * Count the occurrences of all tags across article posts and write to json file
  */
-function createTagCount(allBlogs: ContentLayerBlog[]) {
+function createTagCount(allArticles: ContentlayerArticle[]) {
   const tagCount: Record<string, number> = {}
-  allBlogs.forEach((file) => {
+  allArticles.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
         const formattedTag = slug(tag)
@@ -55,22 +55,22 @@ function createTagCount(allBlogs: ContentLayerBlog[]) {
   writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
 }
 
-function createSearchIndex(allBlogs: ContentLayerBlog[]) {
+function createSearchIndex(allArticles: ContentlayerArticle[]) {
   if (
     siteMetadata?.search?.provider === 'kbar' &&
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
     writeFileSync(
       `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(allCoreContent(sortPosts(allBlogs)))
+      JSON.stringify(allCoreContent(sortPosts(allArticles)))
     )
     console.log('Local search index generated...')
   }
 }
 
-export const Blog = defineDocumentType(() => ({
-  name: 'Blog',
-  filePathPattern: 'blog/**/*.mdx',
+export const Article = defineDocumentType(() => ({
+  name: 'Article',
+  filePathPattern: 'article/**/*.mdx',
   contentType: 'mdx',
   fields: {
     title: { type: 'string', required: true },
@@ -91,7 +91,7 @@ export const Blog = defineDocumentType(() => ({
       type: 'json',
       resolve: (doc) => ({
         '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
+        '@type': 'ArticlePosting',
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
@@ -134,7 +134,7 @@ export const Singlepage = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Singlepage],
+  documentTypes: [Article, Authors, Singlepage],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
@@ -150,8 +150,8 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allBlogs } = await importData()
-    createTagCount(allBlogs)
-    createSearchIndex(allBlogs)
+    const { allArticles } = await importData()
+    createTagCount(allArticles)
+    createSearchIndex(allArticles)
   },
 })

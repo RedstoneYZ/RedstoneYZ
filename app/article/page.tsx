@@ -1,19 +1,15 @@
 import ListLayout from '@/layouts/ListLayoutWithTreeStructure'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
+import { allArticles } from 'contentlayer/generated'
+import { genPageMetadata } from 'app/seo'
 
 const POSTS_PER_PAGE = 5
 
-export const generateStaticParams = async () => {
-  const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
-  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
+export const metadata = genPageMetadata({ title: 'Article' })
 
-  return paths
-}
-
-export default function Page({ params }: { params: { page: string } }) {
-  const posts = allCoreContent(sortPosts(allBlogs))
-  const pageNumber = parseInt(params.page as string)
+export default function ArticlePage() {
+  const posts = allCoreContent(sortPosts(allArticles))
+  const pageNumber = 1
   const initialDisplayPosts = posts.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
     POSTS_PER_PAGE * pageNumber
