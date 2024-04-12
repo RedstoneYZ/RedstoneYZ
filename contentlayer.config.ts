@@ -1,6 +1,5 @@
 import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer/source-files'
 import { writeFileSync } from 'fs'
-import { slug } from 'github-slugger'
 // Remark packages
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -43,11 +42,10 @@ function createTagCount(allArticles: ContentlayerArticle[]) {
   allArticles.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
-        const formattedTag = slug(tag)
-        if (formattedTag in tagCount) {
-          tagCount[formattedTag] += 1
+        if (tag in tagCount) {
+          tagCount[tag] += 1
         } else {
-          tagCount[formattedTag] = 1
+          tagCount[tag] = 1
         }
       })
     }
