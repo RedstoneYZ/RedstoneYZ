@@ -19,7 +19,7 @@ class Controller {
   public needRender: boolean;
   public alive: boolean;
 
-  constructor({ xLen, yLen, zLen, mapName, preLoadData }: ControllerOptions) {
+  constructor({ canvas, xLen, yLen, zLen, mapName, preLoadData }: ControllerOptions) {
     this.player = { facing: { direction: 'south', yaw: 0, pitch: 0 } };
 
     this.hotbar = this.getHotbar(preLoadData?.availableBlocks ??
@@ -28,7 +28,7 @@ class Controller {
     this.hotbarIndex = 0;
 
     this.engine = preLoadData ? Engine.spawn(preLoadData) : new Engine({ xLen, yLen, zLen, mapName });
-    this.renderer = new Renderer(this, [xLen, yLen, zLen]);
+    this.renderer = new Renderer(this, canvas, [xLen, yLen, zLen]);
 
     this.needRender = true;
     this.alive = true;
@@ -42,9 +42,9 @@ class Controller {
    * 初始化
    * @param canvas 
    */
-  initialize(canvas: HTMLCanvasElement): void {
+  start(): void {
     this.engine.startTicking();
-    this.renderer.initialize(canvas);
+    this.renderer.startRendering();
   }
 
   private _prevRefX = 0;

@@ -9,27 +9,32 @@ const F32_SIZE = Float32Array.BYTES_PER_ELEMENT;
 
 class Renderer {
   public controller: Controller;
-  public dimensions: Vector3;
-
   public engine: Engine;
-  public canvas?: HTMLCanvasElement | OffscreenCanvas;
+  public canvas: HTMLCanvasElement;
 
+  public dimensions: Vector3;
   public images: Map<string, HTMLImageElement>;
   public indices: Uint16Array;
   
-  private _models: ModelHandler;
-  private _data?: {
-    gl: WebGL2RenderingContext, 
-    vao: WebGLVertexArrayObject, 
-    uMatWorldLoc: WebGLUniformLocation
-  };
+  private models: ModelHandler;
+  private gl: WebGL2RenderingContext;
+  private mainProgram: WebGLProgram;
+  private vao: WebGLVertexArrayObject;
+  private uMatWorldLoc: WebGLUniformLocation;
 
-  constructor(controller: Controller, dimensions: Vector3) {
+  constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
+    this.canvas     = canvas;
     this.dimensions = dimensions;
-    this.engine = controller.engine;
+    this.engine     = controller.engine;
 
     this.images = new Map();
+    ['iron_block', 'comparator', 'comparator_on', 'cobblestone', 'lever', 'redstone_dust_dot', 'redstone_dust_line0', 'redstone_dust_line1', 'redstone_dust_overlay', 'redstone_lamp', 'redstone_lamp_on', 'glass', 'repeater', 'smooth_stone', 'repeater_on', 'redstone_torch', 'redstone_torch_off', 'bedrock', 'target_top', 'target_side'].forEach(src => {
+      const image = new Image();
+      image.src = `/static/images/textures/${src}.png`;
+      this.images.set(src, image);
+    });
+
     this.indices = new Uint16Array(Array.from(
       { length: 4096 }, 
       (_, i) => {
@@ -38,35 +43,24 @@ class Renderer {
       }
     ).flat());
 
-    this._models = new ModelHandler();
-  }
+    this.models = new ModelHandler();
 
-  initialize(canvas: HTMLCanvasElement | OffscreenCanvas): void {
-    ['iron_block', 'comparator', 'comparator_on', 'cobblestone', 'lever', 'redstone_dust_dot', 'redstone_dust_line0', 'redstone_dust_line1', 'redstone_dust_overlay', 'redstone_lamp', 'redstone_lamp_on', 'glass', 'repeater', 'smooth_stone', 'repeater_on', 'redstone_torch', 'redstone_torch_off', 'bedrock', 'target_top', 'target_side'].forEach(src => {
-      const image = new Image();
-      image.src = `/static/images/textures/${src}.png`;
-      this.images.set(src, image);
-    });
-
-    this.canvas = canvas;
-    this.startRendering();
+    this.initGL();
   }
 
   startRendering(): void {
-    const gl = this._initGl();
+    const gl = this.gl;
 
     const draw = async () => {
-      if (!this._data) {
-        throw new Error('Failed to initialize the webgl2 context.');
-      }
+      if (this.needRender) {
+        gl.useProgram(this.mainProgram);
 
-      if (this._needRender) {
-        gl.uniformMatrix4fv(this._data.uMatWorldLoc, false, this._worldMatrix);
+        gl.uniformMatrix4fv(this.uMatWorldLoc, false, this.worldMat);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.bindVertexArray(this._data.vao);
+        gl.bindVertexArray(this.vao);
 
-        const data = await this._getBlockVertices();
+        const data = await this.getBlockVertices();
         for (const [image, vertices] of data) {
           gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
@@ -78,7 +72,7 @@ class Renderer {
         }
 
         gl.bindVertexArray(null);
-        this._resetNeedRender();
+        this.resetNeedRender();
       }
 
       if (this.controller.alive) {
@@ -90,10 +84,8 @@ class Renderer {
   }
 
   getTarget(canvasX: number, canvasY: number): Vector6 | null {
-    if (!this._data?.gl) return null;
-    
     const repCode = new Uint8Array(4);
-    this._data.gl.readPixels(canvasX, 500-canvasY, 1, 1, this._data.gl.RGBA, this._data.gl.UNSIGNED_BYTE, repCode);
+    this.gl.readPixels(canvasX, 500-canvasY, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, repCode);
 
     if (!repCode[0] && !repCode[1] && !repCode[2]) return null;
 
@@ -111,14 +103,7 @@ class Renderer {
     ];
   }
 
-  /**
-   * 生成一個 OpenGL 環境
-   */
-  protected _initGl(): WebGL2RenderingContext {
-    if (!this.canvas) {
-      throw new Error('The canvas has not been initialized.');
-    }
-
+  private initGL(): WebGL2RenderingContext {
     const gl = this.canvas.getContext('webgl2', { alpha: false });
     if (!gl) {
       throw new Error('Your browser does not support webgl2 canvas.');
@@ -128,7 +113,8 @@ class Renderer {
     gl.enable(gl.CULL_FACE);
     gl.clearColor(1, 0.96, 0.66, 1);
 
-    const program = this._initProgram(gl);
+    const program = this.createProgram(gl, this.mainVsSrc, this.mainFsSrc);
+    gl.useProgram(program);
 
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -144,22 +130,18 @@ class Renderer {
       throw new Error("Failed to get uniform location.");
     }
 
-    gl.uniformMatrix4fv(uMatViewLoc, false, this._viewMatrix);
-    gl.uniformMatrix4fv(uMatProjLoc, false, this._projMatrix);
+    gl.uniformMatrix4fv(uMatViewLoc, false, this.viewMat);
+    gl.uniformMatrix4fv(uMatProjLoc, false, this.projMat);
 
-    const vao = this._initVao(gl);
-    this._data = { gl, vao, uMatWorldLoc };
+    this.gl = gl;
+    this.mainProgram = program;
+    this.vao = this.initMainVao(gl);
+    this.uMatWorldLoc = uMatWorldLoc;
 
     return gl;
   }
 
-  private _initProgram(gl: WebGL2RenderingContext): WebGLProgram {
-    const vertexShader = this._loadShader(gl, gl.VERTEX_SHADER, this._vertexShaderSource);
-    const fragmentShader = this._loadShader(gl, gl.FRAGMENT_SHADER, this._fragmentShaderSource);
-    return this._loadProgram(gl, vertexShader, fragmentShader);
-  }
-
-  private _initVao(gl: WebGL2RenderingContext): WebGLVertexArrayObject {
+  private initMainVao(gl: WebGL2RenderingContext): WebGLVertexArrayObject {
     const vao = gl.createVertexArray();
     if (!vao) {
       throw new Error("Failed to create vertex array object");
@@ -189,43 +171,47 @@ class Renderer {
     return vao;
   }
 
-  private _loadShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
-    const shader = gl.createShader(type);
-    if (!shader) {
-      throw new Error('Failed to create shader.');
-    }
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw new Error('Shader Compilation Error\n' + gl.getShaderInfoLog(shader)?.toString());
-    }
-    return shader;
-  }
-
-  private _loadProgram(gl: WebGL2RenderingContext, vShader: WebGLShader, fShader: WebGLShader): WebGLProgram {
+  private createProgram(gl: WebGL2RenderingContext, vss: string, fss: string): WebGLProgram {
     const program = gl.createProgram();
     if (!program) {
       throw new Error('Failed to create program.');
     }
 
-    gl.attachShader(program, vShader);
-    gl.attachShader(program, fShader);
+    const vs = this.createShader(gl, gl.VERTEX_SHADER, vss);
+    const fs = this.createShader(gl, gl.FRAGMENT_SHADER, fss);
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
 
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       throw new Error('Program Link Error\n' + gl.getProgramInfoLog(program)?.toString());
     }
 
+    // TODO: Don't validate at build
     gl.validateProgram(program);
     if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
       throw new Error('Program Validate Error\n' + gl.getProgramInfoLog(program)?.toString());
     }
 
-    gl.useProgram(program);
     return program;
   }
 
-  private async _getBlockVertices(): Promise<Map<string, number[]>> {
+  private createShader(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
+    const shader = gl.createShader(type);
+    if (!shader) {
+      throw new Error('Failed to create shader.');
+    }
+
+    gl.shaderSource(shader, src);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      throw new Error('Shader Compilation Error\n' + gl.getShaderInfoLog(shader)?.toString());
+    }
+
+    return shader;
+  }
+
+  private async getBlockVertices(): Promise<Map<string, number[]>> {
     // TODO: only update block changes
     const map = new Map<string, number[]>();
     for (let i = 0; i < this.dimensions[0]; i++) {
@@ -239,10 +225,10 @@ class Renderer {
           const z = k - this.dimensions[2] / 2;
           const color = 'color' in block ? block.color.map(a => a / 255) : [1, 1, 1];
 
-          const models = await this._models.get(block.type, block.states);
+          const models = await this.models.get(block.type, block.states);
           models.forEach(model => {
             model.faces.forEach(face => {
-              if (this._shouldRender(block, face.cullface)) {
+              if (this.shouldRender(block, face.cullface)) {
                 let storage = map.get(face.texture);
                 if (!storage) {
                   storage = [];
@@ -268,7 +254,7 @@ class Renderer {
   }
 
   // TODO: rewrite to match cullface in data
-  private _shouldRender(block: Block, dir: SixSides) {
+  private shouldRender(block: Block, dir: SixSides) {
     if (block.type !== BlockType.IronBlock && block.type !== BlockType.Glass) return true;
 
     const [x, y, z] = Maps.P6DMap[dir];
@@ -279,16 +265,16 @@ class Renderer {
     return !adjacentBlock.fullBlock || adjacentBlock.type === BlockType.AirBlock || adjacentBlock.type === BlockType.Glass;
   }
 
-  private get _needRender() {
+  private get needRender() {
     return this.controller.needRender || this.engine.needRender;
   }
 
-  private _resetNeedRender() {
+  private resetNeedRender() {
     this.controller.needRender = false;
     this.engine.needRender = false;
   }
 
-  private _vertexShaderSource = `#version 300 es
+  private mainVsSrc = `#version 300 es
     precision mediump float;
     
     layout(location = 0) in vec3 a_position;
@@ -310,7 +296,7 @@ class Renderer {
     }
   `;
 
-  private _fragmentShaderSource = `#version 300 es
+  private mainFsSrc = `#version 300 es
     precision mediump float;
 
     layout(location = 0) out vec4 fragColor;
@@ -333,7 +319,7 @@ class Renderer {
     }
   `;
 
-  private get _worldMatrix(): Float32Array {
+  private get worldMat(): Float32Array {
     const { yaw, pitch } = this.controller.player.facing;
     const c1 = Math.cos(yaw), s1 = Math.sin(yaw);
     const c2 = Math.cos(pitch), s2 = Math.sin(pitch);
@@ -346,21 +332,21 @@ class Renderer {
     ]);
   }
 
-  private __viewMatrix: Float32Array | null = null;
-  private get _viewMatrix() {
-    if (this.__viewMatrix) return this.__viewMatrix;
+  private _viewMat: Float32Array | null = null;
+  private get viewMat() {
+    if (this._viewMat) return this._viewMat;
 
     const a = 2.5 / Math.sqrt(Math.max(...this.dimensions));
-    this.__viewMatrix = new Float32Array([
+    this._viewMat = new Float32Array([
       a, 0, 0, 0, 
       0, a, 0, 0, 
       0, 0, a, 0, 
       0, 0, -15, 1
     ]);
-    return this.__viewMatrix;
+    return this._viewMat;
   }
 
-  private _projMatrix = new Float32Array([
+  private projMat = new Float32Array([
     2.414,     0,    0,  0, 
         0, 2.414,    0,  0, 
         0,     0,   -1, -1, 

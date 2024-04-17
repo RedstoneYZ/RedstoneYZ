@@ -15,6 +15,7 @@ export type CanvasProps = {
 })
 
 export interface ControllerOptions {
+  canvas: HTMLCanvasElement;
   xLen: number;
   yLen: number;
   zLen: number;
