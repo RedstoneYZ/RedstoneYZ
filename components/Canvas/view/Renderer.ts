@@ -18,9 +18,17 @@ class Renderer {
   
   private models: ModelHandler;
   private gl: WebGL2RenderingContext;
-  private mainProgram: WebGLProgram;
-  private vao: WebGLVertexArrayObject;
   private uMatWorldLoc: WebGLUniformLocation;
+
+  private mainProgram: WebGLProgram;
+  private quadProgram: WebGLProgram;
+  private mainVao: WebGLVertexArrayObject;
+  private quadVao: WebGLVertexArrayObject;
+  private mainAb: WebGLBuffer;
+  private mainFbo: WebGLFramebuffer;
+  private imgTexture:  WebGLTexture;
+  private mainTexture: WebGLTexture;
+  private targetTexture: WebGLTexture;
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
@@ -51,27 +59,54 @@ class Renderer {
   startRendering(): void {
     const gl = this.gl;
 
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.CULL_FACE);
+
     const draw = async () => {
       if (this.needRender) {
         gl.useProgram(this.mainProgram);
 
-        gl.uniformMatrix4fv(this.uMatWorldLoc, false, this.worldMat);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.imgTexture);
+        gl.bindVertexArray(this.mainVao);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAb);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
 
-        gl.bindVertexArray(this.vao);
+        gl.uniformMatrix4fv(this.uMatWorldLoc, false, this.worldMat);
+
+        gl.clearBufferfv(gl.COLOR, 0, new Float32Array([1, 0.96, 0.66, 1]));
+        gl.clearBufferiv(gl.COLOR, 1, new Int32Array([0, 0, 0, 0]));
+        gl.clearBufferfv(gl.DEPTH, 0, new Float32Array([1]));
 
         const data = await this.getBlockVertices();
-        for (const [image, vertices] of data) {
+          for (const [image, vertices] of data) {
           gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
           const img = this.images.get(image);
-          if (img) {
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-            gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
-          }
+          if (!img) continue;
+
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+          gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
         }
 
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindVertexArray(null);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        gl.useProgram(this.quadProgram);
+        gl.bindVertexArray(this.quadVao);
+        gl.bindTexture(gl.TEXTURE_2D, this.mainTexture);
+        gl.enable(gl.BLEND);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.disable(gl.BLEND);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindVertexArray(null);
+
+        gl.useProgram(null)
+
         this.resetNeedRender();
       }
 
@@ -84,23 +119,20 @@ class Renderer {
   }
 
   getTarget(canvasX: number, canvasY: number): Vector6 | null {
-    const repCode = new Uint8Array(4);
-    this.gl.readPixels(canvasX, 500-canvasY, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, repCode);
+    const gl = this.gl;
+    const blockId = new Int32Array(1);
 
-    if (!repCode[0] && !repCode[1] && !repCode[2]) return null;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
+    gl.readBuffer(gl.COLOR_ATTACHMENT1);
+    gl.readPixels(
+      canvasX, 500 - canvasY, 1, 1, 
+      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT), 
+      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE), 
+      blockId
+    );
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    repCode[0] -= 128;
-    repCode[1] -= 128;
-    repCode[2] -= 128;
-
-    return [
-      repCode[0] >> 3, 
-      repCode[1] >> 3, 
-      repCode[2] >> 3, 
-      ((repCode[0] & 7) >> 1) - 1, 
-      ((repCode[1] & 7) >> 1) - 1, 
-      ((repCode[2] & 7) >> 1) - 1
-    ];
+    return [0, 0, 0, 0, 0, 0];
   }
 
   private initGL(): WebGL2RenderingContext {
@@ -108,49 +140,60 @@ class Renderer {
     if (!gl) {
       throw new Error('Your browser does not support webgl2 canvas.');
     }
+    this.gl = gl;
 
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-    gl.clearColor(1, 0.96, 0.66, 1);
+    this.mainProgram = this.createProgram(this.mainVsSrc, this.mainFsSrc);
+    this.quadProgram = this.createProgram(this.quadVsSrc, this.quadFsSrc);
 
-    const program = this.createProgram(gl, this.mainVsSrc, this.mainFsSrc);
-    gl.useProgram(program);
+    this.mainVao = this.createMainVao();
+    this.quadVao = this.createQuadVao();
 
-    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.activeTexture(gl.TEXTURE0);
+    this.imgTexture = this.createImgTexture();
+    this.mainTexture = this.createMainTexture();
+    this.targetTexture = this.createTargetTexture();
 
-    const uMatViewLoc  = gl.getUniformLocation(program, 'mView');
-    const uMatProjLoc  = gl.getUniformLocation(program, 'mProj');
-    const uMatWorldLoc = gl.getUniformLocation(program, 'mWorld');
+    this.mainFbo = this.createFrameBuffer();
+
+    const uMatViewLoc  = gl.getUniformLocation(this.mainProgram, 'mView');
+    const uMatProjLoc  = gl.getUniformLocation(this.mainProgram, 'mProj');
+    const uMatWorldLoc = gl.getUniformLocation(this.mainProgram, 'mWorld');
     if (!uMatWorldLoc) {
       throw new Error("Failed to get uniform location.");
     }
+    this.uMatWorldLoc = uMatWorldLoc;
 
+    const uMainSamplerLoc = gl.getUniformLocation(this.mainProgram, 'sampler');
+    const uQuadSamplerLoc = gl.getUniformLocation(this.quadProgram, 'sampler');
+
+    gl.useProgram(this.mainProgram);
     gl.uniformMatrix4fv(uMatViewLoc, false, this.viewMat);
     gl.uniformMatrix4fv(uMatProjLoc, false, this.projMat);
+    gl.uniform1i(uMainSamplerLoc, 0);
 
-    this.gl = gl;
-    this.mainProgram = program;
-    this.vao = this.initMainVao(gl);
-    this.uMatWorldLoc = uMatWorldLoc;
+    gl.useProgram(this.quadProgram);
+    gl.uniform1i(uQuadSamplerLoc, 1);
+    gl.useProgram(null);
 
     return gl;
   }
 
-  private initMainVao(gl: WebGL2RenderingContext): WebGLVertexArrayObject {
+  private createMainVao(): WebGLVertexArrayObject {
+    const gl = this.gl;
     const vao = gl.createVertexArray();
     if (!vao) {
-      throw new Error("Failed to create vertex array object");
+      throw new Error("Failed to create main vertex array object");
     }
 
     gl.bindVertexArray(vao);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(), gl.STATIC_DRAW);
+    const buffer = gl.createBuffer();
+    if (!buffer) {
+      throw new Error("Failed to create main array buffer object");
+    }
+    this.mainAb = buffer;
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAb);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
     // TODO: maybe change normal and texcoords to half float
     gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 11 * F32_SIZE, 0);
@@ -171,14 +214,44 @@ class Renderer {
     return vao;
   }
 
-  private createProgram(gl: WebGL2RenderingContext, vss: string, fss: string): WebGLProgram {
+  private createQuadVao(): WebGLVertexArrayObject {
+    const gl = this.gl;
+    const vao = gl.createVertexArray();
+    if (!vao) {
+      throw new Error("Failed to create vertex array object");
+    }
+
+    gl.bindVertexArray(vao);
+
+    const data = new Float32Array([
+      -1,  1, 0, 1, 
+      -1, -1, 0, 0, 
+       1,  1, 1, 1, 
+       1, -1, 1, 0, 
+    ]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
+
+    gl.enableVertexAttribArray(0);
+    gl.enableVertexAttribArray(1);
+
+    gl.bindVertexArray(null);
+
+    return vao;
+  }
+
+  private createProgram(vss: string, fss: string): WebGLProgram {
+    const gl = this.gl;
     const program = gl.createProgram();
     if (!program) {
       throw new Error('Failed to create program.');
     }
 
-    const vs = this.createShader(gl, gl.VERTEX_SHADER, vss);
-    const fs = this.createShader(gl, gl.FRAGMENT_SHADER, fss);
+    const vs = this.createShader(gl.VERTEX_SHADER, vss);
+    const fs = this.createShader(gl.FRAGMENT_SHADER, fss);
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
 
@@ -196,7 +269,8 @@ class Renderer {
     return program;
   }
 
-  private createShader(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
+  private createShader(type: number, src: string): WebGLShader {
+    const gl = this.gl;
     const shader = gl.createShader(type);
     if (!shader) {
       throw new Error('Failed to create shader.');
@@ -209,6 +283,77 @@ class Renderer {
     }
 
     return shader;
+  }
+
+  private createImgTexture(): WebGLTexture {
+    const gl = this.gl;
+    const texture = gl.createTexture();
+    if (!texture) {
+      throw new Error("Failed to create main texture.");
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  
+    return texture;
+  }
+
+  private createMainTexture(): WebGLTexture {
+    const gl = this.gl;
+    const texture = gl.createTexture();
+    if (!texture) {
+      throw new Error("Failed to create main texture.");
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, 500, 500);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  
+    return texture;
+  }
+
+  private createTargetTexture(): WebGLTexture {
+    const gl = this.gl;
+    const texture = gl.createTexture();
+    if (!texture) {
+      throw new Error("Failed to create main texture.");
+    }
+
+    // gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R32I, 500, 500);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  
+    return texture;
+  }
+
+  private createFrameBuffer(): WebGLFramebuffer {
+    const gl = this.gl;
+    const fbo = gl.createFramebuffer();
+    if (!fbo) {
+      throw new Error("Failed to create main framebuffer.");
+    }
+    this.mainFbo = fbo;
+
+    const rbo = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, rbo);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 500, 500);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.mainTexture, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, this.targetTexture, 0);
+    gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    return fbo;
   }
 
   private async getBlockVertices(): Promise<Map<string, number[]>> {
@@ -275,15 +420,15 @@ class Renderer {
   }
 
   private mainVsSrc = `#version 300 es
-    precision mediump float;
-    
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in vec3 a_normal;
     layout(location = 2) in vec2 a_texcoord;
     layout(location = 3) in vec3 a_colormask;
+
     uniform mat4 mWorld;
     uniform mat4 mView;
     uniform mat4 mProj;
+
     out vec2 fragTexCoord;
     out vec3 fragNormal;
     out vec3 fragColorMask;
@@ -299,16 +444,17 @@ class Renderer {
   private mainFsSrc = `#version 300 es
     precision mediump float;
 
-    layout(location = 0) out vec4 fragColor;
+    in vec2 fragTexCoord;
+    in vec3 fragNormal;
+    in vec3 fragColorMask;
 
     const vec3 ambientIntensity = vec3(0.4, 0.4, 0.7);
     const vec3 lightColor = vec3(0.8, 0.8, 0.4);
     const vec3 lightDirection = normalize(vec3(1.0, 2.0, 3.0));
-
-    in vec2 fragTexCoord;
-    in vec3 fragNormal;
-    in vec3 fragColorMask;
     uniform sampler2D sampler;
+
+    layout(location = 0) out vec4 fragColor;
+    layout(location = 1) out highp int blockId;
 
     void main() {
       vec4 texel = texture(sampler, fragTexCoord);
@@ -316,6 +462,34 @@ class Renderer {
 
       fragColor = vec4(texel.rgb * fragColorMask * lightIntensity, texel.a);
       if (fragColor.a < 0.1) discard;
+
+      blockId = 20110;
+    }
+  `;
+
+  private quadVsSrc = `#version 300 es
+    layout(location = 0) in vec4 aPosition;
+    layout(location = 1) in vec2 aTexCoord;
+
+    out vec2 vTexCoord;
+
+    void main() {
+      gl_Position = aPosition;
+      vTexCoord = aTexCoord;
+    }
+  `;
+
+  private quadFsSrc = `#version 300 es
+    precision mediump float;
+
+    in vec2 vTexCoord;
+
+    uniform sampler2D sampler;
+
+    out vec4 fragColor;
+
+    void main() {
+      fragColor = texture(sampler, vTexCoord);
     }
   `;
 
