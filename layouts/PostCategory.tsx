@@ -38,7 +38,7 @@ export default function PostCategory({ content, authorDetails, next, prev, child
   const basePath = path.split('/')[0]
   const pathSplit = path.split('/')
   let data = articleHierarchy
-  for(let articlepath of pathSplit) {
+  for(const articlepath of pathSplit) {
     if(articlepath !== 'article') {
       // @ts-ignore
       data = data[articlepath as keyof typeof data];
