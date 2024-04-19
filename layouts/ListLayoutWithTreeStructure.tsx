@@ -86,8 +86,6 @@ export default function ListLayoutWithTags({
   )
 }
 
-type ArticleData = { [key: string]: ArticleData | string };
-
 function ArticleTable({ data, parent, title }: ArticleTableProps) {
   const pathname = usePathname();
 

@@ -4,7 +4,6 @@
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Article, Authors } from 'contentlayer/generated'
-import Comments from '@/components/Comments'
 import Link from '@/components/Link'
 import PageTitle from '@/components/PageTitle'
 import SectionContainer from '@/components/SectionContainer'
@@ -35,7 +34,7 @@ interface LayoutProps {
 }
 
 export default function PostCategory({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { filePath, path, slug, date, title, tags } = content
+  const { filePath, path, date, title, tags } = content
   const basePath = path.split('/')[0]
   const pathSplit = path.split('/')
   let data = articleHierarchy
