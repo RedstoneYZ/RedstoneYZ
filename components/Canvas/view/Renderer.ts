@@ -6,6 +6,7 @@ import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
 
 const F32_SIZE = Float32Array.BYTES_PER_ELEMENT;
+const VERTEX_SIZE = 11 * F32_SIZE + Int32Array.BYTES_PER_ELEMENT;
 
 class Renderer {
   public controller: Controller;
@@ -80,14 +81,14 @@ class Renderer {
         gl.clearBufferfv(gl.DEPTH, 0, new Float32Array([1]));
 
         const data = await this.getBlockVertices();
-          for (const [image, vertices] of data) {
-          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        for (const [image, vertices] of data) {
+          gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
           const img = this.images.get(image);
           if (!img) continue;
 
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-          gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
+          gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 48 * 5, gl.UNSIGNED_SHORT, 0);
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -120,7 +121,7 @@ class Renderer {
 
   getTarget(canvasX: number, canvasY: number): Vector6 | null {
     const gl = this.gl;
-    const blockId = new Int32Array(1);
+    const repCode = new Int32Array(1);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
     gl.readBuffer(gl.COLOR_ATTACHMENT1);
@@ -128,11 +129,18 @@ class Renderer {
       canvasX, 500 - canvasY, 1, 1, 
       gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT), 
       gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE), 
-      blockId
+      repCode
     );
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    return [0, 0, 0, 0, 0, 0];
+    return [
+      (repCode[0] >> 22) & 0xFF, 
+      (repCode[0] >> 14) & 0xFF, 
+      (repCode[0] >>  6) & 0xFF, 
+      ((repCode[0] >> 4) & 0x3) - 1, 
+      ((repCode[0] >> 2) & 0x3) - 1, 
+      ((repCode[0] >> 0) & 0x3) - 1, 
+    ];
   }
 
   private initGL(): WebGL2RenderingContext {
@@ -196,15 +204,17 @@ class Renderer {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
     // TODO: maybe change normal and texcoords to half float
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 11 * F32_SIZE, 0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 11 * F32_SIZE, 3 * F32_SIZE);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 11 * F32_SIZE, 6 * F32_SIZE);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 11 * F32_SIZE, 8 * F32_SIZE);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, VERTEX_SIZE, 0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, VERTEX_SIZE, 3 * F32_SIZE);
+    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, VERTEX_SIZE, 6 * F32_SIZE);
+    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, VERTEX_SIZE, 8 * F32_SIZE);
+    gl.vertexAttribIPointer(4, 1, gl.INT, VERTEX_SIZE, 11 * F32_SIZE);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
     gl.enableVertexAttribArray(2);
     gl.enableVertexAttribArray(3);
+    gl.enableVertexAttribArray(4);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
@@ -356,7 +366,7 @@ class Renderer {
     return fbo;
   }
 
-  private async getBlockVertices(): Promise<Map<string, number[]>> {
+  private async getBlockVertices(): Promise<Map<string, Float32Array>> {
     // TODO: only update block changes
     const map = new Map<string, number[]>();
     for (let i = 0; i < this.dimensions[0]; i++) {
@@ -380,22 +390,34 @@ class Renderer {
                   map.set(face.texture, storage);
                 }
   
-                for (let i = 0; i < 4; ++i) {
+                for (let l = 0; l < 4; ++l) {
                   const { corners: c, texCords: t, normal: n } = face;
+                  const coord = (i << 16) | (j << 8) | k;
+                  const norm  = ((n[0] + 1) << 4) | ((n[1] + 1) << 2) | (n[2] + 1);
                   storage.push(
-                    c[i][0] + x, c[i][1] + y, c[i][2] + z, 
+                    c[l][0] + x, c[l][1] + y, c[l][2] + z, 
                     n[0], n[1], n[2], 
-                    t[i][0], t[i][1], 
-                    ...color
+                    t[l][0], t[l][1], 
+                    ...color, (coord << 6) | norm
                   );
                 }
               }
             });
           })
         }
-      }  
+      }
     }
-    return map;
+
+    const result = new Map<string, Float32Array>();
+    for (const [k, v] of map) {
+      const asFloat32 = new Float32Array(v);
+      const asInt32 = new Int32Array(asFloat32.buffer);
+      for (let i = 11; i < v.length; i += 12) {
+        asInt32[i] = v[i];
+      }
+      result.set(k, asFloat32);
+    }
+    return result;
   }
 
   // TODO: rewrite to match cullface in data
@@ -424,19 +446,22 @@ class Renderer {
     layout(location = 1) in vec3 a_normal;
     layout(location = 2) in vec2 a_texcoord;
     layout(location = 3) in vec3 a_colormask;
+    layout(location = 4) in highp int a_blockid;
 
     uniform mat4 mWorld;
     uniform mat4 mView;
     uniform mat4 mProj;
 
-    out vec2 fragTexCoord;
-    out vec3 fragNormal;
-    out vec3 fragColorMask;
+    out vec3 v_colormask;
+    out vec3 v_normal;
+    out vec2 v_texcoord;
+    flat out highp int v_blockid;
 
     void main() {
-      fragTexCoord = a_texcoord;
-      fragColorMask = a_colormask;
-      fragNormal = (mWorld * vec4(a_normal, 0.0)).xyz;
+      v_colormask = a_colormask;
+      v_normal    = a_normal;
+      v_texcoord  = a_texcoord;
+      v_blockid   = a_blockid;
       gl_Position = mProj * mView * mWorld * vec4(a_position, 1.0);
     }
   `;
@@ -444,9 +469,10 @@ class Renderer {
   private mainFsSrc = `#version 300 es
     precision mediump float;
 
-    in vec2 fragTexCoord;
-    in vec3 fragNormal;
-    in vec3 fragColorMask;
+    in vec2 v_texcoord;
+    in vec3 v_colormask;
+    in vec3 v_normal;
+    flat in highp int v_blockid;
 
     const vec3 ambientIntensity = vec3(0.4, 0.4, 0.7);
     const vec3 lightColor = vec3(0.8, 0.8, 0.4);
@@ -457,13 +483,13 @@ class Renderer {
     layout(location = 1) out highp int blockId;
 
     void main() {
-      vec4 texel = texture(sampler, fragTexCoord);
-      vec3 lightIntensity = ambientIntensity + lightColor * max(dot(normalize(fragNormal), lightDirection), 0.0);
+      vec4 texel = texture(sampler, v_texcoord);
+      vec3 lightIntensity = ambientIntensity + lightColor * max(dot(normalize(v_normal), lightDirection), 0.0);
 
-      fragColor = vec4(texel.rgb * fragColorMask * lightIntensity, texel.a);
+      fragColor = vec4(texel.rgb * v_colormask * lightIntensity, texel.a);
       if (fragColor.a < 0.1) discard;
 
-      blockId = 20110;
+      blockId = v_blockid;
     }
   `;
 
