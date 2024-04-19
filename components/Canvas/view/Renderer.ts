@@ -83,10 +83,8 @@ class Renderer {
         gl.clearBufferfv(gl.DEPTH, 0, new Float32Array([1]));
 
         const data = await this.getBlockVertices();
-        for (const [, vertices] of data) {
-          gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-          gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 48 * 5, gl.UNSIGNED_SHORT, 0);
-        }
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+        gl.drawElements(gl.TRIANGLE_FAN, data.length / 48 * 5, gl.UNSIGNED_SHORT, 0);
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -126,12 +124,12 @@ class Renderer {
     if (repCode[0] === 0) return null;
 
     const result: Vector6 = [
-      (repCode[0] >> 22) & 0xFF, 
-      (repCode[0] >> 14) & 0xFF, 
-      (repCode[0] >>  6) & 0xFF, 
-      ((repCode[0] >> 4) & 0x3) - 1, 
-      ((repCode[0] >> 2) & 0x3) - 1, 
-      ((repCode[0] >> 0) & 0x3) - 1, 
+      repCode[0] >> 22 & 0xFF, 
+      repCode[0] >> 14 & 0xFF, 
+      repCode[0] >>  6 & 0xFF, 
+      (repCode[0] >> 4 & 0x3) - 1, 
+      (repCode[0] >> 2 & 0x3) - 1, 
+      (repCode[0] >> 0 & 0x3) - 1, 
     ];
     console.log(result);
 
@@ -199,6 +197,7 @@ class Renderer {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
     // TODO: maybe change normal and texcoords to half float
+    // COMMENT: wait for https://github.com/tc39/proposal-float16array
     gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 48, 0);
     gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 48, 12);
     gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 48, 24);
@@ -368,9 +367,9 @@ class Renderer {
     return fbo;
   }
 
-  private async getBlockVertices(): Promise<Map<string, Float32Array>> {
+  private async getBlockVertices(): Promise<Float32Array> {
     // TODO: only update block changes
-    const map = new Map<string, number[]>();
+    const vertices: number[] = [];
     for (let i = 0; i < this.dimensions[0]; i++) {
       for (let j = 0; j < this.dimensions[1]; j++) {
         for (let k = 0; k < this.dimensions[2]; k++) {
@@ -390,19 +389,13 @@ class Renderer {
                 throw new Error(`Texture ${face.texture} does not exist in texture atlas.`);
               }
 
+              const { corners: c, texCords: t, normal: n } = face;
               const offset = offsets[face.texture as keyof typeof offsets];
-              let storage = map.get(face.texture);
-              if (!storage) {
-                storage = [];
-                map.set(face.texture, storage);
-              }
+              const coord  = i << 16 | j << 8 | k;
+              const norm   = n[0] + 1 << 4 | n[1] + 1 << 2 | n[2] + 1;
 
               for (let l = 0; l < 4; ++l) {
-                const { corners: c, texCords: t, normal: n } = face;
-
-                const coord = (i << 16) | (j << 8) | k;
-                const norm  = ((n[0] + 1) << 4) | ((n[1] + 1) << 2) | (n[2] + 1);
-                storage.push(
+                vertices.push(
                   c[l][0] + x, c[l][1] + y, c[l][2] + z, 
                   n[0], n[1], n[2], 
                   t[l][0] * factor[0] + offset[0], t[l][1] * factor[1] + offset[1], 
@@ -410,21 +403,17 @@ class Renderer {
                 );
               }
             });
-          })
+          });
         }
       }
     }
 
-    const result = new Map<string, Float32Array>();
-    for (const [k, v] of map) {
-      const asFloat32 = new Float32Array(v);
-      const asInt32 = new Int32Array(asFloat32.buffer);
-      for (let i = 11; i < v.length; i += 12) {
-        asInt32[i] = v[i];
-      }
-      result.set(k, asFloat32);
+    const asFloat32 = new Float32Array(vertices);
+    const asInt32 = new Int32Array(asFloat32.buffer);
+    for (let i = 11; i < vertices.length; i += 12) {
+      asInt32[i] = vertices[i];
     }
-    return result;
+    return asFloat32;
   }
 
   // TODO: rewrite to match cullface in data
@@ -450,18 +439,18 @@ class Renderer {
 
   private mainVsSrc = `#version 300 es
     layout(location = 0) in vec3 a_position;
-    layout(location = 1) in vec3 a_normal;
-    layout(location = 2) in vec2 a_texcoord;
-    layout(location = 3) in vec3 a_colormask;
+    layout(location = 1) in mediump vec3 a_normal;
+    layout(location = 2) in mediump vec2 a_texcoord;
+    layout(location = 3) in mediump vec3 a_colormask;
     layout(location = 4) in highp int a_blockid;
 
     uniform mat4 mWorld;
     uniform mat4 mView;
     uniform mat4 mProj;
 
-    out vec3 v_colormask;
-    out vec3 v_normal;
-    out vec2 v_texcoord;
+    out mediump vec3 v_colormask;
+    out mediump vec2 v_texcoord;
+    flat out mediump vec3 v_normal;
     flat out highp int v_blockid;
 
     void main() {
@@ -476,9 +465,9 @@ class Renderer {
   private mainFsSrc = `#version 300 es
     precision mediump float;
 
-    in vec2 v_texcoord;
-    in vec3 v_colormask;
-    in vec3 v_normal;
+    in mediump vec3 v_colormask;
+    in mediump vec2 v_texcoord;
+    flat in mediump vec3 v_normal;
     flat in highp int v_blockid;
 
     const vec3 ambientIntensity = vec3(0.4, 0.4, 0.7);
