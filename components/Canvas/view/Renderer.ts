@@ -4,19 +4,22 @@ import Engine from "../model/Engine";
 import { BlockType, SixSides, Vector3, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
-
-const F32_SIZE = Float32Array.BYTES_PER_ELEMENT;
-const VERTEX_SIZE = 11 * F32_SIZE + Int32Array.BYTES_PER_ELEMENT;
+import AtlasMap from "@/public/static/images/atlas/map.json";
+const { factor, offsets } = AtlasMap;
 
 class Renderer {
   public controller: Controller;
   public engine: Engine;
+  public dimensions: Vector3;
   public canvas: HTMLCanvasElement;
 
-  public dimensions: Vector3;
-  public images: Map<string, HTMLImageElement>;
-  public indices: Uint16Array;
-  
+  public READ_FORMAT: number;
+  public READ_TYPE: number;
+
+  private ready: boolean;
+
+  private indices: Uint16Array;
+
   private models: ModelHandler;
   private gl: WebGL2RenderingContext;
   private uMatWorldLoc: WebGLUniformLocation;
@@ -25,24 +28,17 @@ class Renderer {
   private quadProgram: WebGLProgram;
   private mainVao: WebGLVertexArrayObject;
   private quadVao: WebGLVertexArrayObject;
-  private mainAb: WebGLBuffer;
+  private mainAbo: WebGLBuffer;
   private mainFbo: WebGLFramebuffer;
-  private imgTexture:  WebGLTexture;
-  private mainTexture: WebGLTexture;
-  private targetTexture: WebGLTexture;
+  private spriteTex:  WebGLTexture;
+  private screenTex: WebGLTexture;
+  private targetTex: WebGLTexture;
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
     this.canvas     = canvas;
     this.dimensions = dimensions;
     this.engine     = controller.engine;
-
-    this.images = new Map();
-    ['iron_block', 'comparator', 'comparator_on', 'cobblestone', 'lever', 'redstone_dust_dot', 'redstone_dust_line0', 'redstone_dust_line1', 'redstone_dust_overlay', 'redstone_lamp', 'redstone_lamp_on', 'glass', 'repeater', 'smooth_stone', 'repeater_on', 'redstone_torch', 'redstone_torch_off', 'bedrock', 'target_top', 'target_side'].forEach(src => {
-      const image = new Image();
-      image.src = `/static/images/textures/${src}.png`;
-      this.images.set(src, image);
-    });
 
     this.indices = new Uint16Array(Array.from(
       { length: 4096 }, 
@@ -54,24 +50,25 @@ class Renderer {
 
     this.models = new ModelHandler();
 
+    this.ready = false;
     this.initGL();
   }
 
   startRendering(): void {
     const gl = this.gl;
 
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
 
     const draw = async () => {
       if (this.needRender) {
         gl.useProgram(this.mainProgram);
+        gl.bindVertexArray(this.mainVao);
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.imgTexture);
-        gl.bindVertexArray(this.mainVao);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAb);
+        gl.bindTexture(gl.TEXTURE_2D, this.spriteTex);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAbo);
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
 
         gl.uniformMatrix4fv(this.uMatWorldLoc, false, this.worldMat);
@@ -81,32 +78,25 @@ class Renderer {
         gl.clearBufferfv(gl.DEPTH, 0, new Float32Array([1]));
 
         const data = await this.getBlockVertices();
-        for (const [image, vertices] of data) {
+        for (const [, vertices] of data) {
           gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-          const img = this.images.get(image);
-          if (!img) continue;
-
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
           gl.drawElements(gl.TRIANGLE_FAN, vertices.length / 48 * 5, gl.UNSIGNED_SHORT, 0);
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.bindVertexArray(null);
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, null);
 
         gl.useProgram(this.quadProgram);
         gl.bindVertexArray(this.quadVao);
-        gl.bindTexture(gl.TEXTURE_2D, this.mainTexture);
-        gl.enable(gl.BLEND);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        gl.disable(gl.BLEND);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.bindVertexArray(null);
 
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.screenTex);
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
         gl.useProgram(null)
+        gl.bindVertexArray(null);
 
         this.resetNeedRender();
       }
@@ -125,15 +115,10 @@ class Renderer {
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
     gl.readBuffer(gl.COLOR_ATTACHMENT1);
-    gl.readPixels(
-      canvasX, 500 - canvasY, 1, 1, 
-      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT), 
-      gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE), 
-      repCode
-    );
+    gl.readPixels(canvasX, 500 - canvasY, 1, 1, this.READ_FORMAT, this.READ_TYPE, repCode);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    return [
+    const result: Vector6 = [
       (repCode[0] >> 22) & 0xFF, 
       (repCode[0] >> 14) & 0xFF, 
       (repCode[0] >>  6) & 0xFF, 
@@ -141,9 +126,12 @@ class Renderer {
       ((repCode[0] >> 2) & 0x3) - 1, 
       ((repCode[0] >> 0) & 0x3) - 1, 
     ];
+    console.log(result);
+
+    return result;
   }
 
-  private initGL(): WebGL2RenderingContext {
+  private async initGL() {
     const gl = this.canvas.getContext('webgl2', { alpha: false });
     if (!gl) {
       throw new Error('Your browser does not support webgl2 canvas.');
@@ -156,9 +144,15 @@ class Renderer {
     this.mainVao = this.createMainVao();
     this.quadVao = this.createQuadVao();
 
-    this.imgTexture = this.createImgTexture();
-    this.mainTexture = this.createMainTexture();
-    this.targetTexture = this.createTargetTexture();
+    const atlas = await new Promise<HTMLImageElement>(res => {
+      const image = new Image();
+      image.onload = () => res(image);
+      image.src = "/static/images/atlas/file.png";
+    });
+
+    this.spriteTex = this.createSpriteTexture(atlas);
+    this.screenTex = this.createScreenTexture();
+    this.targetTex = this.createTargetTexture();
 
     this.mainFbo = this.createFrameBuffer();
 
@@ -182,7 +176,7 @@ class Renderer {
     gl.uniform1i(uQuadSamplerLoc, 1);
     gl.useProgram(null);
 
-    return gl;
+    this.ready = true;
   }
 
   private createMainVao(): WebGLVertexArrayObject {
@@ -198,17 +192,17 @@ class Renderer {
     if (!buffer) {
       throw new Error("Failed to create main array buffer object");
     }
-    this.mainAb = buffer;
+    this.mainAbo = buffer;
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAb);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAbo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
     // TODO: maybe change normal and texcoords to half float
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, VERTEX_SIZE, 0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, VERTEX_SIZE, 3 * F32_SIZE);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, VERTEX_SIZE, 6 * F32_SIZE);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, VERTEX_SIZE, 8 * F32_SIZE);
-    gl.vertexAttribIPointer(4, 1, gl.INT, VERTEX_SIZE, 11 * F32_SIZE);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 48, 0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 48, 12);
+    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 48, 24);
+    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 48, 32);
+    gl.vertexAttribIPointer(4, 1, gl.INT, 48, 44);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
@@ -233,14 +227,8 @@ class Renderer {
 
     gl.bindVertexArray(vao);
 
-    const data = new Float32Array([
-      -1,  1, 0, 1, 
-      -1, -1, 0, 0, 
-       1,  1, 1, 1, 
-       1, -1, 1, 0, 
-    ]);
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, this.quadData, gl.STATIC_DRAW);
 
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
     gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);
@@ -295,7 +283,7 @@ class Renderer {
     return shader;
   }
 
-  private createImgTexture(): WebGLTexture {
+  private createSpriteTexture(image: HTMLImageElement): WebGLTexture {
     const gl = this.gl;
     const texture = gl.createTexture();
     if (!texture) {
@@ -307,12 +295,13 @@ class Renderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.bindTexture(gl.TEXTURE_2D, null);
   
     return texture;
   }
 
-  private createMainTexture(): WebGLTexture {
+  private createScreenTexture(): WebGLTexture {
     const gl = this.gl;
     const texture = gl.createTexture();
     if (!texture) {
@@ -333,7 +322,7 @@ class Renderer {
       throw new Error("Failed to create main texture.");
     }
 
-    // gl.activeTexture(gl.TEXTURE2);
+    gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R32I, 500, 500);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -357,10 +346,16 @@ class Renderer {
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.mainTexture, 0);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, this.targetTexture, 0);
+
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.screenTex, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, this.targetTex, 0);
     gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, rbo);
+
+    gl.readBuffer(gl.COLOR_ATTACHMENT1);
+    this.READ_FORMAT = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_FORMAT);
+    this.READ_TYPE = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE);
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     return fbo;
@@ -383,24 +378,29 @@ class Renderer {
           const models = await this.models.get(block.type, block.states);
           models.forEach(model => {
             model.faces.forEach(face => {
-              if (this.shouldRender(block, face.cullface)) {
-                let storage = map.get(face.texture);
-                if (!storage) {
-                  storage = [];
-                  map.set(face.texture, storage);
-                }
-  
-                for (let l = 0; l < 4; ++l) {
-                  const { corners: c, texCords: t, normal: n } = face;
-                  const coord = (i << 16) | (j << 8) | k;
-                  const norm  = ((n[0] + 1) << 4) | ((n[1] + 1) << 2) | (n[2] + 1);
-                  storage.push(
-                    c[l][0] + x, c[l][1] + y, c[l][2] + z, 
-                    n[0], n[1], n[2], 
-                    t[l][0], t[l][1], 
-                    ...color, (coord << 6) | norm
-                  );
-                }
+              if (!this.shouldRender(block, face.cullface)) return;
+              if (!(face.texture in offsets)) {
+                throw new Error(`Texture ${face.texture} does not exist in texture atlas.`);
+              }
+
+              const offset = offsets[face.texture as keyof typeof offsets];
+              let storage = map.get(face.texture);
+              if (!storage) {
+                storage = [];
+                map.set(face.texture, storage);
+              }
+
+              for (let l = 0; l < 4; ++l) {
+                const { corners: c, texCords: t, normal: n } = face;
+
+                const coord = (i << 16) | (j << 8) | k;
+                const norm  = ((n[0] + 1) << 4) | ((n[1] + 1) << 2) | (n[2] + 1);
+                storage.push(
+                  c[l][0] + x, c[l][1] + y, c[l][2] + z, 
+                  n[0], n[1], n[2], 
+                  t[l][0] * factor[0] + offset[0], t[l][1] * factor[1] + offset[1], 
+                  ...color, (coord << 6) | norm
+                );
               }
             });
           })
@@ -433,7 +433,7 @@ class Renderer {
   }
 
   private get needRender() {
-    return this.controller.needRender || this.engine.needRender;
+    return this.ready && (this.controller.needRender || this.engine.needRender);
   }
 
   private resetNeedRender() {
@@ -459,9 +459,9 @@ class Renderer {
 
     void main() {
       v_colormask = a_colormask;
-      v_normal    = a_normal;
       v_texcoord  = a_texcoord;
       v_blockid   = a_blockid;
+      v_normal    = (mWorld * vec4(a_normal, 0.0)).rgb;
       gl_Position = mProj * mView * mWorld * vec4(a_position, 1.0);
     }
   `;
@@ -552,6 +552,8 @@ class Renderer {
         0,     0,   -1, -1, 
         0,     0, -0.2,  0
   ]);
+
+  private quadData = new Float32Array([-1, 1, 0, 1, -1, -1, 0, 0, 1, 1, 1, 1, 1, -1, 1, 0]);
 }
 
 export default Renderer;

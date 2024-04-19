@@ -147,7 +147,8 @@ export default class ModelManager {
       for (const _key in faces) {
         const key = _key as SixSides;
         const face = faces[key]!;
-        const uv = face.uv?.map(v => v / 16) ?? [0, 0, 1, 1];
+        const uv = face.uv?.map((v, i) => v / 16 + (i < 2 ? 0.0001 : -0.0001))
+          ?? [0.0001, 0.0001, 0.9999, 0.9999];
 
         const texCords: [Vector2, Vector2, Vector2, Vector2] = 
           [[uv[0], uv[1]], [uv[0], uv[3]], [uv[2], uv[3]], [uv[2], uv[1]]];
