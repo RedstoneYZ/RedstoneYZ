@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
+'use client'
+
 import { ReactNode } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Article, Authors } from 'contentlayer/generated'
@@ -8,6 +11,8 @@ import Image from '@/components/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import { usePathname } from 'next/navigation'
+import articleHierarchy from '@/app/articleHierarchy.json'
 
 const editUrl = (path: string) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path: string) =>
@@ -28,10 +33,21 @@ interface LayoutProps {
   children: ReactNode
 }
 
-export default function PostLayout({ content, authorDetails, next, prev, children }: LayoutProps) {
+export default function PostCategory({ content, authorDetails, next, prev, children }: LayoutProps) {
   const { filePath, path, date, title, tags } = content
   const basePath = path.split('/')[0]
+  const pathSplit = path.split('/')
+  let data = articleHierarchy
+  for(let articlepath of pathSplit) {
+    if(articlepath !== 'article') {
+      // @ts-ignore
+      data = data[articlepath as keyof typeof data];
+    }
+  }
   
+
+  console.log(` ${prev} ${next}`)
+
   return (
     <SectionContainer>
       <ScrollTopAndComment />
@@ -54,7 +70,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
               </div>
             </div>
           </header>
-          <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-4 xl:gap-x-6 xl:divide-y-0">
+          <div className="grid-rows-[auto_1fr] divide-y divide-gray-200 pb-8 dark:divide-gray-700 xl:grid xl:grid-cols-3 xl:gap-x-6 xl:divide-y-0">
             <dl className="pb-10 pt-6 xl:border-b xl:border-gray-200 xl:pt-11 xl:dark:border-gray-700">
               <dt className="sr-only">Authors</dt>
               <dd>
@@ -90,7 +106,7 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                 </ul>
               </dd>
             </dl>
-            <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-3 xl:row-span-2 xl:pb-0">
+            <div className="divide-y divide-gray-200 dark:divide-gray-700 xl:col-span-2 xl:row-span-2 xl:pb-0">
               <div className="prose max-w-none pb-8 pt-10 dark:prose-invert">{children}</div>
               <div className="pb-6 pt-6 text-sm text-gray-700 dark:text-gray-300">
                 <Link href={discussUrl(path)} rel="nofollow">
@@ -99,8 +115,19 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
                 {` • `}
                 <Link href={editUrl(filePath)}>View on GitHub</Link>
               </div>
+              {/*siteMetadata.comments && (
+                <div
+                  className="pb-6 pt-6 text-center text-gray-700 dark:text-gray-300"
+                  id="comment"
+                >
+                  <Comments slug={slug} />
+                </div>
+              )*/}
             </div>
             <footer>
+              <div className="my-6 px-6 py-4 hidden h-full max-h-screen w-full flex-wrap overflow-auto rounded bg-gray-50 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
+                <ArticleTable data={data} parent={path + '/'} title={title}></ArticleTable>
+              </div>
               <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
                 {tags && (
                   <div className="py-4 xl:py-8">
@@ -154,4 +181,56 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
       </article>
     </SectionContainer>
   )
+}
+
+type ArticleData = { [key: string]: ArticleData | string };
+
+function ArticleTable({
+  data, parent, title
+}: {
+  data: ArticleData, 
+  parent: string, 
+  title: string
+}) {
+  const pathname = usePathname();
+  console.log(data, parent, title, pathname)
+  return (
+    <ul>
+      {
+        'index.mdx' in data && typeof data["index.mdx"] === "string" ? 
+          <Link
+            href={parent}
+            className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+          >
+            {data["index.mdx"]}
+          </Link> : 
+        parent === "/article/" ? 
+          pathname.startsWith('/article') ? (
+            <h3 className="font-bold text-primary-500">{title}</h3>
+          ) : (
+            <Link
+              href={`/article`}
+              className="font-bold text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+            >
+              {title}
+            </Link>
+          ) :
+          parent
+      }
+      {Object.entries(data).filter(([key]) => key !== "index.mdx").map(([key, value]) => {
+        return (
+          <li key={key} className="mx-5 my-3">
+            {typeof value === "string" ? 
+              <Link
+                href={'/' + parent + key.substring(0, key.length - 4)}
+                className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+              >
+                {value}
+              </Link> : 
+              <ArticleTable data={value} parent={parent + key + "/"} title={title}></ArticleTable>}
+          </li>
+        )
+      })}
+    </ul>
+  );
 }

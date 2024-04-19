@@ -8,7 +8,7 @@ import type { Article } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
-import articleHierarchy from '@/data/articleHierarchy.json'
+import articleHierarchy from '@/app/articleHierarchy.json'
 
 interface PaginationProps {
   totalPages: number
