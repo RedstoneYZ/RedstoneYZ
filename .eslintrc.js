@@ -22,8 +22,6 @@ module.exports = {
     tsconfigRootDir: __dirname,
   },
   rules: {
-    'prettier/prettier': 'off',
-    'react/react-in-jsx-scope': 'off',
     'jsx-a11y/anchor-is-valid': [
       'error',
       {
@@ -32,11 +30,14 @@ module.exports = {
         aspects: ['invalidHref', 'preferButton'],
       },
     ],
-    'react/prop-types': 0,
-    '@typescript-eslint/no-unused-vars': 0,
-    'react/no-unescaped-entities': 0,
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-var-requires': 'off',
+    'prettier/prettier': 'off',
+    'react/no-unescaped-entities': 'off',
+    'react/prop-types': 'off',
+    'react/react-in-jsx-scope': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': 0,
+    '@typescript-eslint/no-var-requires': 'off',
   },
 }

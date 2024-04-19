@@ -5,11 +5,10 @@ import { useEffect, useRef, useState } from "react";
 // import Button from "../Button";
 // import Message from "../Message";
 
-import Engine from "./Engine";
-import Controller from "./controllers/Controller";
+import Controller from "./controller/Controller";
 
 import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
-import { CanvasProps, MapData } from "./typings/types";
+import { CanvasProps } from "./model/types";
 
 const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
   const [shiftDown, setShiftDown] = useState(false);
@@ -29,14 +28,14 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const pg = new Controller({ xLen, yLen, zLen, mapName, preLoadData });
-    if (canvasRef.current) {
-      pg.initialize(canvasRef.current);
-      setController(pg);
-      setCurrentBlock(pg.currentBlockName);
-    }
+    if (!canvasRef.current) return;
 
-    return () => pg.destroy();
+    const canvas = canvasRef.current;
+    const controller = new Controller({ canvas, xLen, yLen, zLen, mapName, preLoadData });
+    controller.start();
+    setController(controller);
+    setCurrentBlock(controller.currentBlockName);
+    return () => controller.destroy();
   }, [xLen, yLen, zLen, mapName, preLoadData]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLCanvasElement>) {
@@ -93,18 +92,18 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     setCurrentBlock(controller?.currentBlockName ?? '');
   }
 
-  async function handleCheckMap() {
-    if (!controller) return;
+  // async function handleCheckMap() {
+  //   if (!controller) return;
 
-    if (await Engine.validate(controller.engine)) {
-      console.log('Pass');
-      // Message.send({ content: '恭喜你通過檢查！', type: 'success' });
-    }
-    else {
-      console.log('Fail');
-      // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
-    }
-  }
+  //   if (await Engine.validate(controller.engine)) {
+  //     console.log('Pass');
+  //     // Message.send({ content: '恭喜你通過檢查！', type: 'success' });
+  //   }
+  //   else {
+  //     console.log('Fail');
+  //     // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
+  //   }
+  // }
   
   return (
     <div className="canvas-wrapper">

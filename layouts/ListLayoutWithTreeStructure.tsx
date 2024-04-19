@@ -2,14 +2,12 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { slug } from 'github-slugger'
 import { formatDate } from 'pliny/utils/formatDate'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Article } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
-import tagData from 'app/tag-data.json'
 import articleHierarchy from '@/app/articleHierarchy.json'
 
 interface PaginationProps {
@@ -69,10 +67,6 @@ export default function ListLayoutWithTags({
   initialDisplayPosts = [],
   pagination,
 }: ListLayoutProps) {
-  const tagCounts = tagData as Record<string, number>
-  const tagKeys = Object.keys(tagCounts)
-  const sortedTags = tagKeys.sort((a, b) => tagCounts[b] - tagCounts[a])
-
   const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts
 
   return (
@@ -94,19 +88,13 @@ export default function ListLayoutWithTags({
 
 type ArticleData = { [key: string]: ArticleData | string };
 
-function ArticleTable({
-  data, parent, title
-}: {
-  data: ArticleData, 
-  parent: string, 
-  title: string
-}) {
+function ArticleTable({ data, parent, title }: ArticleTableProps) {
   const pathname = usePathname();
 
   return (
     <ul>
       {
-        'index.mdx' in data && typeof data["index.mdx"] === "string" ? 
+        'index.mdx' in data && typeof data['index.mdx'] === 'string' ? 
           <Link
             href={parent}
             className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
@@ -189,4 +177,14 @@ function RightPanel({
       )}
     </div>
   );
+}
+
+interface ArticleTableProps {
+  data: ArticleTableData;
+  parent: string;
+  title: string;
+}
+
+interface ArticleTableData {
+  [key: string]: ArticleTableData | string;
 }
