@@ -13,8 +13,10 @@ class Renderer {
   public dimensions: Vector3;
   public canvas: HTMLCanvasElement;
 
-  public READ_FORMAT: number;
-  public READ_TYPE: number;
+  private READ_FORMAT: number;
+  private READ_TYPE: number;
+  private WIDTH: number;
+  private HEIGHT: number;
 
   private ready: boolean;
 
@@ -39,6 +41,9 @@ class Renderer {
     this.canvas     = canvas;
     this.dimensions = dimensions;
     this.engine     = controller.engine;
+
+    this.WIDTH      = canvas.width;
+    this.HEIGHT     = canvas.height;
 
     this.indices = new Uint16Array(Array.from(
       { length: 4096 }, 
@@ -109,14 +114,16 @@ class Renderer {
     requestAnimationFrame(draw);
   }
 
-  getTarget(canvasX: number, canvasY: number): Vector6 | null {
+  getTarget(x: number, y: number): Vector6 | null {
     const gl = this.gl;
     const repCode = new Int32Array(1);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
     gl.readBuffer(gl.COLOR_ATTACHMENT1);
-    gl.readPixels(canvasX, 500 - canvasY, 1, 1, this.READ_FORMAT, this.READ_TYPE, repCode);
+    gl.readPixels(x, this.HEIGHT - y, 1, 1, this.READ_FORMAT, this.READ_TYPE, repCode);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    if (repCode[0] === 0) return null;
 
     const result: Vector6 = [
       (repCode[0] >> 22) & 0xFF, 
@@ -144,13 +151,7 @@ class Renderer {
     this.mainVao = this.createMainVao();
     this.quadVao = this.createQuadVao();
 
-    const atlas = await new Promise<HTMLImageElement>(res => {
-      const image = new Image();
-      image.onload = () => res(image);
-      image.src = "/static/images/atlas/file.png";
-    });
-
-    this.spriteTex = this.createSpriteTexture(atlas);
+    this.spriteTex = await this.createSpriteTexture();
     this.screenTex = this.createScreenTexture();
     this.targetTex = this.createTargetTexture();
 
@@ -283,19 +284,25 @@ class Renderer {
     return shader;
   }
 
-  private createSpriteTexture(image: HTMLImageElement): WebGLTexture {
+  private async createSpriteTexture(): Promise<WebGLTexture> {
     const gl = this.gl;
     const texture = gl.createTexture();
     if (!texture) {
       throw new Error("Failed to create main texture.");
     }
 
+    const atlas = await new Promise<HTMLImageElement>(res => {
+      const image = new Image();
+      image.onload = () => res(image);
+      image.src = "/static/images/atlas/file.png";
+    });
+
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas);
     gl.bindTexture(gl.TEXTURE_2D, null);
   
     return texture;
@@ -309,7 +316,7 @@ class Renderer {
     }
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, 500, 500);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, this.WIDTH, this.HEIGHT);
     gl.bindTexture(gl.TEXTURE_2D, null);
   
     return texture;
@@ -324,7 +331,7 @@ class Renderer {
 
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R32I, 500, 500);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.R32I, this.WIDTH, this.HEIGHT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.bindTexture(gl.TEXTURE_2D, null);
@@ -342,7 +349,7 @@ class Renderer {
 
     const rbo = gl.createRenderbuffer();
     gl.bindRenderbuffer(gl.RENDERBUFFER, rbo);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 500, 500);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.WIDTH, this.HEIGHT);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
