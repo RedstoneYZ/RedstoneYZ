@@ -3,6 +3,7 @@ import Renderer from "../view";
 
 import { BlockType, FourFacings, ControllerOptions } from "../model/types";
 import blockNameTable from "../model/utils/blockNameTable";
+import Player from "./Player";
 
 /**
  * The interface of the engine
@@ -10,6 +11,7 @@ import blockNameTable from "../model/utils/blockNameTable";
 class Controller {
   public player: Player;
 
+  public activeKeys: Set<string>;
   public hotbar: HotbarItem[];
   public hotbarIndex: number;
 
@@ -20,8 +22,9 @@ class Controller {
   public alive: boolean;
 
   constructor({ canvas, xLen, yLen, zLen, mapName, preLoadData }: ControllerOptions) {
-    this.player = { facing: { direction: 'south', yaw: 0, pitch: 0 } };
+    this.player = new Player();
 
+    this.activeKeys = new Set();
     this.hotbar = this.getHotbar(preLoadData?.availableBlocks ??
       [BlockType.AirBlock, BlockType.IronBlock, BlockType.Glass, BlockType.RedstoneDust, BlockType.RedstoneTorch, BlockType.RedstoneRepeater, BlockType.RedstoneComparator, BlockType.RedstoneLamp, BlockType.Lever]
     );
@@ -44,54 +47,52 @@ class Controller {
    */
   start(): void {
     this.engine.startTicking();
-    this.renderer.startRendering();
+    this.renderer.startRendering(this.physics);
   }
 
-  private _prevRefX = 0;
-  private _prevRefY = 0;
-  private _prevRefWheel = 0;
+  private prevRefX = 0;
+  private prevRefY = 0;
+  private prevRefWheel = 0;
 
-  /**
-   * 根據當前游標與先前座標的差距來調整觀察者角度
-   * @param cursorX 游標在網頁上的 x 座標
-   * @param cursorY 游標在網頁上的 y 座標
-   * @param init 是否僅初始化
-   */
   adjustAngles(cursorX: number, cursorY: number, init: boolean = false): void {
     if (!init) {
       const facing = this.player.facing;
-      facing.yaw = facing.yaw + (this._prevRefX - cursorX) * 0.0087, 
-      facing.pitch = Math.max(Math.min(facing.pitch + (this._prevRefY - cursorY) * 0.0087, Math.PI / 2), -(Math.PI / 2))
-      if (facing.yaw < -Math.PI) {
-        facing.yaw += Math.PI * 2;
-      }
-      if (Math.PI < facing.yaw) {
-        facing.yaw -= Math.PI * 2;
-      }
+      facing.yaw = facing.yaw + (this.prevRefX - cursorX) * 0.0078125;
+      facing.yaw += facing.yaw < -Math.PI ? Math.PI * 2 : 0;
+      facing.yaw += Math.PI < facing.yaw ? -Math.PI * 2 : 0;
+
+      facing.pitch = facing.pitch - (this.prevRefY - cursorY) * 0.0078125;
+      facing.pitch = Math.max(Math.min(facing.pitch, Math.PI / 2), -(Math.PI / 2));
+      
+      this.activeKeys.clear();
     }
 
-    this._prevRefX = cursorX;
-    this._prevRefY = cursorY;
+
+    this.prevRefX = cursorX;
+    this.prevRefY = cursorY;
     this.needRender = true;
   }
 
-  /**
-   * 根據滾輪滾動的幅度調整快捷欄
-   * @param deltaY 滾輪滾動的幅度
-   */
+  private validInputs = new Set(['w', 'a', 's', 'd', ' ', 'Shift']);
+
+  addActiveKey(key: string) {
+    if (this.validInputs.has(key)) {
+      this.activeKeys.add(key);
+    }
+  }
+
+  removeActiveKey(key: string) {
+    this.activeKeys.delete(key);
+  }
+
   scrollHotbar(deltaY: number): void {
-    this._prevRefWheel += deltaY;
+    this.prevRefWheel += deltaY;
     if (!this.hotbar.length) return;
 
-    this.hotbarIndex = (Math.trunc(this._prevRefWheel / 100) % this.hotbar.length + this.hotbar.length) % this.hotbar.length;
+    this.hotbarIndex = (Math.trunc(this.prevRefWheel / 100) % this.hotbar.length + this.hotbar.length) % this.hotbar.length;
     this.needRender = true;
   }
 
-  /**
-   * 在游標指定的位置上按下破壞鍵
-   * @param cursorX 游標在畫布上的 x 座標
-   * @param cursorY 游標在畫布上的 y 座標
-   */
   leftClick(canvasX: number, canvasY: number): void {
     const target = this.renderer.getTarget(canvasX, canvasY);
     if (!target) return;
@@ -102,13 +103,7 @@ class Controller {
     this.needRender = true;
   }
 
-  /**
-   * 在游標指定的位置上按下使用鍵
-   * @param cursorX 游標在畫布上的 x 座標
-   * @param cursorY 游標在畫布上的 y 座標
-   * @param shiftDown 是否有按下 Shift 鍵
-   */
-  rightClick(canvasX: number, canvasY: number, shiftDown: boolean): void {
+  rightClick(canvasX: number, canvasY: number, shift: boolean): void {
     const target = this.renderer.getTarget(canvasX, canvasY);
     if (!target) return;
 
@@ -116,7 +111,7 @@ class Controller {
     const facingArray: FourFacings[] = ['south', 'east', 'north', 'west', 'south'];
     const facing = facingArray[Math.round(this.player.facing.pitch * 2 / Math.PI)];
 
-    this.engine.addTask(['rightClick', [x, y, z, shiftDown, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock], 0]);
+    this.engine.addTask(['rightClick', [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock], 0]);
     this.needRender = true;
   }
 
@@ -126,6 +121,33 @@ class Controller {
   destroy(): void {
     this.alive = false;
     this.engine.destroy();
+  }
+
+  private physics = () => {
+    if (this.activeKeys.has('w') && !this.activeKeys.has('s')) {
+      this.player.moveForward();
+    }
+    if (this.activeKeys.has('s') && !this.activeKeys.has('w')) {
+      this.player.moveBackward();
+    }
+    if (this.activeKeys.has('a') && !this.activeKeys.has('d')) {
+      this.player.moveLeft();
+    }
+    if (this.activeKeys.has('d') && !this.activeKeys.has('a')) {
+      this.player.moveRight();
+    }
+    if (this.activeKeys.has(' ') && !this.activeKeys.has('Shift')) {
+      this.player.moveUp();
+    }
+    if (this.activeKeys.has('Shift') && !this.activeKeys.has(' ')) {
+      this.player.moveDown();
+    }
+
+    if (this.player.velocity > 0) {
+      this.needRender = true;
+    }
+ 
+    this.player.advance();
   }
 
   private getHotbar(items: BlockType[]): HotbarItem[] {
@@ -139,16 +161,5 @@ interface HotbarItem {
   block: BlockType;
   name: string;
 };
-
-// TODO: make it a class
-interface Player {
-  facing: PlayerFacing;
-}
-
-interface PlayerFacing {
-  direction: 'north' | 'east' | 'south' | 'west';
-  yaw: number;
-  pitch: number;
-}
 
 export default Controller;

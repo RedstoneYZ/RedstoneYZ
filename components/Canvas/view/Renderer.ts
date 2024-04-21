@@ -59,7 +59,7 @@ class Renderer {
     this.initGL();
   }
 
-  startRendering(): void {
+  startRendering(func?: () => any): void {
     const gl = this.gl;
 
     gl.enable(gl.DEPTH_TEST);
@@ -103,6 +103,8 @@ class Renderer {
 
         this.resetNeedRender();
       }
+
+      func?.();
 
       if (this.controller.alive) {
         requestAnimationFrame(draw);
@@ -155,7 +157,6 @@ class Renderer {
 
     this.mainFbo = this.createFrameBuffer();
 
-    const uMatViewLoc  = gl.getUniformLocation(this.mainProgram, 'mView');
     const uMatProjLoc  = gl.getUniformLocation(this.mainProgram, 'mProj');
     const uMatWorldLoc = gl.getUniformLocation(this.mainProgram, 'mWorld');
     if (!uMatWorldLoc) {
@@ -167,7 +168,6 @@ class Renderer {
     const uQuadSamplerLoc = gl.getUniformLocation(this.quadProgram, 'sampler');
 
     gl.useProgram(this.mainProgram);
-    gl.uniformMatrix4fv(uMatViewLoc, false, this.viewMat);
     gl.uniformMatrix4fv(uMatProjLoc, false, this.projMat);
     gl.uniform1i(uMainSamplerLoc, 0);
 
@@ -445,7 +445,6 @@ class Renderer {
     layout(location = 4) in highp int a_blockid;
 
     uniform mat4 mWorld;
-    uniform mat4 mView;
     uniform mat4 mProj;
 
     out mediump vec3 v_colormask;
@@ -458,7 +457,7 @@ class Renderer {
       v_texcoord  = a_texcoord;
       v_blockid   = a_blockid;
       v_normal    = (mWorld * vec4(a_normal, 0.0)).rgb;
-      gl_Position = mProj * mView * mWorld * vec4(a_position, 1.0);
+      gl_Position = mProj * mWorld * vec4(a_position, 1.0);
     }
   `;
 
@@ -516,37 +515,28 @@ class Renderer {
   `;
 
   private get worldMat(): Float32Array {
-    const { yaw, pitch } = this.controller.player.facing;
-    const c1 = Math.cos(yaw), s1 = Math.sin(yaw);
-    const c2 = Math.cos(pitch), s2 = Math.sin(pitch);
+    const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
+    const cp = Math.cos(-pitch), sp = Math.sin(-pitch);
+    const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
+
+    const cycp = cy * cp;
+    const cysp = cy * sp;
+    const sycp = sy * cp;
+    const sysp = sy * sp;
 
     return new Float32Array([
-       c1,  s1 * s2,  c2 * s1, 0, 
-        0,       c2,      -s2, 0, 
-      -s1,  c1 * s2,  c1 * c2, 0, 
-        0,        0,        0, 1
+      -cy, sysp, -sycp, 0, 
+        0,   cp,  sp, 0, 
+      sy, cysp, -cycp, 0, 
+      x*cy - z*sy, - x*sysp - y*cp - z*cysp, x*sycp - y*sp + z*cycp, 1, 
     ]);
-  }
-
-  private _viewMat: Float32Array | null = null;
-  private get viewMat() {
-    if (this._viewMat) return this._viewMat;
-
-    const a = 2.5 / Math.sqrt(Math.max(...this.dimensions));
-    this._viewMat = new Float32Array([
-      a, 0, 0, 0, 
-      0, a, 0, 0, 
-      0, 0, a, 0, 
-      0, 0, -15, 1
-    ]);
-    return this._viewMat;
   }
 
   private projMat = new Float32Array([
-    2.414,     0,    0,  0, 
-        0, 2.414,    0,  0, 
-        0,     0,   -1, -1, 
-        0,     0, -0.2,  0
+    1, 0,      0,  0, 
+    0, 1,      0,  0, 
+    0, 0, -1.002, -1, 
+    0, 0,   -0.2,  0
   ]);
 
   private quadData = new Float32Array([-1, 1, 0, 1, -1, -1, 0, 0, 1, 1, 1, 1, 1, -1, 1, 0]);

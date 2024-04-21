@@ -11,7 +11,6 @@ import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
 import { CanvasProps } from "./model/types";
 
 const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
-  const [shiftDown, setShiftDown] = useState(false);
   const [controller, setController] = useState<Controller>();
   const [currentBlock, setCurrentBlock] = useState('');
 
@@ -39,11 +38,12 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   }, [xLen, yLen, zLen, mapName, preLoadData]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    setShiftDown(e.shiftKey);
+    e.preventDefault();
+    controller?.addActiveKey(e.key);
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    setShiftDown(e.shiftKey);
+    controller?.removeActiveKey(e.key);
   }
 
   function handleMouseEnter() {
@@ -57,7 +57,6 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   function handleDrag(e: React.DragEvent<HTMLCanvasElement>) {
     // 拖曳結束前的最後一個事件的座標會是 (0, 0)，因為會嚴重影響到畫面，所以直接擋掉
     if (e.clientX === 0 && e.clientY === 0) return;
-
     controller?.adjustAngles(e.clientX, e.clientY);
   }
   
@@ -78,12 +77,11 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   }
 
   function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
-    // 防止 Context Menu 真的跳出來
     e.preventDefault();
 
     if (canvasRef.current) {
       const p = getPosition(canvasRef.current, e);
-      controller?.rightClick(p.x, p.y, shiftDown);
+      controller?.rightClick(p.x, p.y, e.shiftKey);
     }
   }
 
