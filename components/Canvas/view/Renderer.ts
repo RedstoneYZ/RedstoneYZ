@@ -106,12 +106,12 @@ class Renderer {
           const models = this.models.get(block.type, block.states);
           models.forEach(model => {
             model.outline.forEach(({ from, to }) => {
-              const x1 = x + from[0] / 16;
-              const y1 = y + from[1] / 16;
-              const z1 = z + from[2] / 16;
-              const x2 = x + to[0] / 16;
-              const y2 = y + to[1] / 16;
-              const z2 = z + to[2] / 16;
+              const x1 = x + from[0];
+              const y1 = y + from[1];
+              const z1 = z + from[2];
+              const x2 = x + to[0];
+              const y2 = y + to[1];
+              const z2 = z + to[2];
 
               let d = (x1 - xyz.x) / eyeDir[0];
               if (d > 0) {

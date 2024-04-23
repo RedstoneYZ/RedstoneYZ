@@ -88,8 +88,13 @@ export default class ModelManager {
     }
 
     try {
-      const outline = require(`../../../public/json/outline/${path}.json`);
-      this.outlineCache[path] = outline;
+      const outline = require(`../../../public/json/outline/${path}.json`) as BlockOutline[];
+      this.outlineCache[path] = outline.map(({ from, to }) => {
+        return {
+          from: from.map(a => a / 16) as Vector3, 
+          to: to.map(a => a / 16) as Vector3
+        };
+      });
     } catch (_) {
       this.outlineCache[path] = [];
     }
@@ -203,7 +208,10 @@ export default class ModelManager {
         });
       }
 
-      outline.push({ from, to });
+      outline.push({
+        from: from.map(a => a / 16) as Vector3, 
+        to: to.map(a => a / 16) as Vector3
+      });
     });
 
     return {
