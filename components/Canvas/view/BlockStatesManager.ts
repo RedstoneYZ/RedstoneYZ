@@ -8,8 +8,8 @@ export default class BlockStatesManager {
     this.blockStatesCache = {};
   }
 
-  async get(path: string, states: BlockStates): Promise<BlockModelRule[][]> {
-    const blockStates = await this.getBlockStates(path);
+  get(path: string, states: BlockStates): BlockModelRule[][] {
+    const blockStates = this.getBlockStates(path);
     const result: BlockModelRule[][] = [];
     for (const rule of blockStates.rules) {
       if ("OR" in rule.when) {
@@ -33,16 +33,16 @@ export default class BlockStatesManager {
     return result;
   }
 
-  private async getBlockStates(path: string): Promise<BlockStatesModel> {
+  private getBlockStates(path: string): BlockStatesModel {
     if (path in this.blockStatesCache) {
       return this.blockStatesCache[path]!;
     }
 
-    const raw_block_states = await this.loadRawBlockStates(path);
+    const raw_block_states = this.loadRawBlockStates(path);
     return this.blockStatesCache[path] = this.parseStates(raw_block_states);
   }
 
-  private async loadRawBlockStates(path: string): Promise<RawBlockStatesModel> {
+  private loadRawBlockStates(path: string): RawBlockStatesModel {
     return require(`../../../public/json/states/${path}.json`) as RawBlockStatesModel;
   }
 

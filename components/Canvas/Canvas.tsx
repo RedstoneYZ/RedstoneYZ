@@ -38,7 +38,9 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   }, [xLen, yLen, zLen, mapName, preLoadData]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    e.preventDefault();
+    if (e.key === "Space") {
+      e.preventDefault();
+    }
     controller?.addActiveKey(e.key);
   }
 

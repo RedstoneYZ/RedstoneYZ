@@ -1,7 +1,7 @@
 import Controller from "../controller/Controller";
 import { Block } from "../model";
 import Engine from "../model/Engine";
-import { BlockType, SixSides, Vector3, Vector6 } from "../model/types";
+import { BlockType, SixSides, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
 import AtlasMap from "@/public/static/images/atlas/map.json";
@@ -82,7 +82,7 @@ class Renderer {
         gl.clearBufferiv(gl.COLOR, 1, new Int32Array([0, 0, 0, 0]));
         gl.clearBufferfv(gl.DEPTH, 0, new Float32Array([1]));
 
-        const data = await this.getBlockVertices();
+        const data = this.getBlockVertices();
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
         gl.drawElements(gl.TRIANGLE_FAN, data.length / 48 * 5, gl.UNSIGNED_SHORT, 0);
 
@@ -114,13 +114,99 @@ class Renderer {
     requestAnimationFrame(draw);
   }
 
-  getTarget(x: number, y: number): Vector6 | null {
+  getTarget(canvasX: number, canvasY: number): Vector6 | null {
+    const xyz = this.controller.player.xyz;
+    const eyeDir = transform(Array.from(this.worldMatInv), [(canvasX / this.WIDTH - 0.5) * 2, (0.5 - canvasY / this.HEIGHT) * 2, -1, 0]);
+
+    const target = { block: [NaN, NaN, NaN], normal: [NaN, NaN, NaN], d: Infinity };
+    for (let x = 0; x < this.dimensions[0]; x++) {
+      for (let y = 0; y < this.dimensions[1]; y++) {
+        for (let z = 0; z < this.dimensions[2]; z++) {
+          const block = this.engine.block(x, y, z);
+          if (!block || block.type === BlockType.AirBlock) continue;
+          const models = this.models.get(block.type, block.states);
+          models.forEach(model => {
+            model.outline.forEach(({ from, to }) => {
+              const x1 = x + from[0] / 16;
+              const y1 = y + from[1] / 16;
+              const z1 = z + from[2] / 16;
+              const x2 = x + to[0] / 16;
+              const y2 = y + to[1] / 16;
+              const z2 = z + to[2] / 16;
+
+              let d = (x1 - xyz.x) / eyeDir[0];
+              if (d > 0) {
+                const dy = xyz.y + eyeDir[1] * d;
+                const dz = xyz.z + eyeDir[2] * d;
+                if (y1 <= dy && dy <= y2 && z1 <= dz && dz <= z2 && d < target.d) {
+                  target.block = [x, y, z];
+                  target.normal = [-1, 0, 0];
+                  target.d = d;
+                }
+              }
+              d = (x2 - xyz.x) / eyeDir[0];
+              if (d > 0) {
+                const dy = xyz.y + eyeDir[1] * d;
+                const dz = xyz.z + eyeDir[2] * d;
+                if (y1 <= dy && dy <= y2 && z1 <= dz && dz <= z2 && d < target.d) {
+                  target.block = [x, y, z];
+                  target.normal = [1, 0, 0];
+                  target.d = d;
+                }
+              }
+              d = (y1 - xyz.y) / eyeDir[1];
+              if (d > 0) {
+                const dx = xyz.x + eyeDir[0] * d;
+                const dz = xyz.z + eyeDir[2] * d;
+                if (x1 <= dx && dx <= x2 && z1 <= dz && dz <= z2 && d < target.d) {
+                  target.block = [x, y, z];
+                  target.normal = [0, -1, 0];
+                  target.d = d;
+                }
+              }
+              d = (y2 - xyz.y) / eyeDir[1];
+              if (d > 0) {
+                const dx = xyz.x + eyeDir[0] * d;
+                const dz = xyz.z + eyeDir[2] * d;
+                if (x1 <= dx && dx <= x2 && z1 <= dz && dz <= z2 && d < target.d) {
+                  target.block = [x, y, z];
+                  target.normal = [0, 1, 0];
+                  target.d = d;
+                }
+              }
+              d = (z1 - xyz.z) / eyeDir[2];
+              if (d > 0) {
+                const dx = xyz.x + eyeDir[0] * d;
+                const dy = xyz.y + eyeDir[1] * d;
+                if (x1 <= dx && dx <= x2 && y1 <= dy && dy <= y2 && d < target.d) {
+                  target.block = [x, y, z];
+                  target.normal = [0, 0, -1];
+                  target.d = d;
+                }
+              }
+              d = (z2 - xyz.z) / eyeDir[2];
+              if (d > 0) {
+                const dx = xyz.x + eyeDir[0] * d;
+                const dy = xyz.y + eyeDir[1] * d;
+                if (x1 <= dx && dx <= x2 && y1 <= dy && dy <= y2 && d < target.d) {
+                  target.block = [x, y, z];
+                  target.normal = [0, 0, 1];
+                  target.d = d;
+                }
+              }
+            });
+          });
+        }
+      }
+    }
+    console.log([...target.block, ...target.normal], target.d);
+
     const gl = this.gl;
     const repCode = new Int32Array(1);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.mainFbo);
     gl.readBuffer(gl.COLOR_ATTACHMENT1);
-    gl.readPixels(x, this.HEIGHT - y, 1, 1, this.READ_FORMAT, this.READ_TYPE, repCode);
+    gl.readPixels(canvasX, this.HEIGHT - canvasY, 1, 1, this.READ_FORMAT, this.READ_TYPE, repCode);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     if (repCode[0] === 0) return null;
@@ -133,7 +219,6 @@ class Renderer {
       (repCode[0] >> 2 & 0x3) - 1, 
       (repCode[0] >> 0 & 0x3) - 1, 
     ];
-    console.log(result);
 
     return result;
   }
@@ -367,21 +452,17 @@ class Renderer {
     return fbo;
   }
 
-  private async getBlockVertices(): Promise<Float32Array> {
+  private getBlockVertices(): Float32Array {
     // TODO: only update block changes
     const vertices: number[] = [];
-    for (let i = 0; i < this.dimensions[0]; i++) {
-      for (let j = 0; j < this.dimensions[1]; j++) {
-        for (let k = 0; k < this.dimensions[2]; k++) {
-          const block = this.engine.block(i, j, k);
+    for (let x = 0; x < this.dimensions[0]; x++) {
+      for (let y = 0; y < this.dimensions[1]; y++) {
+        for (let z = 0; z < this.dimensions[2]; z++) {
+          const block = this.engine.block(x, y, z);
           if (!block || block.type === BlockType.AirBlock) continue;
-
-          const x = i - this.dimensions[0] / 2;
-          const y = j - this.dimensions[1] / 2;
-          const z = k - this.dimensions[2] / 2;
           const color = 'color' in block ? block.color.map(a => a / 255) : [1, 1, 1];
 
-          const models = await this.models.get(block.type, block.states);
+          const models = this.models.get(block.type, block.states);
           models.forEach(model => {
             model.faces.forEach(face => {
               if (!this.shouldRender(block, face.cullface)) return;
@@ -389,9 +470,9 @@ class Renderer {
                 throw new Error(`Texture ${face.texture} does not exist in texture atlas.`);
               }
 
-              const { corners: c, texCords: t, normal: n } = face;
+              const { corners: c, texCoord: t, normal: n } = face;
               const offset = offsets[face.texture as keyof typeof offsets];
-              const coord  = i << 16 | j << 8 | k;
+              const coord  = x << 16 | y << 8 | z;
               const norm   = n[0] + 1 << 4 | n[1] + 1 << 2 | n[2] + 1;
 
               for (let l = 0; l < 4; ++l) {
@@ -526,9 +607,27 @@ class Renderer {
 
     return new Float32Array([
       -cy, sysp, -sycp, 0, 
-        0,   cp,  sp, 0, 
-      sy, cysp, -cycp, 0, 
+        0,   cp,    sp, 0, 
+       sy, cysp, -cycp, 0, 
       x*cy - z*sy, - x*sysp - y*cp - z*cysp, x*sycp - y*sp + z*cycp, 1, 
+    ]);
+  }
+
+  private get worldMatInv(): Float32Array {
+    const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
+    const cp = Math.cos(-pitch), sp = Math.sin(-pitch);
+    const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
+
+    const cycp = cy * cp;
+    const cysp = cy * sp;
+    const sycp = sy * cp;
+    const sysp = sy * sp;
+
+    return new Float32Array([
+        -cy,  0,    sy, 0, 
+       sysp, cp,  cysp, 0, 
+      -sycp, sp, -cycp, 0, 
+      x, y, z, 1, 
     ]);
   }
 
@@ -543,3 +642,12 @@ class Renderer {
 }
 
 export default Renderer;
+
+function transform(mat: number[], vec: number[]): Vector4 {
+  return [
+    mat[0]*vec[0] + mat[4]*vec[1] + mat[8]*vec[2] + mat[12]*vec[3], 
+    mat[1]*vec[0] + mat[5]*vec[1] + mat[9]*vec[2] + mat[13]*vec[3], 
+    mat[2]*vec[0] + mat[6]*vec[1] + mat[10]*vec[2] + mat[14]*vec[3], 
+    mat[3]*vec[0] + mat[7]*vec[1] + mat[11]*vec[2] + mat[15]*vec[3]
+  ];
+}

@@ -1,26 +1,28 @@
 import { BlockStates, SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
 import BlockStatesManager from "./BlockStatesManager";
-import { BlockModel, BlockModelFace } from "./types";
+import { BlockModel, BlockModelFace, BlockOutline } from "./types";
 
 export default class ModelManager {
   private blockStatesManager: BlockStatesManager;
   private rawModelCache: { [key: string]: RawBlockModel };
+  private outlineCache: { [key: string]: BlockOutline[] };
   private modelCache: { [key: string]: BlockModel };
 
   constructor() {
     this.blockStatesManager = new BlockStatesManager();
     this.rawModelCache = {};
+    this.outlineCache = {};
     this.modelCache = {
       ["air"]: {
         ambientocclusion: false, 
         faces: [], 
-        outlines: []
+        outline: []
       }
     };
   }
 
-  async get(path: string, states: BlockStates): Promise<BlockModel[]> {
-    const result = (await this.blockStatesManager.get(path, states))
+  get(path: string, states: BlockStates): BlockModel[] {
+    return this.blockStatesManager.get(path, states)
       .map(pack => {
         if (pack.length === 1) return pack[0];
         let rand = Math.random() * pack.reduce((a, c) => a + c.weight, 0);
@@ -32,55 +34,86 @@ export default class ModelManager {
         }
         return pack[0];
       })
-      .map(async bs => {
+      .map(bs => {
         const rotateX = this.getRotationMatrix({ origin: [8, 8, 8], axis: "x", angle: bs.x });
         const rotateY = this.getRotationMatrix({ origin: [8, 8, 8], axis: "y", angle: bs.y });
         const rotate0 = (vec: Vector3) => rotateX([...rotateY([...vec, 0]), 0]);
         const rotate1 = (vec: Vector3) => rotateX([...rotateY([...vec, 1]), 1]);
+        const model = this.getModel(bs.model);
 
-        const model = await this.getModel(bs.model);
-        const faces: BlockModelFace[] = model.faces.map(face => ({
-          corners: face.corners.map(rotate1) as [Vector3, Vector3, Vector3, Vector3], 
-          texCords: face.texCords, // TODO
-          normal: rotate0(face.normal),
-          shade: face.shade,
-          texture: face.texture,
-          cullface: face.cullface, // TODO
-          tintindex: face.tintindex,
-        }));
-        const outlines: Vector3[][] = model.outlines.map(outline => outline.map(rotate1));
-        return { ambientocclusion: model.ambientocclusion, faces, outlines };
+        return {
+          ambientocclusion: model.ambientocclusion,
+          faces: model.faces.map(face => ({
+            corners: face.corners.map(rotate1) as [Vector3, Vector3, Vector3, Vector3], 
+            texCoord: face.texCoord, // TODO
+            normal: rotate0(face.normal),
+            shade: face.shade,
+            texture: face.texture,
+            cullface: face.cullface, // TODO
+            tintindex: face.tintindex,
+          })),
+          outline: model.outline.map(({ from, to }) => {
+            const _f = rotate1(from), _t = rotate1(to);
+            const f: Vector3 = [0, 0, 0], t: Vector3 = [0, 0, 0];
+            f[0] = _f[0] < _t[0] ? _f[0] : _t[0];
+            f[1] = _f[1] < _t[1] ? _f[1] : _t[1];
+            f[2] = _f[2] < _t[2] ? _f[2] : _t[2];
+            t[0] = _f[0] > _t[0] ? _f[0] : _t[0];
+            t[1] = _f[1] > _t[1] ? _f[1] : _t[1];
+            t[2] = _f[2] > _t[2] ? _f[2] : _t[2];
+            return { from: f, to: t };
+          })
+        };
       });
-    return Promise.all(result);
   }
 
-  private async getModel(path: string): Promise<BlockModel> {
+  private getModel(path: string): BlockModel {
     if (path in this.modelCache) {
-      return this.modelCache[path]!;
+      return this.modelCache[path];
     }
-    else {
-      const raw_model = await this.loadRawModel(path);
-      return this.modelCache[path] = await this.parseModel(raw_model);
+
+    const raw_model = this.loadRawModel(path);
+    const model = this.parseModel(raw_model);
+    const outline = this.getOutline(path);
+    if (outline.length > 0) {
+      model.outline = outline;
     }
+
+    return this.modelCache[path] = model;
   }
 
-  private async loadRawModel(path: string): Promise<RawBlockModel> {
+  private getOutline(path: string): BlockOutline[] {
+    if (path in this.outlineCache) {
+      return this.outlineCache[path];
+    }
+
+    try {
+      const outline = require(`../../../public/json/outline/${path}.json`);
+      this.outlineCache[path] = outline;
+    } catch (_) {
+      this.outlineCache[path] = [];
+    }
+
+    return this.outlineCache[path];
+  }
+
+  private loadRawModel(path: string): RawBlockModel {
     if (path in this.rawModelCache) {
-      return this.rawModelCache[path]!;
+      return this.rawModelCache[path];
     }
 
     const model = require(`../../../public/json/blocks/${path}.json`) as RawBlockModel;
     return this.rawModelCache[path] = model;
   }
 
-  private async parseModel(rawModel: RawBlockModel): Promise<BlockModel> {
-    const _1 = await this.unfoldModel(rawModel);
+  private parseModel(rawModel: RawBlockModel): BlockModel {
+    const _1 = this.unfoldModel(rawModel);
     const _2 = this.propagateTexture(_1);
     const _3 = this.clearElement(_2);
     return _3;
   }
 
-  private async unfoldModel(rawModel: RawBlockModel): Promise<FullModel> {
+  private unfoldModel(rawModel: RawBlockModel): FullModel {
     const result: FullModel = {
       ambientocclusion: rawModel.ambientocclusion ?? true, 
       textures: rawModel.textures ?? {},
@@ -89,7 +122,7 @@ export default class ModelManager {
 
     let parent = rawModel.parent;
     while (parent) {
-      const parentData = await this.loadRawModel(this.parsePath(parent));
+      const parentData = this.loadRawModel(this.parsePath(parent));
 
       result.ambientocclusion &&= parentData.ambientocclusion ?? true;
 
@@ -136,7 +169,7 @@ export default class ModelManager {
   }
 
   private clearElement(model: Omit<FullModel, 'textures'>): BlockModel {
-    const outlines: Vector3[][] = [];
+    const outline: BlockOutline[] = [];
     const modelFaces: BlockModelFace[] = [];
 
     model.elements.forEach(({ from, to, rotation, shade, faces }) => {
@@ -150,10 +183,10 @@ export default class ModelManager {
         const uv = face.uv?.map((v, i) => v / 16 + (i < 2 ? 0.001 : -0.001))
           ?? [0.001, 0.001, 0.999, 0.999];
 
-        const texCords: [Vector2, Vector2, Vector2, Vector2] = 
+        const texCoord: [Vector2, Vector2, Vector2, Vector2] = 
           [[uv[0], uv[1]], [uv[0], uv[3]], [uv[2], uv[3]], [uv[2], uv[1]]];
         while (face.rotation && face.rotation > 0) {
-          texCords.push(texCords.shift()!);
+          texCoord.push(texCoord.shift()!);
           face.rotation -= 90;
         }
 
@@ -161,7 +194,7 @@ export default class ModelManager {
         const v = this.sixSides[key][0];
         modelFaces.push({
           corners: [rotated[v[0]], rotated[v[1]], rotated[v[2]], rotated[v[3]]], 
-          texCords: texCords,
+          texCoord: texCoord,
           normal: normals[key],
           shade: shade ?? true,
           texture: face.texture,
@@ -170,12 +203,14 @@ export default class ModelManager {
         });
       }
 
-      // if (!data.outlines?.length) {
-        outlines.push(vertices.original);
-      // }
+      outline.push({ from, to });
     });
 
-    return { faces: modelFaces, outlines, ambientocclusion: model.ambientocclusion };
+    return {
+      ambientocclusion: model.ambientocclusion, 
+      faces: modelFaces, 
+      outline
+    };
   }
 
   private parsePath(path: string): string {
