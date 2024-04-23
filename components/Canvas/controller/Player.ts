@@ -12,7 +12,7 @@ class Player {
 
   constructor() {
     this.xyz = { x: 0, y: 2, z: 0 };
-    this.facing = { direction: 'south', yaw: 0, pitch: Math.PI/2 };
+    this.facing = { direction: 'south', yaw: 0, pitch: 0 };
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;
