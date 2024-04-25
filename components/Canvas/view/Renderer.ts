@@ -5,6 +5,7 @@ import { BlockType, SixSides, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
 import AtlasMap from "@/public/static/images/atlas/map.json";
+import MainProgram from "./Programs/MainProgram";
 const { factor, offsets } = AtlasMap;
 
 class Renderer {
@@ -16,18 +17,10 @@ class Renderer {
   private WIDTH: number;
   private HEIGHT: number;
 
-  private ready: boolean;
-
-  private indices: Uint16Array;
-
   private models: ModelHandler;
   private gl: WebGL2RenderingContext;
-  private uMatWorldLoc: WebGLUniformLocation;
 
-  private mainProgram: WebGLProgram;
-  private mainVao: WebGLVertexArrayObject;
-  private mainAbo: WebGLBuffer;
-  private spriteTex:  WebGLTexture;
+  private programs: MainProgram[];
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
@@ -38,18 +31,10 @@ class Renderer {
     this.WIDTH      = canvas.width;
     this.HEIGHT     = canvas.height;
 
-    this.indices = new Uint16Array(Array.from(
-      { length: 4096 }, 
-      (_, i) => {
-        i <<= 2;
-        return [i, i + 1, i + 2, i + 3, 65535];
-      }
-    ).flat());
-
     this.models = new ModelHandler();
+    this.gl = this.initGL();
 
-    this.ready = false;
-    this.initGL();
+    this.programs = [new MainProgram(this, this.gl)];
   }
 
   startRendering(func?: () => any): void {
@@ -61,26 +46,15 @@ class Renderer {
 
     const draw = async () => {
       if (this.needRender) {
-        gl.useProgram(this.mainProgram);
-        gl.bindVertexArray(this.mainVao);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAbo);
+        let allSuccess = true;
+        for (const program of this.programs) {
+          const success = program.draw();
+          allSuccess &&= success;
+        }
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.spriteTex);
-
-        gl.uniformMatrix4fv(this.uMatWorldLoc, false, this.worldMat);
-
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        const data = this.getBlockVertices();
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-        gl.drawElements(gl.TRIANGLE_FAN, data.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.bindVertexArray(null);
-        gl.useProgram(null)
-
-        this.resetNeedRender();
+        if (allSuccess) {
+          this.resetNeedRender();
+        }
       }
 
       func?.();
@@ -184,139 +158,15 @@ class Renderer {
     return [...target.block, ...target.normal] as Vector6;
   }
 
-  private async initGL() {
+  private initGL(): WebGL2RenderingContext {
     const gl = this.canvas.getContext('webgl2', { alpha: false });
     if (!gl) {
       throw new Error('Your browser does not support webgl2 canvas.');
     }
-    this.gl = gl;
-
-    this.mainProgram = this.createProgram(this.mainVsSrc, this.mainFsSrc);
-    this.mainVao = this.createMainVao();
-    this.spriteTex = await this.createSpriteTexture();
-
-    const uMatProjLoc  = gl.getUniformLocation(this.mainProgram, 'mProj');
-    const uMatWorldLoc = gl.getUniformLocation(this.mainProgram, 'mWorld');
-    if (!uMatWorldLoc) {
-      throw new Error("Failed to get uniform location.");
-    }
-    this.uMatWorldLoc = uMatWorldLoc;
-
-    const uMainSamplerLoc = gl.getUniformLocation(this.mainProgram, 'sampler');
-
-    gl.useProgram(this.mainProgram);
-    gl.uniformMatrix4fv(uMatProjLoc, false, this.projMat);
-    gl.uniform1i(uMainSamplerLoc, 0);
-    gl.useProgram(null);
-
-    this.ready = true;
+    return gl;
   }
 
-  private createMainVao(): WebGLVertexArrayObject {
-    const gl = this.gl;
-    const vao = gl.createVertexArray();
-    if (!vao) {
-      throw new Error("Failed to create main vertex array object");
-    }
-
-    gl.bindVertexArray(vao);
-
-    const buffer = gl.createBuffer();
-    if (!buffer) {
-      throw new Error("Failed to create main array buffer object");
-    }
-    this.mainAbo = buffer;
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.mainAbo);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
-
-    // TODO: maybe change normal and texcoords to half float
-    // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 44, 0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 44, 12);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 44, 24);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 44, 32);
-
-    gl.enableVertexAttribArray(0);
-    gl.enableVertexAttribArray(1);
-    gl.enableVertexAttribArray(2);
-    gl.enableVertexAttribArray(3);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
-
-    gl.bindVertexArray(null);
-
-    return vao;
-  }
-
-  private createProgram(vss: string, fss: string): WebGLProgram {
-    const gl = this.gl;
-    const program = gl.createProgram();
-    if (!program) {
-      throw new Error('Failed to create program.');
-    }
-
-    const vs = this.createShader(gl.VERTEX_SHADER, vss);
-    const fs = this.createShader(gl.FRAGMENT_SHADER, fss);
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      throw new Error('Program Link Error\n' + gl.getProgramInfoLog(program)?.toString());
-    }
-
-    // TODO: Don't validate at build
-    gl.validateProgram(program);
-    if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-      throw new Error('Program Validate Error\n' + gl.getProgramInfoLog(program)?.toString());
-    }
-
-    return program;
-  }
-
-  private createShader(type: number, src: string): WebGLShader {
-    const gl = this.gl;
-    const shader = gl.createShader(type);
-    if (!shader) {
-      throw new Error('Failed to create shader.');
-    }
-
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw new Error('Shader Compilation Error\n' + gl.getShaderInfoLog(shader)?.toString());
-    }
-
-    return shader;
-  }
-
-  private async createSpriteTexture(): Promise<WebGLTexture> {
-    const gl = this.gl;
-    const texture = gl.createTexture();
-    if (!texture) {
-      throw new Error("Failed to create main texture.");
-    }
-
-    const atlas = await new Promise<HTMLImageElement>(res => {
-      const image = new Image();
-      image.onload = () => res(image);
-      image.src = "/static/images/atlas/file.png";
-    });
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-  
-    return texture;
-  }
-
-  private getBlockVertices(): Float32Array {
+  public getBlockVertices(): Float32Array {
     // TODO: only update block changes
     const vertices: number[] = [];
     for (let x = 0; x < this.dimensions[0]; x++) {
@@ -367,7 +217,7 @@ class Renderer {
   }
 
   private get needRender() {
-    return this.ready && (this.controller.needRender || this.engine.needRender);
+    return this.controller.needRender || this.engine.needRender;
   }
 
   private resetNeedRender() {
@@ -375,51 +225,7 @@ class Renderer {
     this.engine.needRender = false;
   }
 
-  private mainVsSrc = `#version 300 es
-    layout(location = 0) in vec3 a_position;
-    layout(location = 1) in mediump vec3 a_normal;
-    layout(location = 2) in mediump vec2 a_texcoord;
-    layout(location = 3) in mediump vec3 a_colormask;
-
-    uniform mat4 mWorld;
-    uniform mat4 mProj;
-
-    out mediump vec3 v_colormask;
-    out mediump vec2 v_texcoord;
-    flat out mediump vec3 v_normal;
-
-    void main() {
-      v_colormask = a_colormask;
-      v_texcoord  = a_texcoord;
-      v_normal    = (mWorld * vec4(a_normal, 0.0)).rgb;
-      gl_Position = mProj * mWorld * vec4(a_position, 1.0);
-    }
-  `;
-
-  private mainFsSrc = `#version 300 es
-    precision mediump float;
-
-    in mediump vec3 v_colormask;
-    in mediump vec2 v_texcoord;
-    flat in mediump vec3 v_normal;
-
-    const vec3 ambientIntensity = vec3(0.4, 0.4, 0.7);
-    const vec3 lightColor = vec3(0.8, 0.8, 0.4);
-    const vec3 lightDirection = normalize(vec3(1.0, 2.0, 3.0));
-    uniform sampler2D sampler;
-
-    out vec4 fragColor;
-
-    void main() {
-      vec4 texel = texture(sampler, v_texcoord);
-      vec3 lightIntensity = ambientIntensity + lightColor * max(dot(normalize(v_normal), lightDirection), 0.0);
-
-      fragColor = vec4(texel.rgb * v_colormask * lightIntensity, texel.a);
-      if (fragColor.a < 0.1) discard;
-    }
-  `;
-
-  private get worldMat(): Float32Array {
+  public get worldMat(): Float32Array {
     const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
     const cp = Math.cos(-pitch), sp = Math.sin(-pitch);
     const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
@@ -455,7 +261,7 @@ class Renderer {
     ]);
   }
 
-  private projMat = new Float32Array([
+  public projMat = new Float32Array([
     1, 0,      0,  0, 
     0, 1,      0,  0, 
     0, 0, -1.002, -1, 
