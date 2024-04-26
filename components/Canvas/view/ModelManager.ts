@@ -35,25 +35,26 @@ export default class ModelManager {
         return pack[0];
       })
       .map(bs => {
-        const rotateX = this.getRotationMatrix({ origin: [8, 8, 8], axis: "x", angle: bs.x });
-        const rotateY = this.getRotationMatrix({ origin: [8, 8, 8], axis: "y", angle: bs.y });
-        const rotate0 = (vec: Vector3) => rotateX([...rotateY([...vec, 0]), 0]);
-        const rotate1 = (vec: Vector3) => rotateX([...rotateY([...vec, 1]), 1]);
+        const rotate = this.rotateAxis(bs.x, bs.y);
+        // const rotateX = this.getRotationMatrix({ origin: [8, 8, 8], axis: "x", angle: bs.x });
+        // const rotateY = this.getRotationMatrix({ origin: [8, 8, 8], axis: "y", angle: bs.y });
+        // const rotate0 = (vec: Vector3) => rotateX([...rotateY([...vec, 0]), 0]);
+        // const rotate1 = (vec: Vector3) => rotateX([...rotateY([...vec, 1]), 1]);
         const model = this.getModel(bs.model);
 
         return {
           ambientocclusion: model.ambientocclusion,
           faces: model.faces.map(face => ({
-            corners: face.corners.map(rotate1) as [Vector3, Vector3, Vector3, Vector3], 
+            corners: face.corners.map(v => rotate(v, 1)) as [Vector3, Vector3, Vector3, Vector3], 
             texCoord: face.texCoord, // TODO
-            normal: rotate0(face.normal),
+            normal: rotate(face.normal, 0),
             shade: face.shade,
             texture: face.texture,
-            cullface: face.cullface, // TODO
+            cullface: face.cullface ? this.rotateFace(face.cullface, bs.x, bs.y) : undefined, // TODO
             tintindex: face.tintindex,
           })),
           outline: model.outline.map(({ from, to }) => {
-            const _f = rotate1(from), _t = rotate1(to);
+            const _f = rotate(from, 1), _t = rotate(to, 1);
             const f: Vector3 = [0, 0, 0], t: Vector3 = [0, 0, 0];
             f[0] = _f[0] < _t[0] ? _f[0] : _t[0];
             f[1] = _f[1] < _t[1] ? _f[1] : _t[1];
@@ -194,15 +195,14 @@ export default class ModelManager {
           face.rotation -= 90;
         }
 
-        const { rotated } = vertices;
         const v = this.sixSides[key][0];
         modelFaces.push({
-          corners: [rotated[v[0]], rotated[v[1]], rotated[v[2]], rotated[v[3]]], 
+          corners: [vertices[v[0]], vertices[v[1]], vertices[v[2]], vertices[v[3]]], 
           texCoord: texCoord,
           normal: normals[key],
           shade: shade ?? true,
           texture: face.texture,
-          cullface: face.cullface ?? key,
+          cullface: face.cullface,
           tintindex: face.tintindex ?? -1,
         });
       }
@@ -228,6 +228,56 @@ export default class ModelManager {
       path = path.substring(6);
     }
     return path;
+  }
+
+  private rotateAxisMap: ((v: Vector3, w: number) => Vector3)[][] = [
+    [
+      (v, _) => [    v[0],     v[1],     v[2]], 
+      (v, w) => [    v[2],     v[1], w - v[0]], 
+      (v, w) => [w - v[0],     v[1], w - v[2]], 
+      (v, w) => [w - v[2],     v[1],     v[0]], 
+    ], [
+      (v, w) => [    v[0], w - v[2],     v[1]], 
+      (v, _) => [    v[2],     v[0],     v[1]], 
+      (v, w) => [w - v[0],     v[2],     v[1]], 
+      (v, w) => [w - v[2], w - v[0],     v[1]], 
+    ], [
+      (v, w) => [    v[0], w - v[1], w - v[2]], 
+      (v, w) => [    v[2], w - v[1],     v[0]], 
+      (v, w) => [w - v[0], w - v[1],     v[2]], 
+      (v, w) => [w - v[2], w - v[1], w - v[0]], 
+    ], [
+      (v, w) => [    v[0],     v[2], w - v[1]], 
+      (v, w) => [    v[2], w - v[0], w - v[1]], 
+      (v, w) => [w - v[0], w - v[2], w - v[1]], 
+      (v, w) => [w - v[2],     v[0], w - v[1]], 
+    ]
+  ];
+
+  private rotateAxis(x: number, y: number): (v: Vector3, w: number) => Vector3 {
+    return this.rotateAxisMap[x / 90][y / 90];
+  }
+
+  private rotateFace(face: SixSides, x: number, y: number): SixSides {
+    const yFaces: SixSides[] = ['south', 'east', 'north', 'west'];
+    const xFaces: SixSides[] = ['south', 'down', 'north', 'up'];
+    let result = face;
+
+    let index = yFaces.findIndex(v => v === face);
+    if (index >= 0) {
+      index += (y / 90);
+      index = index >= 4 ? index - 4 : index;
+      result = yFaces[index];
+    }
+
+    index = xFaces.findIndex(v => v === face);
+    if (index >= 0) {
+      index += (x / 90);
+      index = index >= 4 ? index - 4 : index;
+      result = xFaces[index];
+    }
+
+    return result;
   }
 
   private getRotationMatrix(rotation?: RawBlockModelElementRotation): Rotation {
@@ -273,7 +323,7 @@ export default class ModelManager {
     }
   }
 
-  private expandVertices(from: Vector3, to: Vector3, rotate: Rotation): { original: Vector3[], rotated: Vector3[] } {
+  private expandVertices(from: Vector3, to: Vector3, rotate: Rotation): Vector3[] {
     const f = [from[0] / 16, from[1] / 16, from[2] / 16];
     const t = [to[0] / 16, to[1] / 16, to[2] / 16];
   
@@ -288,10 +338,7 @@ export default class ModelManager {
       [t[0], t[1], t[2]]
     ];
   
-    return {
-      original, 
-      rotated: original.map(v => rotate([...v, 1]))
-    };
+    return original.map(v => rotate([...v, 1]));
   }
 
   private getNormals(rotate: Rotation): Record<SixSides, Vector3> {

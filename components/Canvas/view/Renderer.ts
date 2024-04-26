@@ -1,11 +1,12 @@
 import Controller from "../controller/Controller";
 import { Block } from "../model";
 import Engine from "../model/Engine";
-import { BlockType, SixSides, Vector3, Vector4, Vector6 } from "../model/types";
+import { BlockType, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
 import MainProgram from "./Programs/MainProgram";
 import TextureManager from "./TextureManager";
+import { BlockModelFace } from "./types";
 
 class Renderer {
   public controller: Controller;
@@ -179,7 +180,7 @@ class Renderer {
           const models = this.models.get(block.type, block.states);
           models.forEach(model => {
             model.faces.forEach(face => {
-              if (!this.shouldRender(block, face.cullface)) return;
+              if (!this.shouldRender(block, face)) return;
 
               const { corners: c, texCoord: t, normal: n } = face;
               const offset = this.textures.sample(face.texture, this.engine.tick);
@@ -213,15 +214,37 @@ class Renderer {
   }
 
   // TODO: rewrite to match cullface in data
-  private shouldRender(block: Block, dir: SixSides) {
-    if (block.type !== BlockType.IronBlock && block.type !== BlockType.Glass) return true;
+  private shouldRender(block: Block, face: BlockModelFace) {
+    if (!face.cullface) return true;
 
-    const [x, y, z] = Maps.P6DMap[dir];
-    const adjacentBlock = this.engine.block(block.x + x, block.y + y, block.z + z);
-    if (!adjacentBlock) return true;
+    const [x, y, z] = Maps.P6DMap[face.cullface];
+    const neighbor = this.engine.block(block.x + x, block.y + y, block.z + z);
+    if (!neighbor || neighbor.type === BlockType.AirBlock) return true;
+  
+    const map = {
+      south: [0, 1], north: [0, 1], 
+      east: [1, 2], west: [1, 2], 
+      up: [2, 0], down: [2, 0], 
+    } as const;
 
-    if (block.type === BlockType.Glass) return !adjacentBlock.fullBlock;
-    return !adjacentBlock.fullBlock || adjacentBlock.type === BlockType.AirBlock || adjacentBlock.type === BlockType.Glass;
+    const reverse = Maps.ReverseDir[face.cullface];
+
+    const neighborModels = this.models.get(neighbor.type, neighbor.states);
+    const [i1, i2] = map[face.cullface];
+
+    const min1 = Math.min(...face.corners.map(a => a[i1]));
+    const max1 = Math.max(...face.corners.map(a => a[i1]));
+    const min2 = Math.min(...face.corners.map(a => a[i2]));
+    const max2 = Math.max(...face.corners.map(a => a[i2]));
+
+    for (const model of neighborModels) {
+      for (const neighborFace of model.faces) {
+        if (neighborFace.cullface !== reverse) continue;
+        if (neighborFace.corners.every(c => (c[i1] <= min1 || c[i1] >= max1) && (c[i2] <= min2 || c[i2] >= max2))) return false;
+      }
+    }
+
+    return true;
   }
 
   private get needRender() {

@@ -194,11 +194,10 @@ export default class MainProgram extends Program {
       vec4 texel1 = texture(sampler, v_texcoord1);
       vec4 texel2 = texture(sampler, v_texcoord2);
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
+      if (texel.a < 0.1) discard;
 
       vec3 lightIntensity = ambientIntensity + lightColor * max(dot(normalize(v_normal), lightDirection), 0.0);
-
       fragColor = vec4(texel.rgb * v_colormask * lightIntensity, texel.a);
-      if (fragColor.a < 0.1) discard;
     }
   `;
 
@@ -214,10 +213,10 @@ export default class MainProgram extends Program {
 
 /**
   * a_texture format (ivec2)
-  * a_texture[0]: 00000000 00000000 00000000 00000000
-  *                 └─────────┘└─────────┘└─────────┘
-  *                   tex1.x     tex1.y     tex2.x
-  * a_texture[1]: 00000000 00000000 00000000 00000000
-  *                 └─────────┘└─────────┘└─────────┘
-  *                   tex2.y     inter.d    intex.n
+  *               3 2         1         0         
+  *               10987654321098765432109876543210
+  * a_texture[0]: 00000000000000000000000000000000
+  *                 └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
+  * a_texture[1]: 00000000000000000000000000000000
+  *                 └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
  */
