@@ -124,23 +124,29 @@ class Controller {
   }
 
   private physics = () => {
-    if (this.activeKeys.has('w') && !this.activeKeys.has('s')) {
-      this.player.moveForward();
+    if (this.activeKeys.has('w')) {
+      if(this.activeKeys.has('s')) this.player.moveStop();
+      else this.player.moveForward();
     }
-    if (this.activeKeys.has('s') && !this.activeKeys.has('w')) {
-      this.player.moveBackward();
+    if (this.activeKeys.has('s')) {
+      if(this.activeKeys.has('w')) this.player.moveStop();
+      else this.player.moveBackward();
     }
-    if (this.activeKeys.has('a') && !this.activeKeys.has('d')) {
-      this.player.moveLeft();
+    if (this.activeKeys.has('a')) {
+      if(this.activeKeys.has('d')) this.player.moveStop();
+      else this.player.moveLeft();
     }
-    if (this.activeKeys.has('d') && !this.activeKeys.has('a')) {
-      this.player.moveRight();
+    if (this.activeKeys.has('d')) {
+      if(this.activeKeys.has('a')) this.player.moveStop();
+      else this.player.moveRight();
     }
-    if (this.activeKeys.has(' ') && !this.activeKeys.has('Shift')) {
-      this.player.moveUp();
+    if (this.activeKeys.has(' ')) {
+      if(this.activeKeys.has('Shift')) this.player.moveStop();
+      else this.player.moveUp();
     }
-    if (this.activeKeys.has('Shift') && !this.activeKeys.has(' ')) {
-      this.player.moveDown();
+    if (this.activeKeys.has('Shift')) {
+      if(this.activeKeys.has(' ')) this.player.moveStop();
+      else this.player.moveDown();
     }
 
     if (this.player.velocity > 0) {
