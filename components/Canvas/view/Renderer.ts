@@ -186,13 +186,8 @@ class Renderer {
               const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
               for (let l = 0; l < 4; ++l) {
-                const x1 = Math.round(t[l][0] * 16 + ox1);
-                const y1 = Math.round(t[l][1] * 16 + oy1);
-                const x2 = Math.round(t[l][0] * 16 + ox2);
-                const y2 = Math.round(t[l][1] * 16 + oy2);
-
-                const tex1 = x1 << 20 | y1 << 10 | x2;
-                const tex2 = y2 << 20 | oa << 10 | ob;
+                const tex1 = t[l][0] + ox1 << 20 | t[l][1] + oy1 << 10 | t[l][0] + ox2;
+                const tex2 = t[l][1] + oy2 << 20 | oa << 10 | ob;
 
                 vertices.push(
                   c[l][0] + x, c[l][1] + y, c[l][2] + z, 

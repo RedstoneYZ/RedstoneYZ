@@ -210,3 +210,14 @@ export default class MainProgram extends Program {
     }
   ).flat());
 }
+
+
+/**
+  * a_texture format (ivec2)
+  * a_texture[0]: 00000000 00000000 00000000 00000000
+  *                 └─────────┘└─────────┘└─────────┘
+  *                   tex1.x     tex1.y     tex2.x
+  * a_texture[1]: 00000000 00000000 00000000 00000000
+  *                 └─────────┘└─────────┘└─────────┘
+  *                   tex2.y     inter.d    intex.n
+ */

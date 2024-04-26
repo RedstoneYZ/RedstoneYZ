@@ -185,8 +185,7 @@ export default class ModelManager {
       for (const _key in faces) {
         const key = _key as SixSides;
         const face = faces[key]!;
-        const uv = face.uv?.map((v, i) => v / 16 + (i < 2 ? 0.01 : -0.01))
-          ?? [0.01, 0.01, 0.99, 0.99];
+        const uv = face.uv ?? [0, 0, 16, 16];
 
         const texCoord: [Vector2, Vector2, Vector2, Vector2] = 
           [[uv[0], uv[1]], [uv[0], uv[3]], [uv[2], uv[3]], [uv[2], uv[1]]];
