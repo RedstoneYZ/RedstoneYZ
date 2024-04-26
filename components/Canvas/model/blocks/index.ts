@@ -1,5 +1,6 @@
 import AirBlock from "./AirBlock";
 import Block from "./Block";
+import CommandBlock from "./CommandBlock";
 import IronBlock from "./IronBlock";
 import Glass from "./Glass";
 import Lever from "./Lever";
@@ -14,6 +15,7 @@ import Target from "./Target";
 export {
   AirBlock, 
   Block, 
+  CommandBlock, 
   IronBlock, 
   Glass, 
   Lever, 

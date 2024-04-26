@@ -1,5 +1,5 @@
 import Engine from "./Engine";
-import { AirBlock, Glass, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./blocks";
+import { AirBlock, CommandBlock, Glass, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./blocks";
 
 export type CanvasProps = {
   canvasWidth: number;
@@ -70,6 +70,7 @@ export interface ValidationData {
 
 export enum BlockType {
   AirBlock           = "air", 
+  CommandBlock       = "command_block",
   IronBlock          = "iron_block", 
   Glass              = "glass", 
   RedstoneDust       = "redstone_wire", 
@@ -83,7 +84,7 @@ export enum BlockType {
 }
 
 
-export type Blocks = AirBlock | Glass | IronBlock | Lever | RedstoneComparator | RedstoneDust | RedstoneLamp | RedstoneRepeater | RedstoneTorch | RedstoneWallTorch | Target;
+export type Blocks = AirBlock | CommandBlock | Glass | IronBlock | Lever | RedstoneComparator | RedstoneDust | RedstoneLamp | RedstoneRepeater | RedstoneTorch | RedstoneWallTorch | Target;
 
 export type BlockConstructor = new (options: BlockOptions) => Blocks;
 
@@ -138,6 +139,11 @@ export interface PowerTransmission {
 export interface BlockStates {
   power: number;
   source: boolean;
+}
+
+export interface CommandBlockStates extends BlockStates {
+  conditional: boolean;
+  facing: SixSides;
 }
 
 export interface LeverStates extends BlockStates {

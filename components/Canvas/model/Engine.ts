@@ -10,8 +10,8 @@ class Engine {
   public mapName: string;
   public validation: ValidationData | undefined;
 
+  public tick: number;
   public taskQueue: EngineTask[];
-
   public needRender: boolean;
 
   private _pg: Blocks[][][];
@@ -23,8 +23,8 @@ class Engine {
     this.mapName = mapName;
     this.validation = validation;
 
+    this.tick = 0;
     this.taskQueue = [];
-
     this.needRender = true;
 
     this._pg = Array.from({ length: xLen }, (_, x) => 
@@ -235,6 +235,8 @@ class Engine {
       }
 
       this.taskQueue.push(...nextQueue);
+
+      this.tick++;
     }, 50);
   }
 

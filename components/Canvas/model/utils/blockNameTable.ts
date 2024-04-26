@@ -2,6 +2,7 @@ import { BlockType } from "../types";
 
 const blockNameTable: Record<BlockType, string> = {
   [BlockType.AirBlock]:           '空氣', 
+  [BlockType.CommandBlock]:       '指令方塊', 
   [BlockType.Glass]:              '玻璃', 
   [BlockType.IronBlock]:          '鐵方塊', 
   [BlockType.Lever]:              '控制桿', 

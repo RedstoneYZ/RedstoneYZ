@@ -1,31 +1,83 @@
 import fs from "fs";
 import Jimp from "jimp";
 
-const imagesFolder = "./public/static/images/textures/";
-const files = fs.readdirSync(imagesFolder);
+const ROOT = "./public/static/images/textures/";
+const UNIT = 16;
 
-const IMAGE_SIZE = 16;
-const ATLAS_WIDTH = (2 ** Math.ceil(Math.log2(Math.sqrt(files.length))));
-const ATLAS_HEIGHT = (2 ** Math.ceil(Math.log2(files.length / ATLAS_WIDTH)));
+(async () => {
+  const files = fs.readdirSync(ROOT);
+  const [pngs, mcmetas] = partition(files, (file) => file.endsWith(".png"));
+  
+  const images = { occupied: 0, data: {} };
 
-const width = IMAGE_SIZE * ATLAS_WIDTH;
-const height = IMAGE_SIZE * ATLAS_HEIGHT;
+  for (const png of pngs) {
+    const image = await Jimp.read(ROOT + png);
+    if (image.getWidth() !== UNIT) {
+      throw new Error("Unexpected behavior: Image width is not " + UNIT);
+    }
 
-const json = {};
-json.factor = [1 / ATLAS_WIDTH, 1 / ATLAS_HEIGHT];
-json.offsets = {};
+    const height = image.getHeight() / UNIT;
+    images.occupied += height;
+    images.data[png.substring(0, png.length - 4)] = { image, height };
+  }
 
-new Jimp(width, height, async (err, result) => {
-  for (let y = 0, i = 0; y < ATLAS_HEIGHT && i < files.length; y++) {
-    for (let x = 0; x < ATLAS_WIDTH && i < files.length; x++, i++) {
-      const image = await Jimp.read(imagesFolder + files[i]);
-      result.blit(image, IMAGE_SIZE * x, IMAGE_SIZE * y)
-        .write("./public/static/images/atlas/file.png");
-      
-      json.offsets[files[i].substring(0, files[i].length - 4)] = 
-        [json.factor[0] * x, json.factor[1] * y];
+  for (const mcmeta of mcmetas) {
+    const { animation } = JSON.parse(fs.readFileSync(ROOT + mcmeta));
+    images.data[mcmeta.substring(0, mcmeta.length - 11)].animation = animation;
+  }
+  
+  const ATLAS_WIDTH = (2 ** Math.ceil(Math.log2(Math.sqrt(images.occupied))));
+  const ATLAS_HEIGHT = (2 ** Math.ceil(Math.log2(images.occupied / ATLAS_WIDTH)));
+  
+  const json = {};
+  json.factor = [1 / ATLAS_WIDTH, 1 / ATLAS_HEIGHT];
+  json.data = {};
+  
+  new Jimp(UNIT * ATLAS_WIDTH, UNIT * ATLAS_HEIGHT, async (_err, result) => {
+    let x = 0, y = 0;
+
+    for (const texName in images.data) {
+      const data = images.data[texName];
+      const offset = [];
+      for (let i = 0; i < data.height; i++) {
+        result.blit(data.image, x * UNIT, y * UNIT, 0, i * UNIT, UNIT, UNIT);
+        offset.push([json.factor[0] * x, json.factor[1] * y]);
+
+        x += 1;
+        if (x >= ATLAS_WIDTH) {
+          x -= ATLAS_WIDTH;
+          y += 1;
+        }
+      }
+
+      json.data[texName] = { offset };
+      if (data.animation) {
+        json.data[texName].animation = data.animation;
+      }
+    }
+  
+    result.write("./public/static/images/atlas/atlas.png");
+    fs.writeFileSync("./public/static/images/atlas/texture.json", JSON.stringify(json, null, 2));
+  });
+})();
+
+
+
+/**
+ * @template T
+ * @param {T[]} arr 
+ * @param {(ele: T) => boolean} condition 
+ * @returns {[T[], T[]]}
+ */
+function partition(arr, condition) {
+  const passed = [], other = [];
+  for (const element of arr) {
+    if (condition(element)) {
+      passed.push(element);
+    }
+    else {
+      other.push(element);
     }
   }
-  fs.writeFileSync("./public/static/images/atlas/map.json", JSON.stringify(json, null, 2));
-});
-
+  return [passed, other];
+}

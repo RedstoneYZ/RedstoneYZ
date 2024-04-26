@@ -4,13 +4,13 @@ import Engine from "../model/Engine";
 import { BlockType, SixSides, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
-import AtlasMap from "@/public/static/images/atlas/map.json";
 import MainProgram from "./Programs/MainProgram";
-const { factor, offsets } = AtlasMap;
+import TextureManager from "./TextureManager";
 
 class Renderer {
   public controller: Controller;
   public engine: Engine;
+  public textures: TextureManager;
   public dimensions: Vector3;
   public canvas: HTMLCanvasElement;
 
@@ -25,6 +25,7 @@ class Renderer {
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
     this.canvas     = canvas;
+    this.textures   = new TextureManager();
     this.dimensions = dimensions;
     this.engine     = controller.engine;
 
@@ -180,18 +181,16 @@ class Renderer {
           models.forEach(model => {
             model.faces.forEach(face => {
               if (!this.shouldRender(block, face.cullface)) return;
-              if (!(face.texture in offsets)) {
-                throw new Error(`Texture ${face.texture} does not exist in texture atlas.`);
-              }
 
               const { corners: c, texCoord: t, normal: n } = face;
-              const offset = offsets[face.texture as keyof typeof offsets];
+              const o = this.textures.sample(face.texture, this.engine.tick);
 
               for (let l = 0; l < 4; ++l) {
                 vertices.push(
                   c[l][0] + x, c[l][1] + y, c[l][2] + z, 
                   n[0], n[1], n[2], 
-                  t[l][0] * factor[0] + offset[0], t[l][1] * factor[1] + offset[1], 
+                  t[l][0] * this.textures.factor[0] + o[0], 
+                  t[l][1] * this.textures.factor[1] + o[1], 
                   ...color
                 );
               }

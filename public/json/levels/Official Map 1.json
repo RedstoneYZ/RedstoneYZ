@@ -3,7 +3,7 @@
   "yLen": 5,
   "zLen": 5,
   "mapName": "Official Map 1",
-  "availableBlocks": [1, 100, 106],
+  "availableBlocks": ["command_block"],
   "blocks": [
     [
       [{
