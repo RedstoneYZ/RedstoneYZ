@@ -155,7 +155,6 @@ class Renderer {
     }
 
     if (target.d === Infinity) return null;
-    console.log([...target.block, ...target.normal]);
     return [...target.block, ...target.normal] as Vector6;
   }
 
@@ -183,14 +182,22 @@ class Renderer {
               if (!this.shouldRender(block, face.cullface)) return;
 
               const { corners: c, texCoord: t, normal: n } = face;
-              const o = this.textures.sample(face.texture, this.engine.tick);
+              const offset = this.textures.sample(face.texture, this.engine.tick);
+              const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
               for (let l = 0; l < 4; ++l) {
+                const x1 = Math.round(t[l][0] * 16 + ox1);
+                const y1 = Math.round(t[l][1] * 16 + oy1);
+                const x2 = Math.round(t[l][0] * 16 + ox2);
+                const y2 = Math.round(t[l][1] * 16 + oy2);
+
+                const tex1 = x1 << 20 | y1 << 10 | x2;
+                const tex2 = y2 << 20 | oa << 10 | ob;
+
                 vertices.push(
                   c[l][0] + x, c[l][1] + y, c[l][2] + z, 
                   n[0], n[1], n[2], 
-                  t[l][0] * this.textures.factor[0] + o[0], 
-                  t[l][1] * this.textures.factor[1] + o[1], 
+                  tex1, tex2, 
                   ...color
                 );
               }
@@ -200,7 +207,14 @@ class Renderer {
       }
     }
 
-    return new Float32Array(vertices);
+    const asFloat32 = new Float32Array(vertices);
+    const asInt32   = new Int32Array(asFloat32.buffer);
+    for (let i = 0; i < asFloat32.length; i += 11) {
+      asInt32[i + 6] = vertices[i + 6];
+      asInt32[i + 7] = vertices[i + 7];
+    }
+
+    return asFloat32;
   }
 
   // TODO: rewrite to match cullface in data

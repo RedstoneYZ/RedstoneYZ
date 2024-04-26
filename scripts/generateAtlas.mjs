@@ -26,14 +26,13 @@ const UNIT = 16;
     images.data[mcmeta.substring(0, mcmeta.length - 11)].animation = animation;
   }
   
-  const ATLAS_WIDTH = (2 ** Math.ceil(Math.log2(Math.sqrt(images.occupied))));
-  const ATLAS_HEIGHT = (2 ** Math.ceil(Math.log2(images.occupied / ATLAS_WIDTH)));
+  const ATLAS_SIZE = (2 ** Math.ceil(Math.log2(Math.sqrt(images.occupied))));
   
   const json = {};
-  json.factor = [1 / ATLAS_WIDTH, 1 / ATLAS_HEIGHT];
+  json.factor = [1 / ATLAS_SIZE, 1 / ATLAS_SIZE];
   json.data = {};
-  
-  new Jimp(UNIT * ATLAS_WIDTH, UNIT * ATLAS_HEIGHT, async (_err, result) => {
+
+  new Jimp(UNIT * ATLAS_SIZE, UNIT * ATLAS_SIZE, async (_err, result) => {
     let x = 0, y = 0;
 
     for (const texName in images.data) {
@@ -41,11 +40,11 @@ const UNIT = 16;
       const offset = [];
       for (let i = 0; i < data.height; i++) {
         result.blit(data.image, x * UNIT, y * UNIT, 0, i * UNIT, UNIT, UNIT);
-        offset.push([json.factor[0] * x, json.factor[1] * y]);
+        offset.push([x * UNIT, y * UNIT]);
 
         x += 1;
-        if (x >= ATLAS_WIDTH) {
-          x -= ATLAS_WIDTH;
+        if (x >= ATLAS_SIZE) {
+          x -= ATLAS_SIZE;
           y += 1;
         }
       }

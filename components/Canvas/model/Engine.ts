@@ -230,12 +230,11 @@ class Engine {
 
           default: break;
         }
-
-        this.needRender = true;
       }
 
       this.taskQueue.push(...nextQueue);
 
+      this.needRender = true;
       this.tick++;
     }, 50);
   }
