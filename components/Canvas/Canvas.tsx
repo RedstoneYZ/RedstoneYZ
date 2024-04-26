@@ -41,11 +41,11 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     if (e.key === " ") {
       e.preventDefault();
     }
-    controller?.addActiveKey(e.key);
+    controller?.addActiveKey(e.key.toLowerCase());
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    controller?.removeActiveKey(e.key);
+    controller?.removeActiveKey(e.key.toLowerCase());
   }
 
   function handleMouseEnter() {

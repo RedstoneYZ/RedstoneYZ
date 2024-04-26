@@ -17,6 +17,7 @@ class Renderer {
 
   private WIDTH: number;
   private HEIGHT: number;
+  public projMat: Float32Array;
 
   private models: ModelHandler;
   private gl: WebGL2RenderingContext;
@@ -32,6 +33,15 @@ class Renderer {
 
     this.WIDTH      = canvas.width;
     this.HEIGHT     = canvas.height;
+
+    const x = this.WIDTH > this.HEIGHT ? this.HEIGHT / this.WIDTH : 1;
+    const y = this.WIDTH > this.HEIGHT ? 1 : this.WIDTH / this.HEIGHT;
+    this.projMat = new Float32Array([
+      x, 0,      0,  0, 
+      0, y,      0,  0, 
+      0, 0, -1.002, -1, 
+      0, 0,   -0.2,  0
+    ]);
 
     this.models = new ModelHandler();
     this.gl = this.initGL();
@@ -69,9 +79,15 @@ class Renderer {
     requestAnimationFrame(draw);
   }
 
+  private eyeDir(x: number, y: number): Vector4 {
+    const fx = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
+    const fy = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
+    return [(x / this.WIDTH - 0.5) * 2 * fx, (0.5 - y / this.HEIGHT) * 2 * fy, -1, 0]
+  }
+
   getTarget(canvasX: number, canvasY: number): Vector6 | null {
     const xyz = this.controller.player.xyz;
-    const eyeDir = transform(Array.from(this.worldMatInv), [(canvasX / this.WIDTH - 0.5) * 2, (0.5 - canvasY / this.HEIGHT) * 2, -1, 0]);
+    const eyeDir = transform(Array.from(this.worldMatInv), this.eyeDir(canvasX, canvasY));
 
     const target = { block: [0, 0, 0], normal: [0, 0, 0], d: Infinity };
     for (let x = 0; x < this.dimensions[0]; x++) {
@@ -291,13 +307,6 @@ class Renderer {
       x, y, z, 1, 
     ]);
   }
-
-  public projMat = new Float32Array([
-    1, 0,      0,  0, 
-    0, 1,      0,  0, 
-    0, 0, -1.002, -1, 
-    0, 0,   -0.2,  0
-  ]);
 }
 
 export default Renderer;

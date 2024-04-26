@@ -73,7 +73,7 @@ class Controller {
     this.needRender = true;
   }
 
-  private validInputs = new Set(['w', 'a', 's', 'd', ' ', 'Shift']);
+  private validInputs = new Set(['w', 'a', 's', 'd', ' ', 'shift']);
 
   addActiveKey(key: string) {
     if (this.validInputs.has(key)) {
@@ -136,10 +136,10 @@ class Controller {
     if (this.activeKeys.has('d') && !this.activeKeys.has('a')) {
       this.player.moveRight();
     }
-    if (this.activeKeys.has(' ') && !this.activeKeys.has('Shift')) {
+    if (this.activeKeys.has(' ') && !this.activeKeys.has('shift')) {
       this.player.moveUp();
     }
-    if (this.activeKeys.has('Shift') && !this.activeKeys.has(' ')) {
+    if (this.activeKeys.has('shift') && !this.activeKeys.has(' ')) {
       this.player.moveDown();
     }
 
