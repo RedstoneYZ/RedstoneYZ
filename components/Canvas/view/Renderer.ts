@@ -5,6 +5,8 @@ import { BlockType, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
 import MainProgram from "./Programs/MainProgram";
+import EnvironmentProgram from "./Programs/EnvironmentProgram";
+import Program from "./Programs/Program";
 import TextureManager from "./TextureManager";
 import { BlockModelFace } from "./types";
 
@@ -22,7 +24,7 @@ class Renderer {
   private models: ModelHandler;
   private gl: WebGL2RenderingContext;
 
-  private programs: MainProgram[];
+  private programs: Program[];
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
@@ -46,7 +48,10 @@ class Renderer {
     this.models = new ModelHandler();
     this.gl = this.initGL();
 
-    this.programs = [new MainProgram(this, this.gl)];
+    this.programs = [
+      new MainProgram(this, this.gl), 
+      new EnvironmentProgram(this, this.gl)
+    ];
   }
 
   startRendering(func?: () => any): void {
@@ -54,10 +59,15 @@ class Renderer {
 
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
-    gl.clearColor(1, 0.96, 0.66, 1);
+    gl.clearColor(0.5, 0.63, 1, 1);
+    
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.enable(gl.BLEND);
 
     const draw = async () => {
       if (this.needRender) {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
         let allSuccess = true;
         for (const program of this.programs) {
           const success = program.draw();

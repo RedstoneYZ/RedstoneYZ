@@ -11,6 +11,7 @@ class Engine {
   public validation: ValidationData | undefined;
 
   public tick: number;
+  public day: number;
   public taskQueue: EngineTask[];
   public needRender: boolean;
 
@@ -24,6 +25,7 @@ class Engine {
     this.validation = validation;
 
     this.tick = 0;
+    this.day = 1;
     this.taskQueue = [];
     this.needRender = true;
 
@@ -235,7 +237,11 @@ class Engine {
       this.taskQueue.push(...nextQueue);
 
       this.needRender = true;
+
       this.tick++;
+      if (this.tick % 24000 === 0) {
+        this.day++;
+      }
     }, 50);
   }
 

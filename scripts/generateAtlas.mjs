@@ -1,7 +1,7 @@
 import fs from "fs";
 import Jimp from "jimp";
 
-const ROOT = "./public/static/images/textures/";
+const ROOT = "./public/static/images/textures/block";
 const UNIT = 16;
 
 (async () => {

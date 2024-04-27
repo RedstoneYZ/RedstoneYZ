@@ -4,11 +4,10 @@ import Program from "./Program";
 interface Uniforms {
   mWovi: WebGLUniformLocation;
   mProj: WebGLUniformLocation;
-  lightnorm: WebGLUniformLocation;
   sampler: WebGLUniformLocation;
 }
 
-export default class MainProgram extends Program {
+export default class EnvironmentProgram extends Program {
   protected program: WebGLProgram;
 
   private uniform: Uniforms;
@@ -37,16 +36,14 @@ export default class MainProgram extends Program {
     gl.useProgram(this.program);
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
+    gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.sprite);
 
     gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
-    gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
-    const data = this.renderer.getBlockVertices();
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, data.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -55,10 +52,22 @@ export default class MainProgram extends Program {
     return true;
   }
 
-  private getLightNorm(): Float32Array {
+  private getData(): Float32Array {
     const tick = this.renderer.engine.tick % 24000;
     const theta = tick * Math.PI / 24000;
-    return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
+    const cos = Math.cos(theta);
+    const sin = Math.sin(theta);
+
+    const v = [[60, 20], [60, -20]];
+    v[0] = [cos*v[0][0] - sin*v[0][1], sin*v[0][0] + cos*v[0][1]];
+    v[1] = [cos*v[1][0] - sin*v[1][1], sin*v[1][0] + cos*v[1][1]];
+
+    return new Float32Array([
+      v[0][0], v[0][1],  20,    0, 0, 
+      v[0][0], v[0][1], -20,    1, 0, 
+      v[1][0], v[1][1], -20,    1, 1, 
+      v[1][0], v[1][1],  20,    0, 1, 
+    ]);
   }
 
   private setupUniform(): Uniforms {
@@ -74,11 +83,6 @@ export default class MainProgram extends Program {
       throw new Error("Failed to get location of mProj.");
     }
 
-    const lightnorm = gl.getUniformLocation(this.program, 'lightnorm');
-    if (!lightnorm) {
-      throw new Error("Failed to get location of sampler.");
-    }
-
     const sampler = gl.getUniformLocation(this.program, 'sampler');
     if (!sampler) {
       throw new Error("Failed to get location of sampler.");
@@ -89,7 +93,7 @@ export default class MainProgram extends Program {
     gl.uniform1i(sampler, 0);
     gl.useProgram(null);
 
-    return { mWovi, mProj, lightnorm, sampler };
+    return { mWovi, mProj, sampler };
   }
 
   private createAbo(): WebGLBuffer {
@@ -112,17 +116,11 @@ export default class MainProgram extends Program {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
-    // TODO: maybe change normal and texcoords to half float
-    // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 44, 0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 44, 12);
-    gl.vertexAttribIPointer(2, 2, gl.INT, 44, 24);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 44, 32);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 20, 0);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 20, 12);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
-    gl.enableVertexAttribArray(2);
-    gl.enableVertexAttribArray(3);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
@@ -139,10 +137,10 @@ export default class MainProgram extends Program {
       throw new Error("Failed to create main texture.");
     }
 
-    const atlas = await new Promise<HTMLImageElement>(res => {
+    const sun = await new Promise<HTMLImageElement>(res => {
       const image = new Image();
       image.onload = () => res(image);
-      image.src = "/static/images/atlas/atlas.png";
+      image.src = "/static/images/textures/environment/sun.png";
     });
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -150,7 +148,7 @@ export default class MainProgram extends Program {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sun);
     gl.bindTexture(gl.TEXTURE_2D, null);
 
     return texture;
@@ -158,57 +156,35 @@ export default class MainProgram extends Program {
 
   protected vsSrc = `#version 300 es
     layout(location = 0) in vec3 a_position;
-    layout(location = 1) in mediump vec3 a_normal;
-    layout(location = 2) in ivec2 a_texture;
-    layout(location = 3) in mediump vec3 a_colormask;
+    layout(location = 1) in vec2 a_texcoord;
 
     uniform mat4 mWovi;
     uniform mat4 mProj;
-    uniform vec3 lightnorm;
 
-    out mediump vec2 v_texcoord1;
-    out mediump vec2 v_texcoord2;
-    out mediump float v_texinter;
-    out mediump vec3 v_colormask;
-
-    const vec3 la = vec3(0.4, 0.4, 0.7);
-    const vec3 lightColor = vec3(0.8, 0.8, 0.4);
+    out mediump vec2 v_texcoord;
 
     void main() {
-      v_texcoord1.x = float(a_texture[0] >> 20 & 1023) / 128.;
-      v_texcoord1.y = float(a_texture[0] >> 10 & 1023) / 128.;
-      v_texcoord2.x = float(a_texture[0]       & 1023) / 128.;
-      v_texcoord2.y = float(a_texture[1] >> 20 & 1023) / 128.;
-      v_texinter = float(a_texture[1] >> 10 & 1023) / float(a_texture[1] & 1023);
-
-      vec4 faceNorm = mWovi * vec4(a_normal, 0.0);
-      vec4 lightNorm = mWovi * vec4(lightnorm, 0.0);
-      vec3 lightIntensity = la + lightColor * max(dot(faceNorm, lightNorm), 0.0);
-      v_colormask = a_colormask * lightIntensity;
-
       gl_Position = mProj * mWovi * vec4(a_position, 1.0);
+      v_texcoord = a_texcoord;
     }
   `;
 
   protected fsSrc = `#version 300 es
     precision mediump float;
 
-    in mediump vec2 v_texcoord1;
-    in mediump vec2 v_texcoord2;
-    in mediump float v_texinter;
-    in mediump vec3 v_colormask;
-    flat in mediump vec3 v_normal;
+    in mediump vec2 v_texcoord;
+
     uniform sampler2D sampler;
 
     out vec4 fragColor;
 
     void main() {
-      vec4 texel1 = texture(sampler, v_texcoord1);
-      vec4 texel2 = texture(sampler, v_texcoord2);
-      vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
-      if (texel.a < 0.1) discard;
+      vec4 texel = texture(sampler, v_texcoord);
+      float value = max(max(texel.r, texel.g), texel.b);
+      if (value == 0.) discard;
 
-      fragColor = vec4(texel.rgb * v_colormask, texel.a);
+      float darkness = 1. - value;
+      fragColor = vec4(texel.rgb + vec3(darkness, darkness, darkness), value);
     }
   `;
 
@@ -220,14 +196,3 @@ export default class MainProgram extends Program {
     }
   ).flat());
 }
-
-
-/**
-  * a_texture format (ivec2)
-  *               3 2         1         0         
-  *               10987654321098765432109876543210
-  * a_texture[0]: 00000000000000000000000000000000
-  *                 └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
-  * a_texture[1]: 00000000000000000000000000000000
-  *                 └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
- */
