@@ -93,8 +93,8 @@ class Controller {
     this.needRender = true;
   }
 
-  leftClick(canvasX: number, canvasY: number): void {
-    const target = this.renderer.getTarget(canvasX, canvasY);
+  leftClick(): void {
+    const target = this.renderer.getTarget();
     if (!target) return;
 
     const [x, y, z] = target;
@@ -103,8 +103,8 @@ class Controller {
     this.needRender = true;
   }
 
-  rightClick(canvasX: number, canvasY: number, shift: boolean): void {
-    const target = this.renderer.getTarget(canvasX, canvasY);
+  rightClick(shift: boolean): void {
+    const target = this.renderer.getTarget();
     if (!target) return;
 
     const [x, y, z, ...normDir] = target;
@@ -114,10 +114,11 @@ class Controller {
     this.engine.addTask(['rightClick', [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock], 0]);
     this.needRender = true;
   }
+  
+  mouseMove(canvasX: number, canvasY: number): void {
+    this.renderer.setLookAt(canvasX, canvasY);
+  }
 
-  /**
-   * 不使用此畫布時必須呼叫此函式
-   */
   destroy(): void {
     this.alive = false;
     this.engine.destroy();

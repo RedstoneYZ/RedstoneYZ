@@ -9,11 +9,13 @@ import EnvironmentProgram from "./Programs/EnvironmentProgram";
 import Program from "./Programs/Program";
 import TextureManager from "./TextureManager";
 import { BlockModelFace } from "./types";
+import LineProgram from "./Programs/LineProgram";
 
 class Renderer {
   public controller: Controller;
   public engine: Engine;
   public textures: TextureManager;
+  public models: ModelHandler;
   public dimensions: Vector3;
   public canvas: HTMLCanvasElement;
 
@@ -21,7 +23,6 @@ class Renderer {
   private HEIGHT: number;
   public projMat: Float32Array;
 
-  private models: ModelHandler;
   private gl: WebGL2RenderingContext;
 
   private programs: Program[];
@@ -30,6 +31,7 @@ class Renderer {
     this.controller = controller;
     this.canvas     = canvas;
     this.textures   = new TextureManager();
+    this.models     = new ModelHandler();
     this.dimensions = dimensions;
     this.engine     = controller.engine;
 
@@ -45,12 +47,12 @@ class Renderer {
       0, 0,   -0.2,  0
     ]);
 
-    this.models = new ModelHandler();
     this.gl = this.initGL();
 
     this.programs = [
       new MainProgram(this, this.gl), 
-      new EnvironmentProgram(this, this.gl)
+      new EnvironmentProgram(this, this.gl), 
+      new LineProgram(this, this.gl), 
     ];
   }
 
@@ -89,15 +91,24 @@ class Renderer {
     requestAnimationFrame(draw);
   }
 
-  private eyeDir(x: number, y: number): Vector4 {
-    const fx = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
-    const fy = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
-    return [(x / this.WIDTH - 0.5) * 2 * fx, (0.5 - y / this.HEIGHT) * 2 * fy, -1, 0]
+  private lookAtX: number = 0;
+  private lookAtY: number = 0;
+  setLookAt(canvasX: number, canvasY: number): void {
+    this.lookAtX = canvasX;
+    this.lookAtY = canvasY;
   }
 
-  getTarget(canvasX: number, canvasY: number): Vector6 | null {
+  private get eyeDir(): Vector4 {
+    const xFactor = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
+    const yFactor = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
+    const screenX = (this.lookAtX / this.WIDTH - 0.5) * 2 * xFactor;
+    const screenY = (0.5 - this.lookAtY / this.HEIGHT) * 2 * yFactor;
+    return transform(Array.from(this.worldMatInv), [screenX, screenY, -1, 0]);
+  }
+
+  getTarget(): Vector6 | null {
     const xyz = this.controller.player.xyz;
-    const eyeDir = transform(Array.from(this.worldMatInv), this.eyeDir(canvasX, canvasY));
+    const eyeDir = this.eyeDir;
 
     const target = { block: [0, 0, 0], normal: [0, 0, 0], d: Infinity };
     for (let x = 0; x < this.dimensions[0]; x++) {

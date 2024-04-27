@@ -52,6 +52,13 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     window.addEventListener('wheel', preventDefault, { passive: false });
   }
 
+  function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+    if (canvasRef.current) {
+      const p = getPosition(canvasRef.current, e);
+      controller?.mouseMove(p.x, p.y);
+    }
+  }
+
   function handleMouseLeave() {
     window.removeEventListener('wheel', preventDefault, false);
   }
@@ -67,24 +74,16 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     if (spanRef.current) {
       e.dataTransfer.setDragImage(spanRef.current, 0, 0);
     }
-
     controller?.adjustAngles(e.clientX, e.clientY, true);
   }
 
-  function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
-    if (canvasRef.current) {
-      const p = getPosition(canvasRef.current, e);
-      controller?.leftClick(p.x, p.y);
-    }
+  function handleClick() {
+    controller?.leftClick();
   }
 
   function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
     e.preventDefault();
-
-    if (canvasRef.current) {
-      const p = getPosition(canvasRef.current, e);
-      controller?.rightClick(p.x, p.y, e.shiftKey);
-    }
+    controller?.rightClick(e.shiftKey);
   }
 
   function handleScroll(e: React.WheelEvent<HTMLCanvasElement>) {
@@ -118,6 +117,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
           onKeyUp={handleKeyUp}
 
           onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           
           draggable={true}
