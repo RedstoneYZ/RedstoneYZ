@@ -158,7 +158,10 @@ export default class MainProgram extends Program {
     out mediump vec2 v_texcoord2;
     out mediump float v_texinter;
     out mediump vec3 v_colormask;
-    flat out mediump vec3 v_normal;
+
+    const vec3 la = vec3(0.4, 0.4, 0.7);
+    const vec3 lightColor = vec3(0.8, 0.8, 0.4);
+    const vec3 lightDirection = normalize(vec3(1.0, 2.0, 3.0));
 
     void main() {
       v_texcoord1.x = float(a_texture[0] >> 20 & 1023) / 128.;
@@ -167,8 +170,9 @@ export default class MainProgram extends Program {
       v_texcoord2.y = float(a_texture[1] >> 20 & 1023) / 128.;
       v_texinter = float(a_texture[1] >> 10 & 1023) / float(a_texture[1] & 1023);
 
-      v_colormask = a_colormask;
-      v_normal    = (mWovi * vec4(a_normal, 0.0)).rgb;
+      vec3 normal = (mWovi * vec4(a_normal, 0.0)).rgb;
+      vec3 lightIntensity = la + lightColor * max(dot(normalize(normal), lightDirection), 0.0);
+      v_colormask = a_colormask * lightIntensity;
 
       gl_Position = mProj * mWovi * vec4(a_position, 1.0);
     }
@@ -182,10 +186,6 @@ export default class MainProgram extends Program {
     in mediump float v_texinter;
     in mediump vec3 v_colormask;
     flat in mediump vec3 v_normal;
-
-    const vec3 ambientIntensity = vec3(0.4, 0.4, 0.7);
-    const vec3 lightColor = vec3(0.8, 0.8, 0.4);
-    const vec3 lightDirection = normalize(vec3(1.0, 2.0, 3.0));
     uniform sampler2D sampler;
 
     out vec4 fragColor;
@@ -196,8 +196,7 @@ export default class MainProgram extends Program {
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      vec3 lightIntensity = ambientIntensity + lightColor * max(dot(normalize(v_normal), lightDirection), 0.0);
-      fragColor = vec4(texel.rgb * v_colormask * lightIntensity, texel.a);
+      fragColor = vec4(texel.rgb * v_colormask, texel.a);
     }
   `;
 
