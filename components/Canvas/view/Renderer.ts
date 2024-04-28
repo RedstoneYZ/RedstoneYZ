@@ -4,12 +4,14 @@ import Engine from "../model/Engine";
 import { BlockType, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
-import MainProgram from "./Programs/MainProgram";
+import TestProgram from "./Programs/TestProgram";
 import EnvironmentProgram from "./Programs/EnvironmentProgram";
 import Program from "./Programs/Program";
 import TextureManager from "./TextureManager";
 import { BlockModelFace } from "./types";
 import LineProgram from "./Programs/LineProgram";
+import LightProgram from "./Programs/LightProgram";
+import MainProgram from "./Programs/MainProgram";
 
 class Renderer {
   public controller: Controller;
@@ -19,13 +21,13 @@ class Renderer {
   public dimensions: Vector3;
   public canvas: HTMLCanvasElement;
 
-  private WIDTH: number;
-  private HEIGHT: number;
+  public WIDTH: number;
+  public HEIGHT: number;
   public projMat: Float32Array;
 
   private gl: WebGL2RenderingContext;
 
-  private programs: Program[];
+  public programs: Program[];
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
@@ -49,11 +51,12 @@ class Renderer {
 
     this.gl = this.initGL();
 
-    this.programs = [
-      new MainProgram(this, this.gl), 
-      new EnvironmentProgram(this, this.gl), 
-      new LineProgram(this, this.gl), 
-    ];
+    this.programs = [];
+    this.programs.push(new LightProgram(this, this.gl));
+    // this.programs.push(new TestProgram(this, this.gl));
+    this.programs.push(new MainProgram(this, this.gl));
+    this.programs.push(new EnvironmentProgram(this, this.gl));
+    this.programs.push(new LineProgram(this, this.gl));
   }
 
   startRendering(func?: () => any): void {
@@ -65,6 +68,8 @@ class Renderer {
     
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.BLEND);
+
+    gl.getExtension('WEBGL_depth_texture');
 
     const draw = async () => {
       if (this.needRender) {
@@ -251,7 +256,7 @@ class Renderer {
   }
 
   // TODO: rewrite to match cullface in data
-  private shouldRender(block: Block, face: BlockModelFace) {
+  public shouldRender(block: Block, face: BlockModelFace) {
     if (!face.cullface) return true;
 
     const [x, y, z] = Maps.P6DMap[face.cullface];

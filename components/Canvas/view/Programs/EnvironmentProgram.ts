@@ -13,7 +13,6 @@ export default class EnvironmentProgram extends Program {
   private uniform: Uniforms;
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
-  private sprite: WebGLTexture;
 
   constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
     super(renderer, gl);
@@ -23,8 +22,7 @@ export default class EnvironmentProgram extends Program {
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
-    this.createSprite().then(sprite => {
-      this.sprite = sprite;
+    this.createSprite().then(() => {
       this.ready = true;
     });
   }
@@ -37,9 +35,6 @@ export default class EnvironmentProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.sprite);
 
     gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
 
@@ -54,7 +49,7 @@ export default class EnvironmentProgram extends Program {
 
   private getData(): Float32Array {
     const tick = this.renderer.engine.tick % 24000;
-    const theta = tick * Math.PI / 24000;
+    const theta = tick * Math.PI / 240;
     const cos = Math.cos(theta);
     const sin = Math.sin(theta);
 
@@ -90,7 +85,7 @@ export default class EnvironmentProgram extends Program {
 
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(mProj, false, this.renderer.projMat);
-    gl.uniform1i(sampler, 0);
+    gl.uniform1i(sampler, 2);
     gl.useProgram(null);
 
     return { mWovi, mProj, sampler };
@@ -143,13 +138,13 @@ export default class EnvironmentProgram extends Program {
       image.src = "/static/images/textures/environment/sun.png";
     });
 
+    gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sun);
-    gl.bindTexture(gl.TEXTURE_2D, null);
 
     return texture;
   }
@@ -181,6 +176,7 @@ export default class EnvironmentProgram extends Program {
     void main() {
       vec4 texel = texture(sampler, v_texcoord);
       float value = max(max(texel.r, texel.g), texel.b);
+
       if (value == 0.) discard;
 
       float darkness = 1. - value;

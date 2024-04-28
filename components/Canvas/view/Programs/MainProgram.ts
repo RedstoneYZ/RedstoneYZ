@@ -1,11 +1,15 @@
 import Renderer from "../Renderer";
+import LightProgram from "./LightProgram";
 import Program from "./Program";
 
 interface Uniforms {
   mWovi: WebGLUniformLocation;
   mProj: WebGLUniformLocation;
+  mWovil: WebGLUniformLocation;
+  mProjl: WebGLUniformLocation;
   lightnorm: WebGLUniformLocation;
-  sampler: WebGLUniformLocation;
+  s_texture: WebGLUniformLocation;
+  s_shadow: WebGLUniformLocation;
 }
 
 export default class MainProgram extends Program {
@@ -14,7 +18,6 @@ export default class MainProgram extends Program {
   private uniform: Uniforms;
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
-  private sprite: WebGLTexture;
 
   constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
     super(renderer, gl);
@@ -24,8 +27,7 @@ export default class MainProgram extends Program {
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
-    this.createSprite().then(sprite => {
-      this.sprite = sprite;
+    this.createSprite().then(() => {
       this.ready = true;
     });
   }
@@ -38,10 +40,8 @@ export default class MainProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.sprite);
-
     gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
+    gl.uniformMatrix4fv(this.uniform.mWovil, false, (this.renderer.programs[0] as LightProgram).worldMat);
     gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
     const data = this.renderer.getBlockVertices();
@@ -57,7 +57,7 @@ export default class MainProgram extends Program {
 
   private getLightNorm(): Float32Array {
     const tick = this.renderer.engine.tick % 24000;
-    const theta = tick * Math.PI / 24000;
+    const theta = tick * Math.PI / 240;
     return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
   }
 
@@ -74,22 +74,39 @@ export default class MainProgram extends Program {
       throw new Error("Failed to get location of mProj.");
     }
 
-    const lightnorm = gl.getUniformLocation(this.program, 'lightnorm');
-    if (!lightnorm) {
-      throw new Error("Failed to get location of sampler.");
+    const mWovil = gl.getUniformLocation(this.program, 'mWovil');
+    if (!mWovil) {
+      throw new Error("Failed to get location of mWovil.");
     }
 
-    const sampler = gl.getUniformLocation(this.program, 'sampler');
-    if (!sampler) {
-      throw new Error("Failed to get location of sampler.");
+    const mProjl = gl.getUniformLocation(this.program, 'mProjl');
+    if (!mProjl) {
+      throw new Error("Failed to get location of mProjl.");
+    }
+
+    const lightnorm = gl.getUniformLocation(this.program, 'lightnorm');
+    if (!lightnorm) {
+      throw new Error("Failed to get location of lightnorm.");
+    }
+
+    const s_texture = gl.getUniformLocation(this.program, 's_texture');
+    if (!s_texture) {
+      throw new Error("Failed to get location of s_texture.");
+    }
+
+    const s_shadow = gl.getUniformLocation(this.program, 's_shadow');
+    if (!s_shadow) {
+      throw new Error("Failed to get location of s_shadow.");
     }
 
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(mProj, false, this.renderer.projMat);
-    gl.uniform1i(sampler, 0);
+    gl.uniformMatrix4fv(mProjl, false, (this.renderer.programs[0] as LightProgram).projMat);
+    gl.uniform1i(s_texture, 0);
+    gl.uniform1i(s_shadow, 1);
     gl.useProgram(null);
 
-    return { mWovi, mProj, lightnorm, sampler };
+    return { mWovi, mProj, mWovil, mProjl, lightnorm, s_texture, s_shadow };
   }
 
   private createAbo(): WebGLBuffer {
@@ -145,13 +162,13 @@ export default class MainProgram extends Program {
       image.src = "/static/images/atlas/atlas.png";
     });
 
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas);
-    gl.bindTexture(gl.TEXTURE_2D, null);
 
     return texture;
   }
@@ -164,12 +181,15 @@ export default class MainProgram extends Program {
 
     uniform mat4 mWovi;
     uniform mat4 mProj;
+    uniform mat4 mWovil;
+    uniform mat4 mProjl;
     uniform vec3 lightnorm;
 
     out mediump vec2 v_texcoord1;
     out mediump vec2 v_texcoord2;
     out mediump float v_texinter;
     out mediump vec3 v_colormask;
+    out mediump vec3 v_shadowcoord;
 
     const vec3 la = vec3(0.4, 0.4, 0.7);
     const vec3 lightColor = vec3(0.8, 0.8, 0.4);
@@ -187,6 +207,10 @@ export default class MainProgram extends Program {
       v_colormask = a_colormask * lightIntensity;
 
       gl_Position = mProj * mWovi * vec4(a_position, 1.0);
+
+      vec4 lightcoord = mProjl * mWovil * vec4(a_position, 1.0);
+      v_shadowcoord = lightcoord.xyz / lightcoord.w;
+      v_shadowcoord = v_shadowcoord * 0.5 + 0.5;
     }
   `;
 
@@ -197,18 +221,23 @@ export default class MainProgram extends Program {
     in mediump vec2 v_texcoord2;
     in mediump float v_texinter;
     in mediump vec3 v_colormask;
-    flat in mediump vec3 v_normal;
-    uniform sampler2D sampler;
+    in mediump vec3 v_shadowcoord;
+
+    uniform sampler2D s_texture;
+    uniform sampler2D s_shadow;
 
     out vec4 fragColor;
 
     void main() {
-      vec4 texel1 = texture(sampler, v_texcoord1);
-      vec4 texel2 = texture(sampler, v_texcoord2);
+      vec4 texel1 = texture(s_texture, v_texcoord1);
+      vec4 texel2 = texture(s_texture, v_texcoord2);
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      fragColor = vec4(texel.rgb * v_colormask, texel.a);
+      float depth = texture(s_shadow, v_shadowcoord.xy).r;
+      float shadow = v_shadowcoord.z > depth ? 0. : 1.;
+
+      fragColor = vec4(texel.rgb * v_colormask * shadow, texel.a);
     }
   `;
 
