@@ -34,10 +34,10 @@ export default class EnvironmentProgram extends Program {
     gl.useProgram(this.program);
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
-    gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
 
     gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
 
+    gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);

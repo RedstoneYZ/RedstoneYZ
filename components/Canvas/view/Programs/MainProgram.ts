@@ -89,6 +89,11 @@ export default class MainProgram extends Program {
       throw new Error("Failed to get location of lightnorm.");
     }
 
+    const screensize = gl.getUniformLocation(this.program, 'screensize');
+    if (!screensize) {
+      throw new Error("Failed to get location of screensize.");
+    }
+
     const s_texture = gl.getUniformLocation(this.program, 's_texture');
     if (!s_texture) {
       throw new Error("Failed to get location of s_texture.");
@@ -102,6 +107,7 @@ export default class MainProgram extends Program {
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(mProj, false, this.renderer.projMat);
     gl.uniformMatrix4fv(mProjl, false, (this.renderer.programs[0] as LightProgram).projMat);
+    gl.uniform2iv(screensize, [this.renderer.WIDTH, this.renderer.HEIGHT]);
     gl.uniform1i(s_texture, 0);
     gl.uniform1i(s_shadow, 1);
     gl.useProgram(null);
@@ -190,9 +196,10 @@ export default class MainProgram extends Program {
     out mediump float v_texinter;
     out mediump vec3 v_colormask;
     out mediump vec3 v_shadowcoord;
+    flat out mediump vec3 v_normal;
 
-    const vec3 la = vec3(0.4, 0.4, 0.7);
-    const vec3 lightColor = vec3(0.8, 0.8, 0.4);
+    const vec3 la = vec3(0.1, 0.1, 0.2);
+    const vec3 lightColor = vec3(1.0, 1.0, 0.9);
 
     void main() {
       v_texcoord1.x = float(a_texture[0] >> 20 & 1023) / 128.;
@@ -201,16 +208,16 @@ export default class MainProgram extends Program {
       v_texcoord2.y = float(a_texture[1] >> 20 & 1023) / 128.;
       v_texinter = float(a_texture[1] >> 10 & 1023) / float(a_texture[1] & 1023);
 
-      vec4 faceNorm = mWovi * vec4(a_normal, 0.0);
-      vec4 lightNorm = mWovi * vec4(lightnorm, 0.0);
-      vec3 lightIntensity = la + lightColor * max(dot(faceNorm, lightNorm), 0.0);
+      vec3 lightIntensity = la + lightColor * max(dot(a_normal, lightnorm), 0.0);
       v_colormask = a_colormask * lightIntensity;
-
+      
       gl_Position = mProj * mWovi * vec4(a_position, 1.0);
-
+      
       vec4 lightcoord = mProjl * mWovil * vec4(a_position, 1.0);
       v_shadowcoord = lightcoord.xyz / lightcoord.w;
       v_shadowcoord = v_shadowcoord * 0.5 + 0.5;
+
+      v_normal = (mWovi * vec4(a_normal, 0.0)).xyz;
     }
   `;
 
@@ -222,6 +229,10 @@ export default class MainProgram extends Program {
     in mediump float v_texinter;
     in mediump vec3 v_colormask;
     in mediump vec3 v_shadowcoord;
+    flat in mediump vec3 v_normal;
+
+    uniform highp vec3 lightnorm;
+    uniform ivec2 screensize;
 
     uniform sampler2D s_texture;
     uniform sampler2D s_shadow;
@@ -234,10 +245,20 @@ export default class MainProgram extends Program {
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      float depth = texture(s_shadow, v_shadowcoord.xy).r;
-      float shadow = v_shadowcoord.z > depth ? 0. : 1.;
+      float bias = max(0.04 * (1. - dot(v_normal, lightnorm)), 0.004);
+      vec2  size = 1. / vec2(screensize);
 
-      fragColor = vec4(texel.rgb * v_colormask * shadow, texel.a);
+      float shadow = 0.;
+      for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+          vec2 xy = v_shadowcoord.xy + vec2(x, y) * size;
+          float depth = texture(s_shadow, xy).r;
+          shadow += v_shadowcoord.z - 0. > depth ? 1. : 0.3;
+        }
+      }
+      shadow *= 0.11;
+
+      fragColor = vec4(texel.rgb * v_colormask * (1. - shadow), texel.a);
     }
   `;
 

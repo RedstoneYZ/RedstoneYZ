@@ -69,7 +69,8 @@ class Renderer {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.BLEND);
 
-    gl.getExtension('WEBGL_depth_texture');
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(2, 20);
 
     const draw = async () => {
       if (this.needRender) {
