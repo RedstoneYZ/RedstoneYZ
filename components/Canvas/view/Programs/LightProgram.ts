@@ -3,8 +3,7 @@ import Renderer from "../Renderer";
 import Program from "./Program";
 
 interface Uniforms {
-  mWovi: WebGLUniformLocation;
-  mProj: WebGLUniformLocation;
+  u_mlp: WebGLUniformLocation;
 }
 
 export default class LightProgram extends Program {
@@ -16,8 +15,6 @@ export default class LightProgram extends Program {
   private vao: WebGLVertexArrayObject;
   private fbo: WebGLFramebuffer;
 
-  public projMat: Float32Array;
-
   constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
     super(renderer, gl);
 
@@ -26,16 +23,6 @@ export default class LightProgram extends Program {
     this.abo = this.createAbo();
     this.vao = this.createVao();
     this.fbo = this.createFbo();
-
-    const x = this.renderer.WIDTH > this.renderer.HEIGHT ? this.renderer.HEIGHT / this.renderer.WIDTH : 1;
-    const y = this.renderer.WIDTH > this.renderer.HEIGHT ? 1 : this.renderer.WIDTH / this.renderer.HEIGHT;
-
-    this.projMat = new Float32Array([
-      x*0.15, 0,      0,  0, 
-      0, y*0.15,      0,  0, 
-      0, 0, -0.1, 0, 
-      0, 0,   6,  1
-    ]);
 
     this.uniform = this.setupUniform();
     this.ready = true;
@@ -52,7 +39,7 @@ export default class LightProgram extends Program {
     gl.cullFace(gl.FRONT);
     gl.colorMask(false, false, false, false);
 
-    gl.uniformMatrix4fv(this.uniform.mWovi, false, this.worldMat);
+    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
 
     gl.clear(gl.DEPTH_BUFFER_BIT);
 
@@ -84,11 +71,8 @@ export default class LightProgram extends Program {
               if (!this.renderer.shouldRender(block, face)) return;
 
               const { corners: c } = face;
-
               for (let l = 0; l < 4; ++l) {
-                vertices.push(
-                  c[l][0] + x, c[l][1] + y, c[l][2] + z, 
-                );
+                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z);
               }
             });
           });
@@ -101,21 +85,12 @@ export default class LightProgram extends Program {
   private setupUniform(): Uniforms {
     const gl = this.gl;
 
-    const mWovi = gl.getUniformLocation(this.program, 'mWovi');
-    if (!mWovi) {
-      throw new Error("Failed to get location of mWovi.");
+    const u_mlp = gl.getUniformLocation(this.program, 'u_mlp');
+    if (!u_mlp) {
+      throw new Error("Failed to get location of u_mlp.");
     }
 
-    const mProj = gl.getUniformLocation(this.program, 'mProj');
-    if (!mProj) {
-      throw new Error("Failed to get location of mProj.");
-    }
-
-    gl.useProgram(this.program);
-    gl.uniformMatrix4fv(mProj, false, this.projMat);
-    gl.useProgram(null);
-
-    return { mWovi, mProj };
+    return { u_mlp };
   }
 
   private createAbo(): WebGLBuffer {
@@ -145,7 +120,7 @@ export default class LightProgram extends Program {
     gl.enableVertexAttribArray(0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
@@ -191,11 +166,10 @@ export default class LightProgram extends Program {
   protected vsSrc = `#version 300 es
     layout(location = 0) in vec3 a_position;
 
-    uniform mat4 mWovi;
-    uniform mat4 mProj;
+    uniform mat4 u_mlp;
 
     void main() {
-      gl_Position = mProj * mWovi * vec4(a_position, 1.0);
+      gl_Position = u_mlp * vec4(a_position, 1.0);
     }
   `;
 
@@ -204,32 +178,6 @@ export default class LightProgram extends Program {
     void main() {
     }
   `;
-
-  public get worldMat(): Float32Array {
-    const d = 60;
-    const tick = this.renderer.engine.tick % 24000;
-    const theta = tick * Math.PI / 240;
-    const c = Math.cos(theta);
-    const s = Math.sin(theta);
-    const x = d*c;
-    const y = -d*s;
-    const z = 0;
-
-    return new Float32Array([
-     0, -s, c, 0, 
-     0,  c, s, 0, 
-    -1,  0, 0, 0, 
-    -z, -s*x - c*y, c*x - s*y, 1, 
-    ]);
-  }
-
-  private indices = new Uint16Array(Array.from(
-    { length: 4096 }, 
-    (_, i) => {
-      i <<= 2;
-      return [i, i + 1, i + 2, i + 3, 65535];
-    }
-  ).flat());
 }
 
 

@@ -2,8 +2,7 @@ import Renderer from "../Renderer";
 import Program from "./Program";
 
 interface Uniforms {
-  mWovi: WebGLUniformLocation;
-  mProj: WebGLUniformLocation;
+  u_mvp: WebGLUniformLocation;
 }
 
 export default class LineProgram extends Program {
@@ -32,7 +31,7 @@ export default class LineProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
@@ -77,21 +76,12 @@ export default class LineProgram extends Program {
   private setupUniform(): Uniforms {
     const gl = this.gl;
 
-    const mWovi = gl.getUniformLocation(this.program, 'mWovi');
-    if (!mWovi) {
-      throw new Error("Failed to get location of mWovi.");
+    const u_mvp = gl.getUniformLocation(this.program, 'u_mvp');
+    if (!u_mvp) {
+      throw new Error("Failed to get location of u_mvp.");
     }
 
-    const mProj = gl.getUniformLocation(this.program, 'mProj');
-    if (!mProj) {
-      throw new Error("Failed to get location of mProj.");
-    }
-
-    gl.useProgram(this.program);
-    gl.uniformMatrix4fv(mProj, false, this.renderer.projMat);
-    gl.useProgram(null);
-
-    return { mWovi, mProj };
+    return { u_mvp };
   }
 
   private createAbo(): WebGLBuffer {
@@ -119,7 +109,7 @@ export default class LineProgram extends Program {
     gl.enableVertexAttribArray(0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
@@ -129,11 +119,10 @@ export default class LineProgram extends Program {
   protected vsSrc = `#version 300 es
     layout(location = 0) in vec3 a_position;
 
-    uniform mat4 mWovi;
-    uniform mat4 mProj;
+    uniform mat4 u_mvp;
 
     void main() {
-      gl_Position = mProj * mWovi * vec4(a_position, 1.0);
+      gl_Position = u_mvp * vec4(a_position, 1.0);
     }
   `;
 
@@ -148,12 +137,4 @@ export default class LineProgram extends Program {
       fragColor = vec4(0, 0, 0, 1);
     }
   `;
-
-  private indices = new Uint16Array(Array.from(
-    { length: 4096 }, 
-    (_, i) => {
-      i <<= 2;
-      return [i, i + 1, i + 2, i + 3, 65535];
-    }
-  ).flat());
 }

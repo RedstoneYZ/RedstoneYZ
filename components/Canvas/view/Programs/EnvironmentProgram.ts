@@ -2,8 +2,7 @@ import Renderer from "../Renderer";
 import Program from "./Program";
 
 interface Uniforms {
-  mWovi: WebGLUniformLocation;
-  mProj: WebGLUniformLocation;
+  u_mvp: WebGLUniformLocation;
   sampler: WebGLUniformLocation;
 }
 
@@ -35,7 +34,7 @@ export default class EnvironmentProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
 
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, 0);
@@ -68,14 +67,9 @@ export default class EnvironmentProgram extends Program {
   private setupUniform(): Uniforms {
     const gl = this.gl;
 
-    const mWovi = gl.getUniformLocation(this.program, 'mWovi');
-    if (!mWovi) {
-      throw new Error("Failed to get location of mWovi.");
-    }
-
-    const mProj = gl.getUniformLocation(this.program, 'mProj');
-    if (!mProj) {
-      throw new Error("Failed to get location of mProj.");
+    const u_mvp = gl.getUniformLocation(this.program, 'u_mvp');
+    if (!u_mvp) {
+      throw new Error("Failed to get location of u_mvp.");
     }
 
     const sampler = gl.getUniformLocation(this.program, 'sampler');
@@ -84,11 +78,10 @@ export default class EnvironmentProgram extends Program {
     }
 
     gl.useProgram(this.program);
-    gl.uniformMatrix4fv(mProj, false, this.renderer.projMat);
     gl.uniform1i(sampler, 2);
     gl.useProgram(null);
 
-    return { mWovi, mProj, sampler };
+    return { u_mvp, sampler };
   }
 
   private createAbo(): WebGLBuffer {
@@ -118,7 +111,7 @@ export default class EnvironmentProgram extends Program {
     gl.enableVertexAttribArray(1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
@@ -153,13 +146,12 @@ export default class EnvironmentProgram extends Program {
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in vec2 a_texcoord;
 
-    uniform mat4 mWovi;
-    uniform mat4 mProj;
+    uniform mat4 u_mvp;
 
     out mediump vec2 v_texcoord;
 
     void main() {
-      gl_Position = mProj * mWovi * vec4(a_position, 1.0);
+      gl_Position = u_mvp * vec4(a_position, 1.0);
       v_texcoord = a_texcoord;
     }
   `;
@@ -183,12 +175,4 @@ export default class EnvironmentProgram extends Program {
       fragColor = vec4(texel.rgb + vec3(darkness, darkness, darkness), value);
     }
   `;
-
-  private indices = new Uint16Array(Array.from(
-    { length: 4096 }, 
-    (_, i) => {
-      i <<= 2;
-      return [i, i + 1, i + 2, i + 3, 65535];
-    }
-  ).flat());
 }

@@ -1,12 +1,9 @@
 import Renderer from "../Renderer";
-import LightProgram from "./LightProgram";
 import Program from "./Program";
 
 interface Uniforms {
-  mWovi: WebGLUniformLocation;
-  mProj: WebGLUniformLocation;
-  mWovil: WebGLUniformLocation;
-  mProjl: WebGLUniformLocation;
+  u_mvp: WebGLUniformLocation;
+  u_mlp: WebGLUniformLocation;
   lightnorm: WebGLUniformLocation;
   s_texture: WebGLUniformLocation;
   s_shadow: WebGLUniformLocation;
@@ -40,8 +37,8 @@ export default class MainProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.mWovi, false, this.renderer.worldMat);
-    gl.uniformMatrix4fv(this.uniform.mWovil, false, (this.renderer.programs[0] as LightProgram).worldMat);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
+    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
     gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
     const data = this.renderer.getBlockVertices();
@@ -64,24 +61,14 @@ export default class MainProgram extends Program {
   private setupUniform(): Uniforms {
     const gl = this.gl;
 
-    const mWovi = gl.getUniformLocation(this.program, 'mWovi');
-    if (!mWovi) {
-      throw new Error("Failed to get location of mWovi.");
+    const u_mvp = gl.getUniformLocation(this.program, 'u_mvp');
+    if (!u_mvp) {
+      throw new Error("Failed to get location of u_mvp.");
     }
 
-    const mProj = gl.getUniformLocation(this.program, 'mProj');
-    if (!mProj) {
-      throw new Error("Failed to get location of mProj.");
-    }
-
-    const mWovil = gl.getUniformLocation(this.program, 'mWovil');
-    if (!mWovil) {
-      throw new Error("Failed to get location of mWovil.");
-    }
-
-    const mProjl = gl.getUniformLocation(this.program, 'mProjl');
-    if (!mProjl) {
-      throw new Error("Failed to get location of mProjl.");
+    const u_mlp = gl.getUniformLocation(this.program, 'u_mlp');
+    if (!u_mlp) {
+      throw new Error("Failed to get location of u_mlp.");
     }
 
     const lightnorm = gl.getUniformLocation(this.program, 'lightnorm');
@@ -105,14 +92,12 @@ export default class MainProgram extends Program {
     }
 
     gl.useProgram(this.program);
-    gl.uniformMatrix4fv(mProj, false, this.renderer.projMat);
-    gl.uniformMatrix4fv(mProjl, false, (this.renderer.programs[0] as LightProgram).projMat);
     gl.uniform2iv(screensize, [this.renderer.WIDTH, this.renderer.HEIGHT]);
     gl.uniform1i(s_texture, 0);
     gl.uniform1i(s_shadow, 1);
     gl.useProgram(null);
 
-    return { mWovi, mProj, mWovil, mProjl, lightnorm, s_texture, s_shadow };
+    return { u_mvp, u_mlp, lightnorm, s_texture, s_shadow };
   }
 
   private createAbo(): WebGLBuffer {
@@ -148,7 +133,7 @@ export default class MainProgram extends Program {
     gl.enableVertexAttribArray(3);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
@@ -185,10 +170,8 @@ export default class MainProgram extends Program {
     layout(location = 2) in ivec2 a_texture;
     layout(location = 3) in mediump vec3 a_colormask;
 
-    uniform mat4 mWovi;
-    uniform mat4 mProj;
-    uniform mat4 mWovil;
-    uniform mat4 mProjl;
+    uniform mat4 u_mvp;
+    uniform mat4 u_mlp;
     uniform vec3 lightnorm;
 
     out mediump vec2 v_texcoord1;
@@ -196,7 +179,6 @@ export default class MainProgram extends Program {
     out mediump float v_texinter;
     out mediump vec3 v_colormask;
     out mediump vec3 v_shadowcoord;
-    flat out mediump vec3 v_normal;
 
     const vec3 la = vec3(0.1, 0.1, 0.2);
     const vec3 lightColor = vec3(1.0, 1.0, 0.9);
@@ -211,13 +193,11 @@ export default class MainProgram extends Program {
       vec3 lightIntensity = la + lightColor * max(dot(a_normal, lightnorm), 0.0);
       v_colormask = a_colormask * lightIntensity;
       
-      gl_Position = mProj * mWovi * vec4(a_position, 1.0);
+      gl_Position = u_mvp * vec4(a_position, 1.0);
       
-      vec4 lightcoord = mProjl * mWovil * vec4(a_position, 1.0);
+      vec4 lightcoord = u_mlp * vec4(a_position, 1.0);
       v_shadowcoord = lightcoord.xyz / lightcoord.w;
       v_shadowcoord = v_shadowcoord * 0.5 + 0.5;
-
-      v_normal = (mWovi * vec4(a_normal, 0.0)).xyz;
     }
   `;
 
@@ -229,7 +209,6 @@ export default class MainProgram extends Program {
     in mediump float v_texinter;
     in mediump vec3 v_colormask;
     in mediump vec3 v_shadowcoord;
-    flat in mediump vec3 v_normal;
 
     uniform highp vec3 lightnorm;
     uniform ivec2 screensize;
@@ -245,7 +224,6 @@ export default class MainProgram extends Program {
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      float bias = max(0.04 * (1. - dot(v_normal, lightnorm)), 0.004);
       vec2  size = 1. / vec2(screensize);
 
       float shadow = 0.;
@@ -261,16 +239,7 @@ export default class MainProgram extends Program {
       fragColor = vec4(texel.rgb * v_colormask * (1. - shadow), texel.a);
     }
   `;
-
-  private indices = new Uint16Array(Array.from(
-    { length: 4096 }, 
-    (_, i) => {
-      i <<= 2;
-      return [i, i + 1, i + 2, i + 3, 65535];
-    }
-  ).flat());
 }
-
 
 /**
   * a_texture format (ivec2)

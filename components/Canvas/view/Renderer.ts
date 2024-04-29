@@ -12,18 +12,21 @@ import { BlockModelFace } from "./types";
 import LineProgram from "./Programs/LineProgram";
 import LightProgram from "./Programs/LightProgram";
 import MainProgram from "./Programs/MainProgram";
+import Matrix4 from "./utils/Matrix4";
 
-class Renderer {
+export default class Renderer {
   public controller: Controller;
   public engine: Engine;
-  public textures: TextureManager;
-  public models: ModelHandler;
   public dimensions: Vector3;
   public canvas: HTMLCanvasElement;
 
+  public textures: TextureManager;
+  public models: ModelHandler;
+
   public WIDTH: number;
   public HEIGHT: number;
-  public projMat: Float32Array;
+  public X_SCALE: number;
+  public Y_SCALE: number;
 
   private gl: WebGL2RenderingContext;
 
@@ -32,31 +35,26 @@ class Renderer {
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
     this.canvas     = canvas;
-    this.textures   = new TextureManager();
-    this.models     = new ModelHandler();
     this.dimensions = dimensions;
     this.engine     = controller.engine;
 
-    this.WIDTH      = canvas.width;
-    this.HEIGHT     = canvas.height;
+    this.textures   = new TextureManager();
+    this.models     = new ModelHandler();
 
-    const x = this.WIDTH > this.HEIGHT ? this.HEIGHT / this.WIDTH : 1;
-    const y = this.WIDTH > this.HEIGHT ? 1 : this.WIDTH / this.HEIGHT;
-    this.projMat = new Float32Array([
-      x, 0,      0,  0, 
-      0, y,      0,  0, 
-      0, 0, -1.002, -1, 
-      0, 0,   -0.2,  0
-    ]);
+    this.WIDTH   = canvas.width;
+    this.HEIGHT  = canvas.height;
+    this.X_SCALE = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
+    this.Y_SCALE = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
 
     this.gl = this.initGL();
 
-    this.programs = [];
-    this.programs.push(new LightProgram(this, this.gl));
-    // this.programs.push(new TestProgram(this, this.gl));
-    this.programs.push(new MainProgram(this, this.gl));
-    this.programs.push(new EnvironmentProgram(this, this.gl));
-    this.programs.push(new LineProgram(this, this.gl));
+    this.programs = [
+      new LightProgram(this, this.gl), 
+      // new TestProgram(this, this.gl), 
+      new MainProgram(this, this.gl), 
+      new EnvironmentProgram(this, this.gl), 
+      new LineProgram(this, this.gl), 
+    ];
   }
 
   startRendering(func?: () => any): void {
@@ -66,8 +64,8 @@ class Renderer {
     gl.enable(gl.CULL_FACE);
     gl.clearColor(0.5, 0.63, 1, 1);
     
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.enable(gl.POLYGON_OFFSET_FILL);
     gl.polygonOffset(2, 20);
@@ -105,11 +103,9 @@ class Renderer {
   }
 
   private get eyeDir(): Vector4 {
-    const xFactor = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
-    const yFactor = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
-    const screenX = (this.lookAtX / this.WIDTH - 0.5) * 2 * xFactor;
-    const screenY = (0.5 - this.lookAtY / this.HEIGHT) * 2 * yFactor;
-    return transform(Array.from(this.worldMatInv), [screenX, screenY, -1, 0]);
+    const screenX = (this.lookAtX / this.WIDTH - 0.5) * 2 * this.X_SCALE;
+    const screenY = (0.5 - this.lookAtY / this.HEIGHT) * 2 * this.Y_SCALE;
+    return Matrix4.MultiplyVec(this.mvInv, [screenX, screenY, -1, 0]);
   }
 
   getTarget(): Vector6 | null {
@@ -299,50 +295,44 @@ class Renderer {
     this.engine.needRender = false;
   }
 
-  public get worldMat(): Float32Array {
+  public get mvp(): Float32Array {
     const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
-    const cp = Math.cos(-pitch), sp = Math.sin(-pitch);
-    const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
 
-    const cycp = cy * cp;
-    const cysp = cy * sp;
-    const sycp = sy * cp;
-    const sysp = sy * sp;
-
-    return new Float32Array([
-      -cy, sysp, -sycp, 0, 
-        0,   cp,    sp, 0, 
-       sy, cysp, -cycp, 0, 
-      x*cy - z*sy, - x*sysp - y*cp - z*cysp, x*sycp - y*sp + z*cycp, 1, 
-    ]);
+    return Matrix4.Multiply(
+      Matrix4.Translate(-x, -y, -z), 
+      Matrix4.RotateY(yaw - Math.PI), 
+      Matrix4.RotateX(-pitch), 
+      Matrix4.Perspective(0.2 * this.X_SCALE, 0.2 * this.Y_SCALE, 0.1, 100)
+    );
   }
 
-  private get worldMatInv(): Float32Array {
-    const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
-    const cp = Math.cos(-pitch), sp = Math.sin(-pitch);
-    const cy = Math.cos(-yaw), sy = Math.sin(-yaw);
+  public get mlp(): Float32Array {
+    const tick = this.engine.tick % 24000;
+    const theta = tick * Math.PI / 240;
+    const x = this.X_SCALE;
+    const y = this.Y_SCALE;
 
-    const cycp = cy * cp;
-    const cysp = cy * sp;
-    const sycp = sy * cp;
-    const sysp = sy * sp;
-
-    return new Float32Array([
-        -cy,  0,    sy, 0, 
-       sysp, cp,  cysp, 0, 
-      -sycp, sp, -cycp, 0, 
-      x, y, z, 1, 
-    ]);
+    return Matrix4.Multiply(
+      Matrix4.RotateY(-Math.PI/2), 
+      Matrix4.RotateX(theta), 
+      Matrix4.Orthographic(-7*x, 7*x, -7*y, 7*y, -10, 10)
+    );
   }
-}
 
-export default Renderer;
+  public indices = new Uint16Array(Array.from(
+    { length: 4096 }, 
+    (_, i) => {
+      i <<= 2;
+      return [i, i + 1, i + 2, i + 3, 65535];
+    }
+  ).flat());
 
-function transform(mat: number[], vec: number[]): Vector4 {
-  return [
-    mat[0]*vec[0] + mat[4]*vec[1] + mat[8]*vec[2] + mat[12]*vec[3], 
-    mat[1]*vec[0] + mat[5]*vec[1] + mat[9]*vec[2] + mat[13]*vec[3], 
-    mat[2]*vec[0] + mat[6]*vec[1] + mat[10]*vec[2] + mat[14]*vec[3], 
-    mat[3]*vec[0] + mat[7]*vec[1] + mat[11]*vec[2] + mat[15]*vec[3]
-  ];
+  private get mvInv(): Float32Array {
+    const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
+    return Matrix4.Multiply(
+      Matrix4.RotateX(pitch), 
+      Matrix4.RotateY(Math.PI - yaw), 
+      Matrix4.Translate(x, y, z), 
+    );
+  }
 }
