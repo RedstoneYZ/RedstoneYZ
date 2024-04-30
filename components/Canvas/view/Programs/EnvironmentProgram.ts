@@ -49,18 +49,23 @@ export default class EnvironmentProgram extends Program {
 
   private getData(): Float32Array {
     const theta = this.renderer.sunAngle;
-    const cos = Math.cos(theta);
-    const sin = Math.sin(theta);
 
-    const v = [[60, 20], [60, -20]];
-    v[0] = [cos*v[0][0] - sin*v[0][1], sin*v[0][0] + cos*v[0][1]];
-    v[1] = [cos*v[1][0] - sin*v[1][1], sin*v[1][0] + cos*v[1][1]];
+    const vs = Matrix4.Multiply(
+      new Float32Array([
+        60,  20,  20, 1, 
+        60,  20, -20, 1, 
+        60, -20, -20, 1, 
+        60, -20,  20, 1, 
+      ]), 
+      Matrix4.RotateZ(theta), 
+      Matrix4.RotateX(25.04 * Math.PI / 180), 
+    );
 
     return new Float32Array([
-      v[0][0], v[0][1],  20,    0, 0, 
-      v[0][0], v[0][1], -20,    1, 0, 
-      v[1][0], v[1][1], -20,    1, 1, 
-      v[1][0], v[1][1],  20,    0, 1, 
+      vs[ 0], vs[ 1], vs[ 2], 0, 0, 
+      vs[ 4], vs[ 5], vs[ 6], 1, 0, 
+      vs[ 8], vs[ 9], vs[10], 1, 1, 
+      vs[12], vs[13], vs[14], 0, 1, 
     ]);
   }
 

@@ -234,7 +234,12 @@ export default class Renderer {
 
   public get sunAngle(): number {
     const tick = this.engine.tick % 24000;
-    return tick * Math.PI / 240;
+    return tick * Math.PI / 12000;
+  }
+
+  public get seasonAngle(): number {
+    const tick = this.engine.tick % (24000 * 96);
+    return tick * Math.PI / (24000 * 48);
   }
 
   public get mvp(): Float32Array {
@@ -255,6 +260,7 @@ export default class Renderer {
 
     return Matrix4.Multiply(
       Matrix4.RotateY(-Math.PI/2), 
+      Matrix4.RotateZ(-25.04 * Math.PI / 180), // 25.04, 121.512
       Matrix4.RotateX(theta), 
       Matrix4.Orthographic(-7*x, 7*x, -7*y, 7*y, -10, 10)
     );
