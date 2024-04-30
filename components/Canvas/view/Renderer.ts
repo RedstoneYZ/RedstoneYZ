@@ -198,14 +198,6 @@ export default class Renderer {
     return [...target.block, ...target.normal] as Vector6;
   }
 
-  private initGL(): WebGL2RenderingContext {
-    const gl = this.canvas.getContext('webgl2', { alpha: false });
-    if (!gl) {
-      throw new Error('Your browser does not support webgl2 canvas.');
-    }
-    return gl;
-  }
-
   // TODO: rewrite to match cullface in data
   public shouldRender(block: Block, face: BlockModelFace) {
     if (!face.cullface) return true;
@@ -240,13 +232,9 @@ export default class Renderer {
     return true;
   }
 
-  private get needRender() {
-    return this.controller.needRender || this.engine.needRender;
-  }
-
-  private resetNeedRender() {
-    this.controller.needRender = false;
-    this.engine.needRender = false;
+  public get sunAngle(): number {
+    const tick = this.engine.tick % 24000;
+    return tick * Math.PI / 240;
   }
 
   public get mvp(): Float32Array {
@@ -261,8 +249,7 @@ export default class Renderer {
   }
 
   public get mlp(): Float32Array {
-    const tick = this.engine.tick % 24000;
-    const theta = tick * Math.PI / 240;
+    const theta = this.sunAngle;
     const x = this.X_SCALE;
     const y = this.Y_SCALE;
 
@@ -288,5 +275,22 @@ export default class Renderer {
       Matrix4.RotateY(Math.PI - yaw), 
       Matrix4.Translate(x, y, z), 
     );
+  }
+
+  private initGL(): WebGL2RenderingContext {
+    const gl = this.canvas.getContext('webgl2', { alpha: false });
+    if (!gl) {
+      throw new Error('Your browser does not support webgl2 canvas.');
+    }
+    return gl;
+  }
+
+  private get needRender() {
+    return this.controller.needRender || this.engine.needRender;
+  }
+
+  private resetNeedRender() {
+    this.controller.needRender = false;
+    this.engine.needRender = false;
   }
 }

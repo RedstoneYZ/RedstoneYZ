@@ -1,6 +1,7 @@
 import { BlockType } from "../../model/types";
 import Renderer from "../Renderer";
 import Program from "./Program";
+import { glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mvp: WebGLUniformLocation;
@@ -55,8 +56,7 @@ export default class MainProgram extends Program {
   }
 
   private getLightNorm(): Float32Array {
-    const tick = this.renderer.engine.tick % 24000;
-    const theta = tick * Math.PI / 240;
+    const theta = this.renderer.sunAngle;
     return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
   }
 
@@ -180,6 +180,8 @@ export default class MainProgram extends Program {
   }
 
   protected vsSrc = `#version 300 es
+    ${glUnpackif}
+
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in mediump vec3 a_normal;
     layout(location = 2) in ivec2 a_texture;
@@ -191,23 +193,22 @@ export default class MainProgram extends Program {
     out mediump vec2 v_texcoord1;
     out mediump vec2 v_texcoord2;
     out mediump float v_texinter;
-    out mediump vec3 v_colormask;
+    out mediump float v_suncosine;
     out mediump vec3 v_shadowcoord;
 
     const vec3 la = vec3(0.1, 0.1, 0.2);
-    const vec3 lightColor = vec3(1.0, 1.0, 0.9);
 
     void main() {
-      v_texcoord1.x = float(a_texture.s >> 20 & 1023) / 128.;
-      v_texcoord1.y = float(a_texture.s >> 10 & 1023) / 128.;
-      v_texcoord2.x = float(a_texture.s       & 1023) / 128.;
-      v_texcoord2.y = float(a_texture.t >> 20 & 1023) / 128.;
-      v_texinter = float(a_texture.t >> 10 & 1023) / float(a_texture.t & 1023);
-
-      v_colormask = la + lightColor * max(dot(a_normal, lightnorm), 0.0);
-      
       gl_Position = u_mvp * vec4(a_position, 1.0);
-      
+
+      v_texcoord1.x = unpackif(a_texture.s, 20, 10) / 128.;
+      v_texcoord1.y = unpackif(a_texture.s, 10, 10) / 128.;
+      v_texcoord2.x = unpackif(a_texture.s,  0, 10) / 128.;
+      v_texcoord2.y = unpackif(a_texture.t, 20, 10) / 128.;
+      v_texinter = unpackif(a_texture.t, 10, 10) / unpackif(a_texture.t, 0, 10);
+
+      v_suncosine = max(dot(a_normal, lightnorm), 0.0);
+
       vec4 lightcoord = u_mlp * vec4(a_position, 1.0);
       v_shadowcoord = lightcoord.xyz / lightcoord.w;
       v_shadowcoord = v_shadowcoord * 0.5 + 0.5;
@@ -220,7 +221,7 @@ export default class MainProgram extends Program {
     in mediump vec2 v_texcoord1;
     in mediump vec2 v_texcoord2;
     in mediump float v_texinter;
-    in mediump vec3 v_colormask;
+    in mediump float v_suncosine;
     in mediump vec3 v_shadowcoord;
 
     uniform highp vec3 lightnorm;
@@ -230,6 +231,9 @@ export default class MainProgram extends Program {
     uniform sampler2D s_shadow;
 
     out vec4 fragColor;
+
+    const vec3 light_color = vec3(1.1, 1.1, 1.0);
+    const vec3 ambient_color = vec3(0.8, 0.8, 1.0);
 
     void main() {
       vec4 texel1 = texture(s_texture, v_texcoord1);
@@ -244,12 +248,13 @@ export default class MainProgram extends Program {
         for (int y = -1; y <= 1; ++y) {
           vec2 xy = v_shadowcoord.xy + vec2(x, y) * size;
           float depth = texture(s_shadow, xy).r;
-          shadow += v_shadowcoord.z - 0. > depth ? 1. : 0.3;
+          shadow += v_shadowcoord.z > depth ? 0.3 : 1.0;
         }
       }
       shadow *= 0.11;
 
-      fragColor = vec4(texel.rgb * v_colormask * (1. - shadow), texel.a);
+      vec3 factor = max(v_suncosine * shadow * light_color, 0.25 * ambient_color);
+      fragColor = vec4(texel.rgb * factor, texel.a);
     }
   `;
 }

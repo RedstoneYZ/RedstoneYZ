@@ -36,7 +36,6 @@ export default class LightProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
-    gl.cullFace(gl.FRONT);
     gl.colorMask(false, false, false, false);
 
     gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
@@ -48,7 +47,6 @@ export default class LightProgram extends Program {
     gl.drawElements(gl.TRIANGLE_FAN, data.length / 3 * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.colorMask(true, true, true, true);
-    gl.cullFace(gl.BACK);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);

@@ -1,4 +1,5 @@
 import Renderer from "../Renderer";
+import Matrix4 from "../utils/Matrix4";
 import Program from "./Program";
 
 interface Uniforms {
@@ -34,7 +35,7 @@ export default class EnvironmentProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.mvp);
 
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, 0);
@@ -47,8 +48,7 @@ export default class EnvironmentProgram extends Program {
   }
 
   private getData(): Float32Array {
-    const tick = this.renderer.engine.tick % 24000;
-    const theta = tick * Math.PI / 240;
+    const theta = this.renderer.sunAngle;
     const cos = Math.cos(theta);
     const sin = Math.sin(theta);
 
@@ -131,6 +131,15 @@ export default class EnvironmentProgram extends Program {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sun);
 
     return texture;
+  }
+
+  private get mvp(): Float32Array {
+    const { xyz: { x, y, z } } = this.renderer.controller.player;
+
+    return Matrix4.Multiply(
+      Matrix4.Translate(x, y, z), 
+      this.renderer.mvp
+    );
   }
 
   protected vsSrc = `#version 300 es
