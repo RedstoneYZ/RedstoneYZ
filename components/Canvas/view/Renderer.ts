@@ -206,52 +206,6 @@ export default class Renderer {
     return gl;
   }
 
-  public getBlockVertices(): Float32Array {
-    // TODO: only update block changes
-    const vertices: number[] = [];
-    for (let x = 0; x < this.dimensions[0]; x++) {
-      for (let y = 0; y < this.dimensions[1]; y++) {
-        for (let z = 0; z < this.dimensions[2]; z++) {
-          const block = this.engine.block(x, y, z);
-          if (!block || block.type === BlockType.AirBlock) continue;
-          const color = 'color' in block ? block.color.map(a => a / 255) : [1, 1, 1];
-
-          const models = this.models.get(block.type, block.states);
-          models.forEach(model => {
-            model.faces.forEach(face => {
-              if (!this.shouldRender(block, face)) return;
-
-              const { corners: c, texCoord: t, normal: n } = face;
-              const offset = this.textures.sample(face.texture, this.engine.tick);
-              const [ox1, oy1, ox2, oy2, oa, ob] = offset;
-
-              for (let l = 0; l < 4; ++l) {
-                const tex1 = t[l][0] + ox1 << 20 | t[l][1] + oy1 << 10 | t[l][0] + ox2;
-                const tex2 = t[l][1] + oy2 << 20 | oa << 10 | ob;
-
-                vertices.push(
-                  c[l][0] + x, c[l][1] + y, c[l][2] + z, 
-                  n[0], n[1], n[2], 
-                  tex1, tex2, 
-                  ...color
-                );
-              }
-            });
-          });
-        }
-      }
-    }
-
-    const asFloat32 = new Float32Array(vertices);
-    const asInt32   = new Int32Array(asFloat32.buffer);
-    for (let i = 0; i < asFloat32.length; i += 11) {
-      asInt32[i + 6] = vertices[i + 6];
-      asInt32[i + 7] = vertices[i + 7];
-    }
-
-    return asFloat32;
-  }
-
   // TODO: rewrite to match cullface in data
   public shouldRender(block: Block, face: BlockModelFace) {
     if (!face.cullface) return true;

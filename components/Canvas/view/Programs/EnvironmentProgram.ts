@@ -17,7 +17,7 @@ export default class EnvironmentProgram extends Program {
     super(renderer, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform();
+    this.uniform = this.setupUniform(['u_mvp', 'sampler']);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -64,24 +64,15 @@ export default class EnvironmentProgram extends Program {
     ]);
   }
 
-  private setupUniform(): Uniforms {
+  protected override setupUniform<T extends string>(uniforms: T[]): Uniforms {
+    const uniform = super.setupUniform(uniforms) as Uniforms;
     const gl = this.gl;
 
-    const u_mvp = gl.getUniformLocation(this.program, 'u_mvp');
-    if (!u_mvp) {
-      throw new Error("Failed to get location of u_mvp.");
-    }
-
-    const sampler = gl.getUniformLocation(this.program, 'sampler');
-    if (!sampler) {
-      throw new Error("Failed to get location of sampler.");
-    }
-
     gl.useProgram(this.program);
-    gl.uniform1i(sampler, 2);
+    gl.uniform1i(uniform.sampler, 2);
     gl.useProgram(null);
 
-    return { u_mvp, sampler };
+    return uniform;
   }
 
   private createAbo(): WebGLBuffer {

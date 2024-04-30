@@ -16,7 +16,7 @@ export default class LineProgram extends Program {
     super(renderer, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform();
+    this.uniform = this.setupUniform(['u_mvp']);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -71,17 +71,6 @@ export default class LineProgram extends Program {
     });
 
     return new Float32Array(result);
-  }
-
-  private setupUniform(): Uniforms {
-    const gl = this.gl;
-
-    const u_mvp = gl.getUniformLocation(this.program, 'u_mvp');
-    if (!u_mvp) {
-      throw new Error("Failed to get location of u_mvp.");
-    }
-
-    return { u_mvp };
   }
 
   private createAbo(): WebGLBuffer {

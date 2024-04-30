@@ -24,7 +24,7 @@ export default class LightProgram extends Program {
     this.vao = this.createVao();
     this.fbo = this.createFbo();
 
-    this.uniform = this.setupUniform();
+    this.uniform = this.setupUniform(['u_mlp']);
     this.ready = true;
   }
 
@@ -80,17 +80,6 @@ export default class LightProgram extends Program {
       }
     }
     return new Float32Array(vertices);
-  }
-
-  private setupUniform(): Uniforms {
-    const gl = this.gl;
-
-    const u_mlp = gl.getUniformLocation(this.program, 'u_mlp');
-    if (!u_mlp) {
-      throw new Error("Failed to get location of u_mlp.");
-    }
-
-    return { u_mlp };
   }
 
   private createAbo(): WebGLBuffer {

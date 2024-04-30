@@ -1,3 +1,4 @@
+import { BlockType } from "../../model/types";
 import Renderer from "../Renderer";
 import Program from "./Program";
 
@@ -7,6 +8,7 @@ interface Uniforms {
   lightnorm: WebGLUniformLocation;
   s_texture: WebGLUniformLocation;
   s_shadow: WebGLUniformLocation;
+  screensize: WebGLUniformLocation;
 }
 
 export default class MainProgram extends Program {
@@ -20,7 +22,7 @@ export default class MainProgram extends Program {
     super(renderer, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform();
+    this.uniform = this.setupUniform(['u_mvp', 'u_mlp', 'lightnorm', 's_texture', 's_shadow', 'screensize']);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -41,9 +43,9 @@ export default class MainProgram extends Program {
     gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
     gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
-    const data = this.renderer.getBlockVertices();
+    const data = this.getBlockVertices();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, data.length / 44 * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, data.length / 32 * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -58,46 +60,17 @@ export default class MainProgram extends Program {
     return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
   }
 
-  private setupUniform(): Uniforms {
+  protected override setupUniform<T extends string>(uniforms: T[]): Uniforms {
+    const uniform = super.setupUniform(uniforms) as Uniforms;
     const gl = this.gl;
 
-    const u_mvp = gl.getUniformLocation(this.program, 'u_mvp');
-    if (!u_mvp) {
-      throw new Error("Failed to get location of u_mvp.");
-    }
-
-    const u_mlp = gl.getUniformLocation(this.program, 'u_mlp');
-    if (!u_mlp) {
-      throw new Error("Failed to get location of u_mlp.");
-    }
-
-    const lightnorm = gl.getUniformLocation(this.program, 'lightnorm');
-    if (!lightnorm) {
-      throw new Error("Failed to get location of lightnorm.");
-    }
-
-    const screensize = gl.getUniformLocation(this.program, 'screensize');
-    if (!screensize) {
-      throw new Error("Failed to get location of screensize.");
-    }
-
-    const s_texture = gl.getUniformLocation(this.program, 's_texture');
-    if (!s_texture) {
-      throw new Error("Failed to get location of s_texture.");
-    }
-
-    const s_shadow = gl.getUniformLocation(this.program, 's_shadow');
-    if (!s_shadow) {
-      throw new Error("Failed to get location of s_shadow.");
-    }
-
     gl.useProgram(this.program);
-    gl.uniform2iv(screensize, [this.renderer.WIDTH, this.renderer.HEIGHT]);
-    gl.uniform1i(s_texture, 0);
-    gl.uniform1i(s_shadow, 1);
+    gl.uniform2iv(uniform.screensize, [this.renderer.WIDTH, this.renderer.HEIGHT]);
+    gl.uniform1i(uniform.s_texture, 0);
+    gl.uniform1i(uniform.s_shadow, 1);
     gl.useProgram(null);
 
-    return { u_mvp, u_mlp, lightnorm, s_texture, s_shadow };
+    return uniform;
   }
 
   private createAbo(): WebGLBuffer {
@@ -122,15 +95,13 @@ export default class MainProgram extends Program {
 
     // TODO: maybe change normal and texcoords to half float
     // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 44, 0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 44, 12);
-    gl.vertexAttribIPointer(2, 2, gl.INT, 44, 24);
-    gl.vertexAttribPointer(3, 3, gl.FLOAT, false, 44, 32);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 32, 0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 32, 12);
+    gl.vertexAttribIPointer(2, 2, gl.INT, 32, 24);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
     gl.enableVertexAttribArray(2);
-    gl.enableVertexAttribArray(3);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
@@ -138,6 +109,50 @@ export default class MainProgram extends Program {
     gl.bindVertexArray(null);
 
     return vao;
+  }
+
+  private getBlockVertices(): Float32Array {
+    // TODO: only update block changes
+    const vertices: number[] = [];
+    for (let x = 0; x < this.renderer.dimensions[0]; x++) {
+      for (let y = 0; y < this.renderer.dimensions[1]; y++) {
+        for (let z = 0; z < this.renderer.dimensions[2]; z++) {
+          const block = this.renderer.engine.block(x, y, z);
+          if (!block || block.type === BlockType.AirBlock) continue;
+
+          const models = this.renderer.models.get(block.type, block.states);
+          models.forEach(model => {
+            model.faces.forEach(face => {
+              if (!this.renderer.shouldRender(block, face)) return;
+
+              const { corners: c, texCoord: t, normal: n } = face;
+              const offset = this.renderer.textures.sample(face.texture, this.renderer.engine.tick);
+              const [ox1, oy1, ox2, oy2, oa, ob] = offset;
+
+              for (let l = 0; l < 4; ++l) {
+                const tex1 = t[l][0] + ox1 << 20 | t[l][1] + oy1 << 10 | t[l][0] + ox2;
+                const tex2 = t[l][1] + oy2 << 20 | oa << 10 | ob;
+
+                vertices.push(
+                  c[l][0] + x, c[l][1] + y, c[l][2] + z, 
+                  n[0], n[1], n[2], 
+                  tex1, tex2
+                );
+              }
+            });
+          });
+        }
+      }
+    }
+
+    const asFloat32 = new Float32Array(vertices);
+    const asInt32   = new Int32Array(asFloat32.buffer);
+    for (let i = 0; i < asFloat32.length; i += 8) {
+      asInt32[i + 6] = vertices[i + 6];
+      asInt32[i + 7] = vertices[i + 7];
+    }
+
+    return asFloat32;
   }
 
   private async createSprite(): Promise<WebGLTexture> {
@@ -168,7 +183,6 @@ export default class MainProgram extends Program {
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in mediump vec3 a_normal;
     layout(location = 2) in ivec2 a_texture;
-    layout(location = 3) in mediump vec3 a_colormask;
 
     uniform mat4 u_mvp;
     uniform mat4 u_mlp;
@@ -184,14 +198,13 @@ export default class MainProgram extends Program {
     const vec3 lightColor = vec3(1.0, 1.0, 0.9);
 
     void main() {
-      v_texcoord1.x = float(a_texture[0] >> 20 & 1023) / 128.;
-      v_texcoord1.y = float(a_texture[0] >> 10 & 1023) / 128.;
-      v_texcoord2.x = float(a_texture[0]       & 1023) / 128.;
-      v_texcoord2.y = float(a_texture[1] >> 20 & 1023) / 128.;
-      v_texinter = float(a_texture[1] >> 10 & 1023) / float(a_texture[1] & 1023);
+      v_texcoord1.x = float(a_texture.s >> 20 & 1023) / 128.;
+      v_texcoord1.y = float(a_texture.s >> 10 & 1023) / 128.;
+      v_texcoord2.x = float(a_texture.s       & 1023) / 128.;
+      v_texcoord2.y = float(a_texture.t >> 20 & 1023) / 128.;
+      v_texinter = float(a_texture.t >> 10 & 1023) / float(a_texture.t & 1023);
 
-      vec3 lightIntensity = la + lightColor * max(dot(a_normal, lightnorm), 0.0);
-      v_colormask = a_colormask * lightIntensity;
+      v_colormask = la + lightColor * max(dot(a_normal, lightnorm), 0.0);
       
       gl_Position = u_mvp * vec4(a_position, 1.0);
       
@@ -224,7 +237,7 @@ export default class MainProgram extends Program {
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      vec2  size = 1. / vec2(screensize);
+      vec2 size = 1. / vec2(screensize);
 
       float shadow = 0.;
       for (int x = -1; x <= 1; ++x) {
@@ -243,10 +256,10 @@ export default class MainProgram extends Program {
 
 /**
   * a_texture format (ivec2)
-  *               3 2         1         0         
-  *               10987654321098765432109876543210
-  * a_texture[0]: 00000000000000000000000000000000
-  *                 └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
-  * a_texture[1]: 00000000000000000000000000000000
-  *                 └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
+  *              3 2         1         0         
+  *              10987654321098765432109876543210
+  * a_texture.s: 00000000000000000000000000000000
+  *                └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
+  * a_texture.t: 00000000000000000000000000000000
+  *                └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
  */

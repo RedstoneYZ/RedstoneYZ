@@ -1,6 +1,10 @@
 import Renderer from "../Renderer";
 import Program from "./Program";
 
+interface Uniforms {
+  sampler: WebGLUniformLocation;
+}
+
 export default class TestProgram extends Program {
   protected program: WebGLProgram;
 
@@ -13,7 +17,7 @@ export default class TestProgram extends Program {
     this.program = this.createProgram();
     this.abo = this.createAbo();
     this.vao = this.createVao();
-    this.setupUniform();
+    this.setupUniform(['sampler']);
     this.ready = true;
   }
 
@@ -34,17 +38,15 @@ export default class TestProgram extends Program {
     return true;
   }
 
-  private setupUniform(): void {
+  protected override setupUniform<T extends string>(uniforms: T[]): Uniforms {
+    const uniform = super.setupUniform(uniforms) as Uniforms;
     const gl = this.gl;
 
-    const sampler = gl.getUniformLocation(this.program, 'sampler');
-    if (!sampler) {
-      throw new Error("Failed to get location of sampler.");
-    }
-
     gl.useProgram(this.program);
-    gl.uniform1i(sampler, 1);
+    gl.uniform1i(uniform.sampler, 1);
     gl.useProgram(null);
+
+    return uniform;
   }
 
   private createAbo(): WebGLBuffer {

@@ -59,4 +59,16 @@ export default abstract class Program {
 
     return shader;
   }
+
+  protected setupUniform<T extends string>(uniforms: T[]): any {
+    const result: Record<string, WebGLUniformLocation> = {};
+    uniforms.forEach(uniform => {
+      const location = this.gl.getUniformLocation(this.program, uniform);
+      if (!location) {
+        throw new Error(`Failed to get location of ${uniform}`);
+      }
+      result[uniform] = location;
+    });
+    return result;
+  }
 }
