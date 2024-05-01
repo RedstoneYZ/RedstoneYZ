@@ -4,7 +4,7 @@ import Engine from "../model/Engine";
 import { BlockType, Vector3, Vector4, Vector6 } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
-import TestProgram from "./Programs/TestProgram";
+// import TestProgram from "./Programs/TestProgram";
 import EnvironmentProgram from "./Programs/EnvironmentProgram";
 import Program from "./Programs/Program";
 import TextureManager from "./TextureManager";

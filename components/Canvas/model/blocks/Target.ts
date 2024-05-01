@@ -1,16 +1,21 @@
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockStates, BlockType } from "../types";
+import { BlockOptions, BlockType } from "../types";
 
 class Target extends FullBlock {
   public type: BlockType.Target;
-  public states: BlockStates;
+  public states: RedstoneTargetState;
 
   constructor(options: BlockOptions) {
-    super({ redstoneAutoConnect: 'full', ...options });
+    super({ redirectRedstone: 'full', ...options });
 
     this.type = BlockType.Target;
-    this.states = { power: 0, source: false };
+    this.states = { power: 0 };
   }
 }
+
+type RedstoneTargetState = {
+  /** 標靶散發的訊號等級 */
+  power: number;
+};
 
 export default Target;

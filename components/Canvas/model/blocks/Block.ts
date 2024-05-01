@@ -1,55 +1,46 @@
 import { NewBlock, Maps } from "../utils";
-import { BlockData, BlockOptions, BlockSpawnOptions, BlockStates, BlockType, Blocks, PowerTransmission, SixSides } from "../types";
+import { BlockData, BlockInternal, BlockOptions, BlockSpawnOptions, BlockType, Blocks, PowerTransmission, SixSides } from "../types";
 import Engine from "../Engine";
 
 /**
  * 代表一個方塊
  */
 abstract class Block {
+  public engine: Engine;
   public x: number;
   public y: number;
   public z: number;
 
-  public engine: Engine;
-
-  /** 此方塊可否被破壞 */
-  public breakable: boolean;
-
-  /** 此方塊是否為透光方塊 */
-  public transparent: boolean;
-
-  /** 此方塊是否為完整方塊，用於加速渲染 */
-  public fullBlock: boolean;
-
-  public upperSupport: boolean;
-  public bottomSupport: boolean;
-  public sideSupport: boolean;
+  public topSolid: boolean;
+  public sideSolid: boolean;
+  public bottomSolid: boolean;
   public needSupport: boolean;
   public needBottomSupport: boolean;
-
-  public redstoneAutoConnect: "full" | "line" | "none";
+  
+  public breakable: boolean;
+  public transparent: boolean;
+  public redirectRedstone: "full" | "line" | "none";
+  public internal: BlockInternal;
 
   public abstract type: BlockType;
-  public abstract states: BlockStates;
+  public abstract states: Record<string, unknown>;
 
   constructor(options: BlockOptions) {
+    this.engine = options.engine;
     this.x = options.x;
     this.y = options.y;
     this.z = options.z;
 
-    this.engine = options.engine;
-
-    this.breakable = options.breakable || true;
-
-    this.transparent = options.transparent || false;
-    this.fullBlock = options.fullBlock || false;
-    this.upperSupport = options.fullSupport || options.upperSupport || false;
-    this.bottomSupport = options.fullSupport || options.bottomSupport || false;
-    this.sideSupport = options.fullSupport || options.sideSupport || false;
+    this.topSolid = options.solid || options.topSolid || false;
+    this.sideSolid = options.solid || options.sideSolid || false;
+    this.bottomSolid = options.solid || options.bottomSolid || false;
     this.needSupport = options.needSupport || false;
     this.needBottomSupport = options.needBottomSupport || false;
-
-    this.redstoneAutoConnect = options.redstoneAutoConnect ?? 'none';
+    
+    this.breakable = options.breakable || true;
+    this.transparent = options.transparent || false;
+    this.redirectRedstone = options.redirectRedstone ?? 'none';
+    this.internal = { power: 0, source: false };
   }
 
   /**
@@ -58,7 +49,7 @@ abstract class Block {
   static spawn({ x, y, z, type, states, breakable, engine }: BlockSpawnOptions): Blocks {
     const block = NewBlock(type, { x, y, z, engine }, states);
     block.breakable = breakable || false;
-    block.states = states;
+    block.states = states as any;
     return block;
   }
 
@@ -100,7 +91,7 @@ abstract class Block {
    * 取得此方塊對指定方向導線元件的能量輸出情形，只能被導線元件（紅石粉、紅石中繼器、紅石比較器）呼叫
    */
   powerTowardsWire(_direction: SixSides): PowerTransmission {
-    return { strong: this.states.source, power: this.states.power };
+    return { strong: this.internal.source, power: this.internal.power };
   }
 
   /**

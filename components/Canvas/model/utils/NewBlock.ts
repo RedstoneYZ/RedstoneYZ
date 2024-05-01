@@ -1,4 +1,4 @@
-import { BlockOptions, BlockStates, BlockType, Blocks, FourFacings, SixSides } from "../types";
+import { BlockOptions, BlockType, Blocks, FourFacings, SixSides } from "../types";
 import { AirBlock, IronBlock, Glass, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target, CommandBlock } from "../blocks";
 
 /**
@@ -7,10 +7,10 @@ import { AirBlock, IronBlock, Glass, Lever, RedstoneComparator, RedstoneDust, Re
 function NewBlock(
   type: BlockType, options: BlockOptions & ({ normDir: SixSides, facingDir: FourFacings })
 ): Blocks;
-function NewBlock<T extends BlockStates>(
+function NewBlock<T extends Record<string, unknown>>(
   type: BlockType, options: Omit<BlockOptions, 'normDir' | 'facingDir'>, states: T
 ): Blocks;
-function NewBlock<T extends BlockStates>(type: BlockType, options: BlockOptions, states?: T): Blocks {
+function NewBlock<T extends Record<string, unknown>>(type: BlockType, options: BlockOptions, states?: T): Blocks {
   if (type === BlockType.RedstoneTorch || type === BlockType.RedstoneWallTorch) {
     if (options.normDir && options.facingDir) {
       return options.normDir === 'up' || options.normDir === 'down' ?

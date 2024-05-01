@@ -1,16 +1,16 @@
-import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3 } from "../types";
+import { BlockOptions, BlockType, FourFacings, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
 class RedstoneComparator extends Block {
   public type: BlockType.RedstoneComparator;
-  public states: RedstoneComparatorStates;
+  public states: RedstoneComparatorState;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
+    super({ needBottomSupport: true, transparent: true, redirectRedstone: 'full', ...options });
 
     this.type = BlockType.RedstoneComparator;
-    this.states = { power: 0, source: false, facing: 'north', mode: 'compare', powered: false };
+    this.states = { facing: 'north', mode: 'compare', powered: false };
 
     this.setFacing(options.normDir, options.facingDir);
   }
@@ -25,13 +25,13 @@ class RedstoneComparator extends Block {
 
   override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
     return this.states.powered && direction === this.states.facing ?
-      { strong: true, power: this.states.power } :
+      { strong: true, power: this.internal.power } :
       { strong: false, power: 0 };
   }
 
   override powerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
     return this.states.powered && direction === this.states.facing ?
-      { strong: true, power: this.states.power } :
+      { strong: true, power: this.internal.power } :
       { strong: false, power: 0 };
   }
 
@@ -48,7 +48,7 @@ class RedstoneComparator extends Block {
     super.PPUpdate();
 
     const newPower = this.currentPower;
-    if (this.states.power !== newPower) {
+    if (this.internal.power !== newPower) {
       this.engine.addTask(['comparatorUpdate', [this.x, this.y, this.z, newPower], 2]);
     }
   }
@@ -58,11 +58,11 @@ class RedstoneComparator extends Block {
    * @param power
    */
   comparatorUpdate(power: number) {
-    if (this.currentPower === this.states.power) {
+    if (this.currentPower === this.internal.power) {
       return;
     }
 
-    this.states.power = power;
+    this.internal.power = power;
     this.states.powered = power > 0;
     this.sendPPUpdate();
   }
@@ -126,5 +126,16 @@ class RedstoneComparator extends Block {
     }
   }
 }
+
+type RedstoneComparatorState = {
+  /** 紅石比較器的面向方向 */
+  facing: FourFacings;
+
+  /** 紅石比較器的運行模式 */
+  mode: "compare" | "subtract";
+
+  /** 紅石比較器是否被啟動 */
+  powered: boolean;
+};
 
 export default RedstoneComparator;

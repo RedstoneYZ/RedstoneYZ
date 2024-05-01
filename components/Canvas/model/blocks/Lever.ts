@@ -1,16 +1,16 @@
-import { BlockOptions, BlockType, FourFacings, LeverStates, SixSides, Vector3 } from "../types";
+import { BlockOptions, BlockType, FourFacings, SixSides, ThreeFaces, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
 class Lever extends Block {
   public type: BlockType.Lever;
-  public states: LeverStates;
+  public states: LeverState;
 
   constructor(options: BlockOptions) {
-    super({ transparent: true, needSupport: true, redstoneAutoConnect: 'full', ...options });
+    super({ transparent: true, needSupport: true, redirectRedstone: 'full', ...options });
 
     this.type = BlockType.Lever;
-    this.states = { power: 0, source: false, face: 'wall', facing: 'north', powered: false };
+    this.states = { face: 'wall', facing: 'north', powered: false };
     this.setFacing(options.normDir, options.facingDir);
   }
 
@@ -39,7 +39,7 @@ class Lever extends Block {
 
   interact() {
     this.states.powered = !this.states.powered;
-    this.states.source = this.states.powered;
+    this.internal.source = this.states.powered;
     this.sendPPUpdate();
   }
 
@@ -72,5 +72,16 @@ class Lever extends Block {
     }
   }
 }
+
+type LeverState = {
+  /** 控制桿的附著位置 */
+  face: ThreeFaces;
+
+  /** 控制桿的面向方向 */
+  facing: FourFacings;
+
+  /** 控制桿是否被拉下 */
+  powered: boolean;
+};
 
 export default Lever;

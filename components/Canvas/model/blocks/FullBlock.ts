@@ -4,7 +4,7 @@ import Block from "./Block";
 
 abstract class FullBlock extends Block {
   constructor(options: BlockOptions) {
-    super({ fullBlock: true, fullSupport: true, ...options });
+    super({ solid: true, ...options });
   }
 
   override PPUpdate() {

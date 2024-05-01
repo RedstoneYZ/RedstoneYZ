@@ -1,16 +1,16 @@
 import { Maps } from "../utils";
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockType, RedstoneLampStates } from "../types";
+import { BlockOptions, BlockType } from "../types";
 
 class RedstoneLamp extends FullBlock {
   public type: BlockType.RedstoneLamp;
-  public states: RedstoneLampStates;
+  public states: RedstoneLampState;
 
   constructor(options: BlockOptions) {
     super(options);
 
     this.type = BlockType.RedstoneLamp;
-    this.states = { power: 0, source: false, lit: false };
+    this.states = { lit: false };
   }
 
   override PPUpdate() {
@@ -39,10 +39,15 @@ class RedstoneLamp extends FullBlock {
 
     const litByPower = Maps.P6DArray.some(([_, [x, y, z]]) => {
       const block = this.engine.block(this.x + x, this.y + y, this.z + z);
-      return block?.states.power;
+      return block?.internal.power;
     });
     return litByPower;
   }
 }
+
+type RedstoneLampState = {
+  /** 紅石燈是否被觸發 */
+  lit: boolean;
+};
 
 export default RedstoneLamp;

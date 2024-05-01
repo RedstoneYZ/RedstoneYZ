@@ -104,15 +104,14 @@ export interface BlockOptions {
   breakable?: boolean;
 
   transparent?: boolean;
-  fullBlock?: boolean;
-  fullSupport?: boolean;
-  upperSupport?: boolean;
-  bottomSupport?: boolean;
-  sideSupport?: boolean;
+  solid?: boolean;
+  topSolid?: boolean;
+  bottomSolid?: boolean;
+  sideSolid?: boolean;
   needSupport?: boolean;
   needBottomSupport?: boolean;
 
-  redstoneAutoConnect?: "full" | "line" | "none";
+  redirectRedstone?: "full" | "line" | "none";
 }
 
 export interface BlockSpawnOptions {
@@ -120,7 +119,7 @@ export interface BlockSpawnOptions {
   y: number;
   z: number;
   type: BlockType;
-  states: BlockStates;
+  states: Record<string, unknown>;
   engine: Engine;
   breakable?: boolean;
 }
@@ -128,7 +127,7 @@ export interface BlockSpawnOptions {
 export interface BlockData {
   type: BlockType;
   breakable: boolean;
-  states: BlockStates;
+  states: Record<string, unknown>;
 }
 
 export interface PowerTransmission {
@@ -136,86 +135,9 @@ export interface PowerTransmission {
   power: number;
 }
 
-export interface BlockStates {
+export interface BlockInternal {
   power: number;
   source: boolean;
-}
-
-export interface CommandBlockStates extends BlockStates {
-  conditional: boolean;
-  facing: SixSides;
-}
-
-export interface LeverStates extends BlockStates {
-  /** 控制桿的附著位置 */
-  face: ThreeFaces;
-
-  /** 控制桿的面向方向 */
-  facing: FourFacings;
-
-  /** 控制桿是否被拉下 */
-  powered: boolean;
-}
-
-export interface RedstoneDustStates extends BlockStates {
-  /** 紅石粉東側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  east: 0 | 1 | 2;
-
-  /** 紅石粉西側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  west: 0 | 1 | 2;
-
-  /** 紅石粉北側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  north: 0 | 1 | 2;
-
-  /** 紅石粉南側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  south: 0 | 1 | 2;
-}
-
-export interface RedstoneTorchBaseStates extends BlockStates {
-  /** 紅石火把是否被觸發 */
-  lit: boolean;
-}
-
-export interface RedstoneTorchStates extends RedstoneTorchBaseStates {}
-
-export interface RedstoneWallTorchStates extends RedstoneTorchBaseStates {
-  /** 紅石火把面向的方向 */
-  facing: FourFacings;
-}
-
-export interface RedstoneRepeaterStates extends BlockStates {
-  /** 紅石中繼器的延遲 */
-  delay: number;
-
-  /** 紅石中繼器的指向 */
-  facing: FourFacings;
-
-  /** 紅石中繼器是否被鎖定 */
-  locked: boolean;
-
-  /** 紅石中繼器是否被激發 */
-  powered: boolean;
-}
-
-export interface RedstoneComparatorStates extends BlockStates {
-  /** 紅石比較器的面向方向 */
-  facing: FourFacings;
-
-  /** 紅石比較器的運行模式 */
-  mode: "compare" | "subtract";
-
-  /** 紅石比較器是否被啟動 */
-  powered: boolean;
-}
-
-export interface RedstoneLampStates extends BlockStates {
-  /** 紅石燈是否被觸發 */
-  lit: boolean;
-}
-
-export interface RedstoneTargetStates extends BlockStates {
-  /** 標靶散發的訊號等級 */
-  power: number;
 }
 
 export type Vector2 = [number, number];

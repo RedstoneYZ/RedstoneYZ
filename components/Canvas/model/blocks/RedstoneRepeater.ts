@@ -1,16 +1,16 @@
-import { BlockOptions, BlockType, FourFacings, RedstoneRepeaterStates, SixSides, Vector3 } from "../types";
+import { BlockOptions, BlockType, FourFacings, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
 class RedstoneRepeater extends Block {
   public type: BlockType.RedstoneRepeater;
-  public states: RedstoneRepeaterStates;
+  public states: RedstoneRepeaterState;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redstoneAutoConnect: 'line', ...options });
+    super({ needBottomSupport: true, transparent: true, redirectRedstone: 'line', ...options });
     
     this.type = BlockType.RedstoneRepeater;
-    this.states = { power: 0, source: false, delay: 1, facing: 'north', locked: false, powered: false };
+    this.states = { delay: 1, facing: 'north', locked: false, powered: false };
     this.setFacing(options.normDir, options.facingDir);
   }
 
@@ -124,5 +124,19 @@ class RedstoneRepeater extends Block {
     return false;
   }
 }
+
+type RedstoneRepeaterState = {
+  /** 紅石中繼器的延遲 */
+  delay: number;
+
+  /** 紅石中繼器的指向 */
+  facing: FourFacings;
+
+  /** 紅石中繼器是否被鎖定 */
+  locked: boolean;
+
+  /** 紅石中繼器是否被激發 */
+  powered: boolean;
+};
 
 export default RedstoneRepeater;
