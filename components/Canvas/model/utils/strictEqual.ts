@@ -2,10 +2,10 @@
  * 遞迴地比較兩個變數是否完全相等，對於物件僅考慮可枚舉的屬性
  */
 function strictEqual(thing1: any, thing2: any) {
-  if (typeof thing1 === 'number' && typeof thing2 === 'number' && isNaN(thing1) && isNaN(thing2)) {
+  if (typeof thing1 === "number" && typeof thing2 === "number" && isNaN(thing1) && isNaN(thing2)) {
     return true;
   }
-  if (typeof thing1 !== 'object' || typeof thing2 !== 'object') {
+  if (typeof thing1 !== "object" || typeof thing2 !== "object") {
     return thing1 === thing2;
   }
   if (thing1 === null || thing2 === null) {

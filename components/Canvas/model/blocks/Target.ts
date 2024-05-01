@@ -6,7 +6,7 @@ class Target extends FullBlock {
   public states: RedstoneTargetState;
 
   constructor(options: BlockOptions) {
-    super({ redirectRedstone: 'full', ...options });
+    super({ redirectRedstone: "full", ...options });
 
     this.type = BlockType.Target;
     this.states = { power: 0 };

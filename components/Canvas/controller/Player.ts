@@ -12,7 +12,7 @@ class Player {
 
   constructor() {
     this.xyz = { x: 0, y: 2, z: 0 };
-    this.facing = { direction: 'south', yaw: 0, pitch: 0 };
+    this.facing = { direction: "south", yaw: 0, pitch: 0 };
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;
@@ -31,13 +31,13 @@ class Player {
     const sy = Math.sin(-this.facing.yaw);
     const cp = Math.cos(-this.facing.pitch);
     const sp = Math.sin(-this.facing.pitch);
-    console.log(sy*cp, -sp, cy*cp);
-    return [sy*cp, -sp, cy*cp];
+    console.log(sy * cp, -sp, cy * cp);
+    return [sy * cp, -sp, cy * cp];
   }
 
   get velocity(): number {
     const { x, y, z } = this.speed;
-    return Math.sqrt(x*x + y*y + z*z);
+    return Math.sqrt(x * x + y * y + z * z);
   }
 
   advance() {

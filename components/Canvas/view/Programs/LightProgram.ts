@@ -24,7 +24,7 @@ export default class LightProgram extends Program {
     this.vao = this.createVao();
     this.fbo = this.createFbo();
 
-    this.uniform = this.setupUniform(['u_mlp']);
+    this.uniform = this.setupUniform(["u_mlp"]);
     this.ready = true;
   }
 
@@ -44,7 +44,7 @@ export default class LightProgram extends Program {
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, data.length / 3 * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 3) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.colorMask(true, true, true, true);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -64,8 +64,8 @@ export default class LightProgram extends Program {
           if (!block || block.type === BlockType.AirBlock) continue;
 
           const models = this.renderer.models.get(block.type, block.states);
-          models.forEach(model => {
-            model.faces.forEach(face => {
+          models.forEach((model) => {
+            model.faces.forEach((face) => {
               if (!this.renderer.shouldRender(block, face)) return;
 
               const { corners: c } = face;
@@ -145,7 +145,13 @@ export default class LightProgram extends Program {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
     // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
-    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT16, this.renderer.WIDTH, this.renderer.HEIGHT);
+    gl.texStorage2D(
+      gl.TEXTURE_2D,
+      1,
+      gl.DEPTH_COMPONENT16,
+      this.renderer.WIDTH,
+      this.renderer.HEIGHT,
+    );
 
     return texture;
   }

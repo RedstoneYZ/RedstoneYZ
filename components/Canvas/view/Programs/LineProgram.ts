@@ -16,7 +16,7 @@ export default class LineProgram extends Program {
     super(renderer, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform(['u_mvp']);
+    this.uniform = this.setupUniform(["u_mvp"]);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -35,7 +35,7 @@ export default class LineProgram extends Program {
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.LINE_LOOP, data.length / 3 * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINE_LOOP, (data.length / 3) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -57,15 +57,85 @@ export default class LineProgram extends Program {
 
     models.forEach(({ outline }) => {
       outline.forEach(({ from: [x1, y1, z1], to: [x2, y2, z2] }) => {
-        x1 += x; y1 += y; z1 += z;
-        x2 += x; y2 += y; z2 += z;
+        x1 += x;
+        y1 += y;
+        z1 += z;
+        x2 += x;
+        y2 += y;
+        z2 += z;
         result.push(
-          x1, y1, z1,  x1, y2, z1,  x2, y2, z1,  x2, y1, z1, 
-          x1, y1, z2,  x1, y2, z2,  x2, y2, z2,  x2, y1, z2, 
-          x1, y1, z1,  x1, y1, z2,  x2, y1, z2,  x2, y1, z1, 
-          x1, y2, z1,  x1, y2, z2,  x2, y2, z2,  x2, y2, z1, 
-          x1, y1, z1,  x1, y1, z2,  x1, y2, z2,  x1, y2, z1, 
-          x2, y1, z1,  x2, y1, z2,  x2, y2, z2,  x2, y2, z1, 
+          x1,
+          y1,
+          z1,
+          x1,
+          y2,
+          z1,
+          x2,
+          y2,
+          z1,
+          x2,
+          y1,
+          z1,
+          x1,
+          y1,
+          z2,
+          x1,
+          y2,
+          z2,
+          x2,
+          y2,
+          z2,
+          x2,
+          y1,
+          z2,
+          x1,
+          y1,
+          z1,
+          x1,
+          y1,
+          z2,
+          x2,
+          y1,
+          z2,
+          x2,
+          y1,
+          z1,
+          x1,
+          y2,
+          z1,
+          x1,
+          y2,
+          z2,
+          x2,
+          y2,
+          z2,
+          x2,
+          y2,
+          z1,
+          x1,
+          y1,
+          z1,
+          x1,
+          y1,
+          z2,
+          x1,
+          y2,
+          z2,
+          x1,
+          y2,
+          z1,
+          x2,
+          y1,
+          z1,
+          x2,
+          y1,
+          z2,
+          x2,
+          y2,
+          z2,
+          x2,
+          y2,
+          z1,
         );
       });
     });

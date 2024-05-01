@@ -14,13 +14,13 @@ export default class TextureManager {
     }
 
     const data = Textures.data[name as keyof typeof Textures.data] as TextureData;
-    if (!('animation' in data && data.animation)) {
+    if (!("animation" in data && data.animation)) {
       const offset = data.offset[0];
       return [offset[0], offset[1], 0, 0, 1, 1];
     }
 
     const frametime = data.animation.frametime;
-    const inter = frametime - tick % frametime;
+    const inter = frametime - (tick % frametime);
     const index1 = Math.floor(tick / frametime) % data.offset.length;
     const index2 = index1 + 1 === data.offset.length ? 0 : index1 + 1;
 

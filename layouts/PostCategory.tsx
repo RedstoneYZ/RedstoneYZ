@@ -1,52 +1,57 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-'use client'
+"use client";
 
-import { ReactNode } from 'react'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Article, Authors } from 'contentlayer/generated'
-import Link from '@/components/Link'
-import PageTitle from '@/components/PageTitle'
-import SectionContainer from '@/components/SectionContainer'
-import Image from '@/components/Image'
-import Tag from '@/components/Tag'
-import siteMetadata from '@/data/siteMetadata'
-import ScrollTopAndComment from '@/components/ScrollTopAndComment'
-import { usePathname } from 'next/navigation'
-import articleHierarchy from '@/app/articleHierarchy.json'
+import { ReactNode } from "react";
+import { CoreContent } from "pliny/utils/contentlayer";
+import type { Article, Authors } from "contentlayer/generated";
+import Link from "@/components/Link";
+import PageTitle from "@/components/PageTitle";
+import SectionContainer from "@/components/SectionContainer";
+import Image from "@/components/Image";
+import Tag from "@/components/Tag";
+import siteMetadata from "@/data/siteMetadata";
+import ScrollTopAndComment from "@/components/ScrollTopAndComment";
+import { usePathname } from "next/navigation";
+import articleHierarchy from "@/app/articleHierarchy.json";
 
-const editUrl = (path: string) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
+const editUrl = (path: string) => `${siteMetadata.siteRepo}/blob/main/data/${path}`;
 const discussUrl = (path: string) =>
-  `https://mobile.twitter.com/search?q=${encodeURIComponent(`${siteMetadata.siteUrl}/${path}`)}`
+  `https://mobile.twitter.com/search?q=${encodeURIComponent(`${siteMetadata.siteUrl}/${path}`)}`;
 
 const postDateTemplate: Intl.DateTimeFormatOptions = {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-}
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
 
 interface LayoutProps {
-  content: CoreContent<Article>
-  authorDetails: CoreContent<Authors>[]
-  next?: { path: string; title: string }
-  prev?: { path: string; title: string }
-  children: ReactNode
+  content: CoreContent<Article>;
+  authorDetails: CoreContent<Authors>[];
+  next?: { path: string; title: string };
+  prev?: { path: string; title: string };
+  children: ReactNode;
 }
 
-export default function PostCategory({ content, authorDetails, next, prev, children }: LayoutProps) {
-  const { filePath, path, date, title, tags } = content
-  const basePath = path.split('/')[0]
-  const pathSplit = path.split('/')
-  let data = articleHierarchy
-  for(const articlepath of pathSplit) {
-    if(articlepath !== 'article') {
+export default function PostCategory({
+  content,
+  authorDetails,
+  next,
+  prev,
+  children,
+}: LayoutProps) {
+  const { filePath, path, date, title, tags } = content;
+  const basePath = path.split("/")[0];
+  const pathSplit = path.split("/");
+  let data = articleHierarchy;
+  for (const articlepath of pathSplit) {
+    if (articlepath !== "article") {
       // @ts-ignore
       data = data[articlepath as keyof typeof data];
     }
   }
-  
 
-  console.log(` ${prev} ${next}`)
+  console.log(` ${prev} ${next}`);
 
   return (
     <SectionContainer>
@@ -96,7 +101,7 @@ export default function PostCategory({ content, authorDetails, next, prev, child
                               href={author.twitter}
                               className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                             >
-                              {author.twitter.replace('https://twitter.com/', '@')}
+                              {author.twitter.replace("https://twitter.com/", "@")}
                             </Link>
                           )}
                         </dd>
@@ -125,8 +130,8 @@ export default function PostCategory({ content, authorDetails, next, prev, child
               )*/}
             </div>
             <footer>
-              <div className="my-6 px-6 py-4 hidden h-full max-h-screen w-full flex-wrap overflow-auto rounded bg-gray-50 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
-                <ArticleTable data={data} parent={path + '/'} title={title}></ArticleTable>
+              <div className="my-6 hidden h-full max-h-screen w-full flex-wrap overflow-auto rounded bg-gray-50 px-6 py-4 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
+                <ArticleTable data={data} parent={path + "/"} title={title}></ArticleTable>
               </div>
               <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
                 {tags && (
@@ -180,57 +185,63 @@ export default function PostCategory({ content, authorDetails, next, prev, child
         </div>
       </article>
     </SectionContainer>
-  )
+  );
 }
 
 type ArticleData = { [key: string]: ArticleData | string };
 
 function ArticleTable({
-  data, parent, title
+  data,
+  parent,
+  title,
 }: {
-  data: ArticleData, 
-  parent: string, 
-  title: string
+  data: ArticleData;
+  parent: string;
+  title: string;
 }) {
   const pathname = usePathname();
-  console.log(data, parent, title, pathname)
+  console.log(data, parent, title, pathname);
   return (
     <ul>
-      {
-        'index.mdx' in data && typeof data["index.mdx"] === "string" ? 
+      {"index.mdx" in data && typeof data["index.mdx"] === "string" ? (
+        <Link
+          href={parent}
+          className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+        >
+          {data["index.mdx"]}
+        </Link>
+      ) : parent === "/article/" ? (
+        pathname.startsWith("/article") ? (
+          <h3 className="font-bold text-primary-500">{title}</h3>
+        ) : (
           <Link
-            href={parent}
-            className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+            href={`/article`}
+            className="font-bold text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
           >
-            {data["index.mdx"]}
-          </Link> : 
-        parent === "/article/" ? 
-          pathname.startsWith('/article') ? (
-            <h3 className="font-bold text-primary-500">{title}</h3>
-          ) : (
-            <Link
-              href={`/article`}
-              className="font-bold text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
-            >
-              {title}
-            </Link>
-          ) :
-          parent
-      }
-      {Object.entries(data).filter(([key]) => key !== "index.mdx").map(([key, value]) => {
-        return (
-          <li key={key} className="mx-5 my-3">
-            {typeof value === "string" ? 
-              <Link
-                href={'/' + parent + key.substring(0, key.length - 4)}
-                className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
-              >
-                {value}
-              </Link> : 
-              <ArticleTable data={value} parent={parent + key + "/"} title={title}></ArticleTable>}
-          </li>
+            {title}
+          </Link>
         )
-      })}
+      ) : (
+        parent
+      )}
+      {Object.entries(data)
+        .filter(([key]) => key !== "index.mdx")
+        .map(([key, value]) => {
+          return (
+            <li key={key} className="mx-5 my-3">
+              {typeof value === "string" ? (
+                <Link
+                  href={"/" + parent + key.substring(0, key.length - 4)}
+                  className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+                >
+                  {value}
+                </Link>
+              ) : (
+                <ArticleTable data={value} parent={parent + key + "/"} title={title}></ArticleTable>
+              )}
+            </li>
+          );
+        })}
     </ul>
   );
 }

@@ -17,7 +17,7 @@ export default class TestProgram extends Program {
     this.program = this.createProgram();
     this.abo = this.createAbo();
     this.vao = this.createVao();
-    this.setupUniform(['sampler']);
+    this.setupUniform(["sampler"]);
     this.ready = true;
   }
 
@@ -67,7 +67,11 @@ export default class TestProgram extends Program {
     gl.bindVertexArray(vao);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 1, 0, 1, -1, -1, 0, 0, 1, 1, 1, 1, 1, -1, 1, 0]), gl.STATIC_DRAW);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, 1, 0, 1, -1, -1, 0, 0, 1, 1, 1, 1, 1, -1, 1, 0]),
+      gl.STATIC_DRAW,
+    );
 
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 16, 0);
     gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 16, 8);

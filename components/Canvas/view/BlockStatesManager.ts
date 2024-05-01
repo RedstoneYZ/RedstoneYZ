@@ -20,9 +20,10 @@ export default class BlockStatesManager {
             break;
           }
         }
-      }
-      else {
-        if (Object.entries(rule.when).every(([k, v]) => `${states[k as keyof BlockStates]}` === v)) {
+      } else {
+        if (
+          Object.entries(rule.when).every(([k, v]) => `${states[k as keyof BlockStates]}` === v)
+        ) {
           if (blockStates.singleMatch) {
             return [rule.apply];
           }
@@ -39,7 +40,7 @@ export default class BlockStatesManager {
     }
 
     const raw_block_states = this.loadRawBlockStates(path);
-    return this.blockStatesCache[path] = this.parseStates(raw_block_states);
+    return (this.blockStatesCache[path] = this.parseStates(raw_block_states));
   }
 
   private loadRawBlockStates(path: string): RawBlockStatesModel {
@@ -47,29 +48,31 @@ export default class BlockStatesManager {
   }
 
   private parseStates(rawStates: RawBlockStatesModel): BlockStatesModel {
-    if ('variants' in rawStates) return {
-      singleMatch: true, 
-      rules: Object.entries(rawStates.variants).map(([key, _value]) => {
-          const value = 'length' in _value ? _value : [_value];
+    if ("variants" in rawStates)
+      return {
+        singleMatch: true,
+        rules: Object.entries(rawStates.variants).map(([key, _value]) => {
+          const value = "length" in _value ? _value : [_value];
           return {
-            when: key.length ? Object.fromEntries(key.split(',').map(a => a.split('='))) : {},
-            apply: this.makeRequired(value)
+            when: key.length ? Object.fromEntries(key.split(",").map((a) => a.split("="))) : {},
+            apply: this.makeRequired(value),
           };
-        })
-    }
+        }),
+      };
 
     return {
-      singleMatch: false, 
+      singleMatch: false,
       rules: rawStates.muitipart.map(({ when: _when, apply: _apply }) => {
-        const apply = 'length' in _apply ? _apply : [_apply];
+        const apply = "length" in _apply ? _apply : [_apply];
         return {
-          when: !('AND' in _when) ? _when : (
-            typeof _when.AND !== "string" ? 
-              _when.AND.reduce((a, c) => ({ ...a, ...c }), {}) : {}
-          ),
-          apply: this.makeRequired(apply)
+          when: !("AND" in _when)
+            ? _when
+            : typeof _when.AND !== "string"
+              ? _when.AND.reduce((a, c) => ({ ...a, ...c }), {})
+              : {},
+          apply: this.makeRequired(apply),
         };
-      })
+      }),
     };
   }
 
@@ -85,12 +88,12 @@ export default class BlockStatesManager {
 
   private makeRequired(data: RawBlockStatesModelRule[]): BlockModelRule[] {
     return data.map(({ model, x, y, uvlock, weight }) => ({
-      model: this.parsePath(model), 
-      x: x ?? 0, 
-      y: y ?? 0, 
-      uvlock: uvlock ?? false, 
-      weight: weight ?? 1
-    }))
+      model: this.parsePath(model),
+      x: x ?? 0,
+      y: y ?? 0,
+      uvlock: uvlock ?? false,
+      weight: weight ?? 1,
+    }));
   }
 }
 
@@ -100,9 +103,7 @@ interface BlockStatesModel {
 }
 
 interface BlockStatesModelRule {
-  when: 
-    | { OR: { [state: string]: string }[] }
-    | { [state: string]: string };
+  when: { OR: { [state: string]: string }[] } | { [state: string]: string };
   apply: Required<RawBlockStatesModelRule>[];
 }
 
@@ -110,7 +111,7 @@ type RawBlockStatesModel = RawBlockStatesModelVariants | RawBlockStatesModelMuit
 
 interface RawBlockStatesModelVariants {
   variants: {
-    [variant: string]: RawBlockStatesModelRule | RawBlockStatesModelRule[]
+    [variant: string]: RawBlockStatesModelRule | RawBlockStatesModelRule[];
   };
 }
 
@@ -119,7 +120,7 @@ interface RawBlockStatesModelMuitipart {
 }
 
 interface RawBlockStatesModelMuitipartCase {
-  when: 
+  when:
     | { OR: { [state: string]: string }[] }
     | { AND: { [state: string]: string }[] }
     | { [state: string]: string };

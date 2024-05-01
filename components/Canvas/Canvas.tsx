@@ -12,16 +12,18 @@ import { CanvasProps } from "./model/types";
 
 const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
   const [controller, setController] = useState<Controller>();
-  const [currentBlock, setCurrentBlock] = useState('');
+  const [currentBlock, setCurrentBlock] = useState("");
 
   // @ts-ignore
-  props.preLoadData = Official_Map_1
+  props.preLoadData = Official_Map_1;
 
-  const { current: xLen } = useRef('xLen' in props ? props.xLen : props.preLoadData.xLen);
-  const { current: yLen } = useRef('xLen' in props ? props.yLen : props.preLoadData.yLen);
-  const { current: zLen } = useRef('xLen' in props ? props.xLen : props.preLoadData.zLen);
-  const { current: mapName } = useRef('preLoadData' in props ? props.preLoadData.mapName : 'New Map');
-  const { current: preLoadData } = useRef('preLoadData' in props ? props.preLoadData : undefined);
+  const { current: xLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.xLen);
+  const { current: yLen } = useRef("xLen" in props ? props.yLen : props.preLoadData.yLen);
+  const { current: zLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.zLen);
+  const { current: mapName } = useRef(
+    "preLoadData" in props ? props.preLoadData.mapName : "New Map",
+  );
+  const { current: preLoadData } = useRef("preLoadData" in props ? props.preLoadData : undefined);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -49,7 +51,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   }
 
   function handleMouseEnter() {
-    window.addEventListener('wheel', preventDefault, { passive: false });
+    window.addEventListener("wheel", preventDefault, { passive: false });
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -60,7 +62,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   }
 
   function handleMouseLeave() {
-    window.removeEventListener('wheel', preventDefault, false);
+    window.removeEventListener("wheel", preventDefault, false);
   }
 
   function handleDrag(e: React.DragEvent<HTMLCanvasElement>) {
@@ -88,7 +90,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
 
   function handleScroll(e: React.WheelEvent<HTMLCanvasElement>) {
     controller?.scrollHotbar(e.deltaY);
-    setCurrentBlock(controller?.currentBlockName ?? '');
+    setCurrentBlock(controller?.currentBlockName ?? "");
   }
 
   // async function handleCheckMap() {
@@ -107,34 +109,30 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   return (
     <div className="canvas-wrapper">
       <div className="canvas-wrapper-upper">
-        <canvas className="canvas"
+        <canvas
+          className="canvas"
           ref={canvasRef}
           width={canvasWidth}
           height={canvasHeight}
-
           tabIndex={0}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
-
           onMouseEnter={handleMouseEnter}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-
           draggable={true}
           onDrag={handleDrag}
           onDragStart={handleDragStart}
-
           onClick={handleClick}
           onContextMenu={handleContextMenu}
-
           onWheelCapture={handleScroll}
         />
-        <span ref={spanRef} style={{ display: 'none' }} />
+        <span ref={spanRef} style={{ display: "none" }} />
       </div>
       <div className="canvas-wrapper-middle">{currentBlock}</div>
       {
-        // TODO: 
-        // storable || (checkable && controller?.engine.validation) ? 
+        // TODO:
+        // storable || (checkable && controller?.engine.validation) ?
         //   <div className="canvas-wrapper-lower">
         //     {checkable && controller?.engine.validation ? <Button type="primary" onClick={handleCheckMap}>檢查地圖</Button> : <></>}
         //   </div> :
@@ -142,13 +140,13 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
       }
     </div>
   );
-}
+};
 
 function getPosition(canvas: HTMLCanvasElement, event: React.MouseEvent<HTMLCanvasElement>) {
   const p = canvas.getBoundingClientRect();
   return {
-    x: event.clientX - p.left, 
-    y: event.clientY - p.top
+    x: event.clientX - p.left,
+    y: event.clientY - p.top,
   };
 }
 

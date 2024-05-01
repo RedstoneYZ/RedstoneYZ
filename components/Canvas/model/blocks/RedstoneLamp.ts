@@ -18,9 +18,8 @@ class RedstoneLamp extends FullBlock {
 
     if (this._shouldLit()) {
       this.states.lit = true;
-    }
-    else {
-      this.engine.addTask(['lampUnlit', [this.x, this.y, this.z], 4]);
+    } else {
+      this.engine.addTask(["lampUnlit", [this.x, this.y, this.z], 4]);
     }
   }
 
@@ -29,7 +28,6 @@ class RedstoneLamp extends FullBlock {
 
     this.states.lit = false;
   }
-
 
   /**
    * 判斷此紅石燈是否應該要被點亮

@@ -1,7 +1,16 @@
 import { sleep, strictEqual } from "./utils";
 import { AirBlock, Block, IronBlock, Lever, NewBlock, RedstoneLamp } from ".";
 import blockNameTable from "./utils/blockNameTable";
-import { BlockType, Blocks, EngineOptions, EngineTask, FourFacings, MapData, ValidationData, Vector3 } from "./types";
+import {
+  BlockType,
+  Blocks,
+  EngineOptions,
+  EngineTask,
+  FourFacings,
+  MapData,
+  ValidationData,
+  Vector3,
+} from "./types";
 
 class Engine {
   public xLen: number;
@@ -29,12 +38,14 @@ class Engine {
     this.taskQueue = [];
     this.needRender = true;
 
-    this._pg = Array.from({ length: xLen }, (_, x) => 
-      Array.from({ length: yLen }, (_, y) => 
-        Array.from({ length: zLen }, (_, z) => y === 0 ?
-          new IronBlock({ x, y, z, engine: this, breakable: false }) :
-          new AirBlock({ x, y, z, engine: this }))
-      )
+    this._pg = Array.from({ length: xLen }, (_, x) =>
+      Array.from({ length: yLen }, (_, y) =>
+        Array.from({ length: zLen }, (_, z) =>
+          y === 0
+            ? new IronBlock({ x, y, z, engine: this, breakable: false })
+            : new AirBlock({ x, y, z, engine: this }),
+        ),
+      ),
     );
   }
 
@@ -43,44 +54,48 @@ class Engine {
     blocks.forEach((layer, i) => {
       layer.forEach((line, j) => {
         line.forEach((block, k) => {
-          engine._pg[i][j][k] = block ? Block.spawn({ ...block, x: i, y: j, z: k, engine }) : new AirBlock({ x: i, y: j, z: k, engine });
-        })
-      })
+          engine._pg[i][j][k] = block
+            ? Block.spawn({ ...block, x: i, y: j, z: k, engine })
+            : new AirBlock({ x: i, y: j, z: k, engine });
+        });
+      });
     });
     return engine;
   }
 
   /**
    * 把一個引擎轉換成可儲存的資料形式
-   * @param engine 
-   * @returns 
+   * @param engine
+   * @returns
    */
   static extract(engine: Engine): MapData {
     return {
-      xLen: engine.xLen, 
-      yLen: engine.yLen, 
-      zLen: engine.zLen, 
-      mapName: engine.mapName, 
-      blocks: engine._pg.map(layer => {
-        return layer.map(line => {
-          return line.map(block => block.type === BlockType.AirBlock ? null : Block.extract(block));
-        })
-      })
+      xLen: engine.xLen,
+      yLen: engine.yLen,
+      zLen: engine.zLen,
+      mapName: engine.mapName,
+      blocks: engine._pg.map((layer) => {
+        return layer.map((line) => {
+          return line.map((block) =>
+            block.type === BlockType.AirBlock ? null : Block.extract(block),
+          );
+        });
+      }),
     };
   }
 
   /**
    * 檢查控制感與紅石燈的關係是否符合給定布林表達式的要求
-   * @param engine 
+   * @param engine
    */
   static async validate(engine: Engine): Promise<boolean> {
     if (!engine.validation) {
-      throw new Error('This engine does not contain validation data.');
+      throw new Error("This engine does not contain validation data.");
     }
 
     const { leverLocations, lampLocations, boolFuncs, timeout } = engine.validation;
     const leverBlocks: Lever[] = [];
-    const lampBlocks: RedstoneLamp[] = []
+    const lampBlocks: RedstoneLamp[] = [];
 
     for (const [x, y, z] of leverLocations) {
       const block = engine.block(x, y, z);
@@ -100,7 +115,9 @@ class Engine {
       if (!block) continue;
 
       if (block.type !== BlockType.RedstoneLamp) {
-        throw new Error(`Position [${x}, ${y}, ${z}] is ${blockNameTable[block.type]}, not Redstone Lamp.`);
+        throw new Error(
+          `Position [${x}, ${y}, ${z}] is ${blockNameTable[block.type]}, not Redstone Lamp.`,
+        );
       }
       lampBlocks.push(block);
     }
@@ -108,7 +125,8 @@ class Engine {
     const count = Math.round(2 ** leverLocations.length);
     let output = true;
     for (let i = 1; i <= count; i++) {
-      let temp = 1, c = 0;
+      let temp = 1,
+        c = 0;
       while (temp <= i && c < leverLocations.length) {
         if (i % temp === 0) {
           leverBlocks[c].interact();
@@ -119,15 +137,15 @@ class Engine {
 
       await sleep(timeout);
 
-      const leverStatus = leverBlocks.map(b => b.states.powered);
-      const lampStatus = lampBlocks.map(b => b.states.lit);
+      const leverStatus = leverBlocks.map((b) => b.states.powered);
+      const lampStatus = lampBlocks.map((b) => b.states.lit);
 
       for (let i = 0; i < lampLocations.length; i++) {
         const func = boolFuncs[i];
 
         let ans = false;
         for (let j = 0; j < func.length; j++) {
-          if (func[j].every(ele => ele > 0 ? leverStatus[ele - 1] : !leverStatus[-ele - 1])) {
+          if (func[j].every((ele) => (ele > 0 ? leverStatus[ele - 1] : !leverStatus[-ele - 1]))) {
             ans = true;
             break;
           }
@@ -144,7 +162,7 @@ class Engine {
       }
     }
 
-    leverBlocks.forEach(b => {
+    leverBlocks.forEach((b) => {
       if (b.states.powered) {
         b.interact();
       }
@@ -157,7 +175,10 @@ class Engine {
    */
   addTask(task: EngineTask): void {
     // 忽略重複的工作
-    if (this.taskQueue.some(t => t[0] === task[0] && t[2] === task[2] && strictEqual(t[1], task[1]))) return;
+    if (
+      this.taskQueue.some((t) => t[0] === task[0] && t[2] === task[2] && strictEqual(t[1], task[1]))
+    )
+      return;
     this.taskQueue.push(task);
   }
 
@@ -177,7 +198,6 @@ class Engine {
       this._interval = undefined;
     }
   }
-
 
   private _interval: NodeJS.Timeout | undefined;
 
@@ -206,31 +226,32 @@ class Engine {
         }
 
         switch (taskName) {
-          case 'leftClick':
+          case "leftClick":
             this._leftClick(...params);
             break;
 
-          case 'rightClick':
+          case "rightClick":
             this._rightClick(...params);
             break;
 
-          case 'torchUpdate':
+          case "torchUpdate":
             this._torchUpdate(...params);
             break;
 
-          case 'repeaterUpdate':
+          case "repeaterUpdate":
             this._repeaterUpdate(...params);
             break;
 
-          case 'comparatorUpdate':
+          case "comparatorUpdate":
             this._comparatorUpdate(...params);
             break;
 
-          case 'lampUnlit':
+          case "lampUnlit":
             this._lampUnlit(...params);
             break;
 
-          default: break;
+          default:
+            break;
         }
       }
 
@@ -259,19 +280,25 @@ class Engine {
 
   /**
    * 對指定方塊的指定面上按下使用鍵
-   * @param shiftDown 
+   * @param shiftDown
    * @param normDir 指定面的法向量
    * @param facing 與觀察視角最接近的軸向量方向
    * @param type 在不觸發互動時所放下的方塊
    */
   private _rightClick(
-    x: number, y: number, z: number, shiftDown: boolean, normDir: Vector3, facing: FourFacings, type: BlockType
+    x: number,
+    y: number,
+    z: number,
+    shiftDown: boolean,
+    normDir: Vector3,
+    facing: FourFacings,
+    type: BlockType,
   ): void {
     let block = this.block(x, y, z);
     if (!block) return;
 
     // 如果指向的方塊可以互動，就互動
-    if (!shiftDown && 'interact' in block) {
+    if (!shiftDown && "interact" in block) {
       block.interact();
       return;
     }
@@ -285,10 +312,17 @@ class Engine {
     // 不能超出範圍，且原位置必須為空
     if (!block || block.type !== BlockType.AirBlock) return;
 
-    const face =
-      normDir[0] ? (normDir[0] === 1 ? 'east' : 'west') :
-      normDir[1] ? (normDir[1] === 1 ? 'up' : 'down') :
-      (normDir[2] === 1 ? 'south' : 'north');
+    const face = normDir[0]
+      ? normDir[0] === 1
+        ? "east"
+        : "west"
+      : normDir[1]
+        ? normDir[1] === 1
+          ? "up"
+          : "down"
+        : normDir[2] === 1
+          ? "south"
+          : "north";
     const newBlock = NewBlock(type, { x, y, z, engine: this, normDir: face, facingDir: facing });
 
     if (newBlock.needBottomSupport && !this.block(x, y - 1, z)?.topSolid) return;

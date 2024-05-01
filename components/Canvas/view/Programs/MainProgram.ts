@@ -23,7 +23,14 @@ export default class MainProgram extends Program {
     super(renderer, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform(['u_mvp', 'u_mlp', 'lightnorm', 's_texture', 's_shadow', 'screensize']);
+    this.uniform = this.setupUniform([
+      "u_mvp",
+      "u_mlp",
+      "lightnorm",
+      "s_texture",
+      "s_shadow",
+      "screensize",
+    ]);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -46,7 +53,7 @@ export default class MainProgram extends Program {
 
     const data = this.getBlockVertices();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, data.length / 32 * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 32) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -121,8 +128,8 @@ export default class MainProgram extends Program {
           if (!block || block.type === BlockType.AirBlock) continue;
 
           const models = this.renderer.models.get(block.type, block.states);
-          models.forEach(model => {
-            model.faces.forEach(face => {
+          models.forEach((model) => {
+            model.faces.forEach((face) => {
               if (!this.renderer.shouldRender(block, face)) return;
 
               const { corners: c, texCoord: t, normal: n } = face;
@@ -130,14 +137,10 @@ export default class MainProgram extends Program {
               const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
               for (let l = 0; l < 4; ++l) {
-                const tex1 = t[l][0] + ox1 << 20 | t[l][1] + oy1 << 10 | t[l][0] + ox2;
-                const tex2 = t[l][1] + oy2 << 20 | oa << 10 | ob;
+                const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
+                const tex2 = ((t[l][1] + oy2) << 20) | (oa << 10) | ob;
 
-                vertices.push(
-                  c[l][0] + x, c[l][1] + y, c[l][2] + z, 
-                  n[0], n[1], n[2], 
-                  tex1, tex2
-                );
+                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, n[0], n[1], n[2], tex1, tex2);
               }
             });
           });
@@ -146,7 +149,7 @@ export default class MainProgram extends Program {
     }
 
     const asFloat32 = new Float32Array(vertices);
-    const asInt32   = new Int32Array(asFloat32.buffer);
+    const asInt32 = new Int32Array(asFloat32.buffer);
     for (let i = 0; i < asFloat32.length; i += 8) {
       asInt32[i + 6] = vertices[i + 6];
       asInt32[i + 7] = vertices[i + 7];
@@ -162,7 +165,7 @@ export default class MainProgram extends Program {
       throw new Error("Failed to create main texture.");
     }
 
-    const atlas = await new Promise<HTMLImageElement>(res => {
+    const atlas = await new Promise<HTMLImageElement>((res) => {
       const image = new Image();
       image.onload = () => res(image);
       image.src = "/static/images/atlas/atlas.png";
@@ -260,11 +263,11 @@ export default class MainProgram extends Program {
 }
 
 /**
-  * a_texture format (ivec2)
-  *              3 2         1         0         
-  *              10987654321098765432109876543210
-  * a_texture.s: 00000000000000000000000000000000
-  *                └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
-  * a_texture.t: 00000000000000000000000000000000
-  *                └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
+ * a_texture format (ivec2)
+ *              3 2         1         0
+ *              10987654321098765432109876543210
+ * a_texture.s: 00000000000000000000000000000000
+ *                └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
+ * a_texture.t: 00000000000000000000000000000000
+ *                └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
  */

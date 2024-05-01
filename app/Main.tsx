@@ -1,16 +1,16 @@
-import Link from '@/components/Link'
-import Tag from '@/components/Tag'
-import siteMetadata from '@/data/siteMetadata'
-import { formatDate } from 'pliny/utils/formatDate'
-import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { Article, Singlepage, allSinglepages } from 'contentlayer/generated'
-import { components } from '@/components/MDXComponents'
-import { CoreContent } from 'pliny/utils/contentlayer'
+import Link from "@/components/Link";
+import Tag from "@/components/Tag";
+import siteMetadata from "@/data/siteMetadata";
+import { formatDate } from "pliny/utils/formatDate";
+import { MDXLayoutRenderer } from "pliny/mdx-components";
+import { Article, Singlepage, allSinglepages } from "contentlayer/generated";
+import { components } from "@/components/MDXComponents";
+import { CoreContent } from "pliny/utils/contentlayer";
 
-const MAX_DISPLAY = 3
+const MAX_DISPLAY = 3;
 
 export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
-  const homepage = allSinglepages.find((p) => p.slug === 'homepage') as Singlepage
+  const homepage = allSinglepages.find((p) => p.slug === "homepage") as Singlepage;
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -21,12 +21,12 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             {siteMetadata.description}
           </p>
-          <MDXLayoutRenderer code={homepage.body.code} components={components} toc={homepage.toc}/>
+          <MDXLayoutRenderer code={homepage.body.code} components={components} toc={homepage.toc} />
         </div>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {!posts.length && 'No posts found.'}
+          {!posts.length && "No posts found."}
           {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags } = post
+            const { slug, date, title, summary, tags } = post;
             return (
               <li key={slug} className="py-12">
                 <article>
@@ -71,7 +71,7 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
                   </div>
                 </article>
               </li>
-            )
+            );
           })}
         </ul>
       </div>
@@ -87,5 +87,5 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
         </div>
       )}
     </>
-  )
+  );
 }

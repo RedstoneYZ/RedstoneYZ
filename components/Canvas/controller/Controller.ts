@@ -25,12 +25,24 @@ class Controller {
     this.player = new Player();
 
     this.activeKeys = new Set();
-    this.hotbar = this.getHotbar(preLoadData?.availableBlocks ??
-      [BlockType.AirBlock, BlockType.IronBlock, BlockType.Glass, BlockType.RedstoneDust, BlockType.RedstoneTorch, BlockType.RedstoneRepeater, BlockType.RedstoneComparator, BlockType.RedstoneLamp, BlockType.Lever]
+    this.hotbar = this.getHotbar(
+      preLoadData?.availableBlocks ?? [
+        BlockType.AirBlock,
+        BlockType.IronBlock,
+        BlockType.Glass,
+        BlockType.RedstoneDust,
+        BlockType.RedstoneTorch,
+        BlockType.RedstoneRepeater,
+        BlockType.RedstoneComparator,
+        BlockType.RedstoneLamp,
+        BlockType.Lever,
+      ],
     );
     this.hotbarIndex = 0;
 
-    this.engine = preLoadData ? Engine.spawn(preLoadData) : new Engine({ xLen, yLen, zLen, mapName });
+    this.engine = preLoadData
+      ? Engine.spawn(preLoadData)
+      : new Engine({ xLen, yLen, zLen, mapName });
     this.renderer = new Renderer(this, canvas, [xLen, yLen, zLen]);
 
     this.needRender = true;
@@ -43,7 +55,7 @@ class Controller {
 
   /**
    * 初始化
-   * @param canvas 
+   * @param canvas
    */
   start(): void {
     this.engine.startTicking();
@@ -67,13 +79,12 @@ class Controller {
       this.activeKeys.clear();
     }
 
-
     this.prevRefX = cursorX;
     this.prevRefY = cursorY;
     this.needRender = true;
   }
 
-  private validInputs = new Set(['w', 'a', 's', 'd', ' ', 'shift']);
+  private validInputs = new Set(["w", "a", "s", "d", " ", "shift"]);
 
   addActiveKey(key: string) {
     if (this.validInputs.has(key)) {
@@ -89,7 +100,9 @@ class Controller {
     this.prevRefWheel += deltaY;
     if (!this.hotbar.length) return;
 
-    this.hotbarIndex = (Math.trunc(this.prevRefWheel / 100) % this.hotbar.length + this.hotbar.length) % this.hotbar.length;
+    this.hotbarIndex =
+      ((Math.trunc(this.prevRefWheel / 100) % this.hotbar.length) + this.hotbar.length) %
+      this.hotbar.length;
     this.needRender = true;
   }
 
@@ -99,7 +112,7 @@ class Controller {
 
     const [x, y, z] = target;
 
-    this.engine.addTask(['leftClick', [x, y, z], 0]);
+    this.engine.addTask(["leftClick", [x, y, z], 0]);
     this.needRender = true;
   }
 
@@ -108,10 +121,14 @@ class Controller {
     if (!target) return;
 
     const [x, y, z, ...normDir] = target;
-    const facingArray: FourFacings[] = ['south', 'east', 'north', 'west', 'south'];
-    const facing = facingArray[Math.round(this.player.facing.pitch * 2 / Math.PI)];
+    const facingArray: FourFacings[] = ["south", "east", "north", "west", "south"];
+    const facing = facingArray[Math.round((this.player.facing.pitch * 2) / Math.PI)];
 
-    this.engine.addTask(['rightClick', [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock], 0]);
+    this.engine.addTask([
+      "rightClick",
+      [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock],
+      0,
+    ]);
     this.needRender = true;
   }
 
@@ -125,22 +142,22 @@ class Controller {
   }
 
   private physics = () => {
-    if (this.activeKeys.has('w') && !this.activeKeys.has('s')) {
+    if (this.activeKeys.has("w") && !this.activeKeys.has("s")) {
       this.player.moveForward();
     }
-    if (this.activeKeys.has('s') && !this.activeKeys.has('w')) {
+    if (this.activeKeys.has("s") && !this.activeKeys.has("w")) {
       this.player.moveBackward();
     }
-    if (this.activeKeys.has('a') && !this.activeKeys.has('d')) {
+    if (this.activeKeys.has("a") && !this.activeKeys.has("d")) {
       this.player.moveLeft();
     }
-    if (this.activeKeys.has('d') && !this.activeKeys.has('a')) {
+    if (this.activeKeys.has("d") && !this.activeKeys.has("a")) {
       this.player.moveRight();
     }
-    if (this.activeKeys.has(' ') && !this.activeKeys.has('shift')) {
+    if (this.activeKeys.has(" ") && !this.activeKeys.has("shift")) {
       this.player.moveUp();
     }
-    if (this.activeKeys.has('shift') && !this.activeKeys.has(' ')) {
+    if (this.activeKeys.has("shift") && !this.activeKeys.has(" ")) {
       this.player.moveDown();
     }
 
@@ -149,11 +166,11 @@ class Controller {
     }
 
     this.player.advance();
-  }
+  };
 
   private getHotbar(items: BlockType[]): HotbarItem[] {
-    return items.map(block => {
-      return { block, name: blockNameTable[block] }
+    return items.map((block) => {
+      return { block, name: blockNameTable[block] };
     });
   }
 }
@@ -161,6 +178,6 @@ class Controller {
 interface HotbarItem {
   block: BlockType;
   name: string;
-};
+}
 
 export default Controller;

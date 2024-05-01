@@ -6,7 +6,7 @@ abstract class RedstoneTorchBase extends Block {
   public states: RedstoneTorchBaseState;
 
   constructor(options: BlockOptions) {
-    super({ needSupport: true, transparent: true, redirectRedstone: 'full', ...options });
+    super({ needSupport: true, transparent: true, redirectRedstone: "full", ...options });
 
     this.states = { lit: true };
     this.internal = { power: 0, source: true };
@@ -16,13 +16,13 @@ abstract class RedstoneTorchBase extends Block {
     return this.states.lit ? 15 : 0;
   }
 
-  override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
-    return direction === 'up' && this.states.lit ?
-      { strong: true, power: 15 } :
-      { strong: false, power: 0 };
+  override powerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
+    return direction === "up" && this.states.lit
+      ? { strong: true, power: 15 }
+      : { strong: false, power: 0 };
   }
 
-  override powerTowardsWire(): { strong: boolean, power: number } {
+  override powerTowardsWire(): { strong: boolean; power: number } {
     return { strong: this.states.lit, power: this.states.lit ? 15 : 0 };
   }
 
@@ -34,7 +34,11 @@ abstract class RedstoneTorchBase extends Block {
 
     const attachedBlock = this.supportingBlock;
     if (!attachedBlock?.internal.power !== this.states.lit) {
-      this.engine.addTask(['torchUpdate', [this.x, this.y, this.z, !attachedBlock?.internal.power], 2]);
+      this.engine.addTask([
+        "torchUpdate",
+        [this.x, this.y, this.z, !attachedBlock?.internal.power],
+        2,
+      ]);
     }
   }
 

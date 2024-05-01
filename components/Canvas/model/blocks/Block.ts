@@ -1,5 +1,14 @@
 import { NewBlock, Maps } from "../utils";
-import { BlockData, BlockInternal, BlockOptions, BlockSpawnOptions, BlockType, Blocks, PowerTransmission, SixSides } from "../types";
+import {
+  BlockData,
+  BlockInternal,
+  BlockOptions,
+  BlockSpawnOptions,
+  BlockType,
+  Blocks,
+  PowerTransmission,
+  SixSides,
+} from "../types";
 import Engine from "../Engine";
 
 /**
@@ -39,7 +48,7 @@ abstract class Block {
 
     this.breakable = options.breakable || true;
     this.transparent = options.transparent || false;
-    this.redirectRedstone = options.redirectRedstone ?? 'none';
+    this.redirectRedstone = options.redirectRedstone ?? "none";
     this.internal = { power: 0, source: false };
   }
 
@@ -60,9 +69,9 @@ abstract class Block {
     const states = JSON.parse(JSON.stringify(block.states));
     delete states.__typename;
     return {
-      type: block.type, 
-      breakable: block.breakable, 
-      states: states
+      type: block.type,
+      breakable: block.breakable,
+      states: states,
     };
   }
 

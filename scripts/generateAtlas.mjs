@@ -7,7 +7,7 @@ const UNIT = 16;
 (async () => {
   const files = fs.readdirSync(ROOT);
   const [pngs, mcmetas] = partition(files, (file) => file.endsWith(".png"));
-  
+
   const images = { occupied: 0, data: {} };
 
   for (const png of pngs) {
@@ -25,15 +25,16 @@ const UNIT = 16;
     const { animation } = JSON.parse(fs.readFileSync(ROOT + mcmeta));
     images.data[mcmeta.substring(0, mcmeta.length - 11)].animation = animation;
   }
-  
-  const ATLAS_SIZE = (2 ** Math.ceil(Math.log2(Math.sqrt(images.occupied))));
-  
+
+  const ATLAS_SIZE = 2 ** Math.ceil(Math.log2(Math.sqrt(images.occupied)));
+
   const json = {};
   json.factor = [1 / ATLAS_SIZE, 1 / ATLAS_SIZE];
   json.data = {};
 
   new Jimp(UNIT * ATLAS_SIZE, UNIT * ATLAS_SIZE, async (_err, result) => {
-    let x = 0, y = 0;
+    let x = 0,
+      y = 0;
 
     for (const texName in images.data) {
       const data = images.data[texName];
@@ -54,27 +55,25 @@ const UNIT = 16;
         json.data[texName].animation = data.animation;
       }
     }
-  
+
     result.write("./public/static/images/atlas/atlas.png");
     fs.writeFileSync("./public/static/images/atlas/texture.json", JSON.stringify(json, null, 2));
   });
 })();
 
-
-
 /**
  * @template T
- * @param {T[]} arr 
- * @param {(ele: T) => boolean} condition 
+ * @param {T[]} arr
+ * @param {(ele: T) => boolean} condition
  * @returns {[T[], T[]]}
  */
 function partition(arr, condition) {
-  const passed = [], other = [];
+  const passed = [],
+    other = [];
   for (const element of arr) {
     if (condition(element)) {
       passed.push(element);
-    }
-    else {
+    } else {
       other.push(element);
     }
   }

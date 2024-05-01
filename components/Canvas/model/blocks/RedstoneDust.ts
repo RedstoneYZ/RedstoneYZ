@@ -10,7 +10,7 @@ class RedstoneDust extends Block {
   public crossMode: boolean;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redirectRedstone: 'full', ...options });
+    super({ needBottomSupport: true, transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneDust;
     this.states = { east: 1, south: 1, west: 1, north: 1 };
@@ -29,18 +29,18 @@ class RedstoneDust extends Block {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
 
-  override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
-    if (direction === 'up') return { strong: false, power: 0 };
-    return direction === 'down' || this.states[direction] ?
-      { strong: false, power: this.internal.power } :
-      { strong: false, power: 0 };
+  override powerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
+    if (direction === "up") return { strong: false, power: 0 };
+    return direction === "down" || this.states[direction]
+      ? { strong: false, power: this.internal.power }
+      : { strong: false, power: 0 };
   }
 
-  override powerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
-    if (direction === 'up' || direction === 'down') return { strong: false, power: 0 };
-    return this.states[direction] ?
-      { strong: true, power: this.internal.power } :
-      { strong: false, power: 0 };
+  override powerTowardsWire(direction: SixSides): { strong: boolean; power: number } {
+    if (direction === "up" || direction === "down") return { strong: false, power: 0 };
+    return this.states[direction]
+      ? { strong: true, power: this.internal.power }
+      : { strong: false, power: 0 };
   }
 
   /**
@@ -61,7 +61,7 @@ class RedstoneDust extends Block {
 
       target.PPUpdate();
 
-      if (dir === 'up' || dir === 'down') return;
+      if (dir === "up" || dir === "down") return;
 
       // 如果有指向側邊，側邊的上下兩個方塊也要更新
       if (this.states[dir] && target.type !== BlockType.RedstoneDust) {
@@ -76,7 +76,12 @@ class RedstoneDust extends Block {
     super.PPUpdate();
 
     const oldStates = JSON.parse(JSON.stringify(this.states)) as RedstoneDustState;
-    this.internal.power = this.states.east = this.states.west = this.states.south = this.states.north = 0;
+    this.internal.power =
+      this.states.east =
+      this.states.west =
+      this.states.south =
+      this.states.north =
+        0;
 
     Maps.P6DArray.forEach(([dir, [dx, dy, dz]]) => {
       const x = this.x + dx;
@@ -96,24 +101,23 @@ class RedstoneDust extends Block {
         this.internal.power = Math.max(this.internal.power, power);
       }
 
-      if (dir === 'up' || dir === 'down') return;
+      if (dir === "up" || dir === "down") return;
 
       // 四周方塊如果會連上紅石粉，就根據規則連上
       if (block.redirectRedstone) {
         if (
-          block.redirectRedstone === 'full' || (
-            block.redirectRedstone === 'line' &&
-            'facing' in block.states &&
-            [dir as SixSides, Maps.ReverseDir[dir]].includes(block.states.facing)
-          )
+          block.redirectRedstone === "full" ||
+          (block.redirectRedstone === "line" &&
+            "facing" in block.states &&
+            [dir as SixSides, Maps.ReverseDir[dir]].includes(block.states.facing))
         ) {
           this.states[dir] = 1;
         }
       }
 
-      const sideDown = this.engine.block(x     , this.y - 1, z);
-      const sideUp   = this.engine.block(x     , this.y + 1, z);
-      const above    = this.engine.block(this.x, this.y + 1, this.z);
+      const sideDown = this.engine.block(x, this.y - 1, z);
+      const sideUp = this.engine.block(x, this.y + 1, z);
+      const above = this.engine.block(this.x, this.y + 1, this.z);
 
       // 側下方的紅石粉
       if (sideDown?.type === BlockType.RedstoneDust && block?.transparent) {
@@ -128,16 +132,15 @@ class RedstoneDust extends Block {
       }
     });
 
-    const explicitDir = Maps.P4DArray
-      .map(([dir]) => this.states[dir] ? dir : undefined)
-      .filter(a => a) as FourFacings[];
+    const explicitDir = Maps.P4DArray.map(([dir]) => (this.states[dir] ? dir : undefined)).filter(
+      (a) => a,
+    ) as FourFacings[];
 
     if (explicitDir.length === 0) {
       if (this.crossMode) {
         this.states.east = this.states.south = this.states.west = this.states.north = 1;
       }
-    }
-    else {
+    } else {
       this.crossMode = true;
       if (explicitDir.length === 1) {
         this.states[Maps.ReverseDir[explicitDir[0]]] = 1;

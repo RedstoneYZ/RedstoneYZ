@@ -34,26 +34,26 @@ export default class Renderer {
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
-    this.canvas     = canvas;
+    this.canvas = canvas;
     this.dimensions = dimensions;
-    this.engine     = controller.engine;
+    this.engine = controller.engine;
 
-    this.textures   = new TextureManager();
-    this.models     = new ModelHandler();
+    this.textures = new TextureManager();
+    this.models = new ModelHandler();
 
-    this.WIDTH   = canvas.width;
-    this.HEIGHT  = canvas.height;
+    this.WIDTH = canvas.width;
+    this.HEIGHT = canvas.height;
     this.X_SCALE = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
     this.Y_SCALE = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
 
     this.gl = this.initGL();
 
     this.programs = [
-      new LightProgram(this, this.gl), 
-      // new TestProgram(this, this.gl), 
-      new MainProgram(this, this.gl), 
-      new EnvironmentProgram(this, this.gl), 
-      new LineProgram(this, this.gl), 
+      new LightProgram(this, this.gl),
+      // new TestProgram(this, this.gl),
+      new MainProgram(this, this.gl),
+      new EnvironmentProgram(this, this.gl),
+      new LineProgram(this, this.gl),
     ];
   }
 
@@ -90,7 +90,7 @@ export default class Renderer {
       if (this.controller.alive) {
         requestAnimationFrame(draw);
       }
-    }
+    };
 
     requestAnimationFrame(draw);
   }
@@ -119,7 +119,7 @@ export default class Renderer {
           const block = this.engine.block(x, y, z);
           if (!block || block.type === BlockType.AirBlock) continue;
           const models = this.models.get(block.type, block.states);
-          models.forEach(model => {
+          models.forEach((model) => {
             model.outline.forEach(({ from, to }) => {
               const x1 = x + from[0];
               const y1 = y + from[1];
@@ -207,9 +207,12 @@ export default class Renderer {
     if (!neighbor || neighbor.type === BlockType.AirBlock) return true;
 
     const map = {
-      south: [0, 1], north: [0, 1], 
-      east: [1, 2], west: [1, 2], 
-      up: [2, 0], down: [2, 0], 
+      south: [0, 1],
+      north: [0, 1],
+      east: [1, 2],
+      west: [1, 2],
+      up: [2, 0],
+      down: [2, 0],
     } as const;
 
     const reverse = Maps.ReverseDir[face.cullface];
@@ -217,15 +220,20 @@ export default class Renderer {
     const neighborModels = this.models.get(neighbor.type, neighbor.states);
     const [i1, i2] = map[face.cullface];
 
-    const min1 = Math.min(...face.corners.map(a => a[i1]));
-    const max1 = Math.max(...face.corners.map(a => a[i1]));
-    const min2 = Math.min(...face.corners.map(a => a[i2]));
-    const max2 = Math.max(...face.corners.map(a => a[i2]));
+    const min1 = Math.min(...face.corners.map((a) => a[i1]));
+    const max1 = Math.max(...face.corners.map((a) => a[i1]));
+    const min2 = Math.min(...face.corners.map((a) => a[i2]));
+    const max2 = Math.max(...face.corners.map((a) => a[i2]));
 
     for (const model of neighborModels) {
       for (const neighborFace of model.faces) {
         if (neighborFace.cullface !== reverse) continue;
-        if (neighborFace.corners.every(c => (c[i1] <= min1 || c[i1] >= max1) && (c[i2] <= min2 || c[i2] >= max2))) return false;
+        if (
+          neighborFace.corners.every(
+            (c) => (c[i1] <= min1 || c[i1] >= max1) && (c[i2] <= min2 || c[i2] >= max2),
+          )
+        )
+          return false;
       }
     }
 
@@ -234,61 +242,66 @@ export default class Renderer {
 
   public get sunAngle(): number {
     const tick = this.engine.tick % 24000;
-    return tick * Math.PI / 12000;
+    return (tick * Math.PI) / 12000;
   }
 
   public get seasonAngle(): number {
     const tick = this.engine.tick % (24000 * 96);
-    return tick * Math.PI / (24000 * 48);
+    return (tick * Math.PI) / (24000 * 48);
   }
 
   public get mvp(): Float32Array {
-    const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
+    const {
+      xyz: { x, y, z },
+      facing: { yaw, pitch },
+    } = this.controller.player;
 
     return Matrix4.Multiply(
-      Matrix4.Translate(-x, -y, -z), 
-      Matrix4.RotateY(yaw - Math.PI), 
-      Matrix4.RotateX(-pitch), 
-      Matrix4.Perspective(0.2 * this.X_SCALE, 0.2 * this.Y_SCALE, 0.1, 100)
+      Matrix4.Translate(-x, -y, -z),
+      Matrix4.RotateY(yaw - Math.PI),
+      Matrix4.RotateX(-pitch),
+      Matrix4.Perspective(0.2 * this.X_SCALE, 0.2 * this.Y_SCALE, 0.1, 100),
     );
   }
 
   public get mlp(): Float32Array {
     const theta = this.sunAngle;
-    const phi   = this.seasonAngle;
+    const phi = this.seasonAngle;
     const x = this.X_SCALE;
     const y = this.Y_SCALE;
 
     return Matrix4.Multiply(
-      Matrix4.RotateY(-Math.PI/2), 
-      Matrix4.RotateZ(-25.04 * Math.PI / 180), 
-      Matrix4.RotateX(theta), 
-      Matrix4.RotateY(-23.4 * Math.sin(phi) * Math.PI / 180), 
-      Matrix4.Orthographic(-7*x, 7*x, -7*y, 7*y, -10, 10)
+      Matrix4.RotateY(-Math.PI / 2),
+      Matrix4.RotateZ((-25.04 * Math.PI) / 180),
+      Matrix4.RotateX(theta),
+      Matrix4.RotateY((-23.4 * Math.sin(phi) * Math.PI) / 180),
+      Matrix4.Orthographic(-7 * x, 7 * x, -7 * y, 7 * y, -10, 10),
     );
   }
 
-  public indices = new Uint16Array(Array.from(
-    { length: 4096 }, 
-    (_, i) => {
+  public indices = new Uint16Array(
+    Array.from({ length: 4096 }, (_, i) => {
       i <<= 2;
       return [i, i + 1, i + 2, i + 3, 65535];
-    }
-  ).flat());
+    }).flat(),
+  );
 
   private get mvInv(): Float32Array {
-    const { xyz: { x, y, z }, facing: { yaw, pitch } } = this.controller.player;
+    const {
+      xyz: { x, y, z },
+      facing: { yaw, pitch },
+    } = this.controller.player;
     return Matrix4.Multiply(
-      Matrix4.RotateX(pitch), 
-      Matrix4.RotateY(Math.PI - yaw), 
-      Matrix4.Translate(x, y, z), 
+      Matrix4.RotateX(pitch),
+      Matrix4.RotateY(Math.PI - yaw),
+      Matrix4.Translate(x, y, z),
     );
   }
 
   private initGL(): WebGL2RenderingContext {
-    const gl = this.canvas.getContext('webgl2', { alpha: false });
+    const gl = this.canvas.getContext("webgl2", { alpha: false });
     if (!gl) {
-      throw new Error('Your browser does not support webgl2 canvas.');
+      throw new Error("Your browser does not support webgl2 canvas.");
     }
     return gl;
   }

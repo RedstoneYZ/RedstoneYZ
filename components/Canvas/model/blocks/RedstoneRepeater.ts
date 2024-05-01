@@ -7,10 +7,10 @@ class RedstoneRepeater extends Block {
   public states: RedstoneRepeaterState;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redirectRedstone: 'line', ...options });
+    super({ needBottomSupport: true, transparent: true, redirectRedstone: "line", ...options });
 
     this.type = BlockType.RedstoneRepeater;
-    this.states = { delay: 1, facing: 'north', locked: false, powered: false };
+    this.states = { delay: 1, facing: "north", locked: false, powered: false };
     this.setFacing(options.normDir, options.facingDir);
   }
 
@@ -22,16 +22,16 @@ class RedstoneRepeater extends Block {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
 
-  overridepowerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
-    return this.states.powered && direction === this.states.facing ?
-      { strong: true, power: 15 } :
-      { strong: false, power: 0 };
+  overridepowerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
+    return this.states.powered && direction === this.states.facing
+      ? { strong: true, power: 15 }
+      : { strong: false, power: 0 };
   }
 
-  overridepowerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
-    return this.states.powered && direction === this.states.facing ?
-      { strong: true, power: 15 } :
-      { strong: false, power: 0 };
+  overridepowerTowardsWire(direction: SixSides): { strong: boolean; power: number } {
+    return this.states.powered && direction === this.states.facing
+      ? { strong: true, power: 15 }
+      : { strong: false, power: 0 };
   }
 
   /**
@@ -50,7 +50,11 @@ class RedstoneRepeater extends Block {
     const locked = this.currentLocked;
 
     if (!locked && this.states.powered !== powered) {
-      this.engine.addTask(['repeaterUpdate', [this.x, this.y, this.z, powered], this.states.delay * 2]);
+      this.engine.addTask([
+        "repeaterUpdate",
+        [this.x, this.y, this.z, powered],
+        this.states.delay * 2,
+      ]);
     }
     if (this.states.locked !== locked) {
       this.states.locked = locked;
@@ -70,9 +74,8 @@ class RedstoneRepeater extends Block {
     this.sendPPUpdate();
   }
 
-
-  private _left: FourFacings = 'east';
-  private _right: FourFacings = 'west';
+  private _left: FourFacings = "east";
+  private _right: FourFacings = "west";
   private _backCoords: Vector3 = [this.x, this.y, this.z + 1];
   private _leftCoords: Vector3 = [this.x - 1, this.y, this.z];
   private _rightCoords: Vector3 = [this.x + 1, this.y, this.z];
@@ -85,9 +88,13 @@ class RedstoneRepeater extends Block {
   private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
     if (!normDir || !facingDir) return;
 
-    this.states.facing = facingDir ?? 'north';
-    this._left = ({ north: 'east', east: 'south', south: 'west', west: 'north' } as const)[facingDir];
-    this._right = ({ north: 'west', west: 'south', south: 'east', east: 'north' } as const)[facingDir];
+    this.states.facing = facingDir ?? "north";
+    this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[
+      facingDir
+    ];
+    this._right = ({ north: "west", west: "south", south: "east", east: "north" } as const)[
+      facingDir
+    ];
 
     let x: number, y: number, z: number;
     [x, y, z] = Maps.P4DMap[Maps.ReverseDir[facingDir]];
@@ -112,7 +119,10 @@ class RedstoneRepeater extends Block {
     const [rx, ry, rz] = this._rightCoords;
 
     let block = this.engine.block(lx, ly, lz);
-    if (block?.type === BlockType.RedstoneRepeater && block.powerTowardsWire(this._right).power > 0) {
+    if (
+      block?.type === BlockType.RedstoneRepeater &&
+      block.powerTowardsWire(this._right).power > 0
+    ) {
       return true;
     }
 

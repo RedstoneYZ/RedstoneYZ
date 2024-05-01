@@ -9,7 +9,7 @@ class CommandBlock extends FullBlock {
     super(options);
 
     this.type = BlockType.CommandBlock;
-    this.states = { conditional: false, facing: 'down' };
+    this.states = { conditional: false, facing: "down" };
   }
 }
 

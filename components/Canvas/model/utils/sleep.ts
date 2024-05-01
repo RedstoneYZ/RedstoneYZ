@@ -4,7 +4,7 @@
 function sleep(ms: number): Promise<void>;
 function sleep<T>(ms: number, value: T): Promise<T>;
 function sleep<T>(ms: number, value?: T): Promise<T | void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve(value);
     }, ms);

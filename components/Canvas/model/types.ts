@@ -1,18 +1,34 @@
 import Engine from "./Engine";
-import { AirBlock, CommandBlock, Glass, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./blocks";
+import {
+  AirBlock,
+  CommandBlock,
+  Glass,
+  IronBlock,
+  Lever,
+  RedstoneComparator,
+  RedstoneDust,
+  RedstoneLamp,
+  RedstoneRepeater,
+  RedstoneTorch,
+  RedstoneWallTorch,
+  Target,
+} from "./blocks";
 
 export type CanvasProps = {
   canvasWidth: number;
   canvasHeight: number;
   storable?: boolean;
   checkable?: boolean;
-} & ({
-  xLen: number;
-  yLen: number;
-  zLen: number;
-} | {
-  preLoadData: MapData;
-})
+} & (
+  | {
+      xLen: number;
+      yLen: number;
+      zLen: number;
+    }
+  | {
+      preLoadData: MapData;
+    }
+);
 
 export interface ControllerOptions {
   canvas: HTMLCanvasElement;
@@ -32,16 +48,17 @@ export interface EngineOptions {
 }
 
 export type EngineTaskParams = {
-  leftClick: [number, number, number], 
-  rightClick: [number, number, number, boolean, Vector3, FourFacings, BlockType], 
-  torchUpdate: [number, number, number, boolean], 
-  repeaterUpdate: [number, number, number, boolean], 
-  comparatorUpdate: [number, number, number, number], 
-  lampUnlit: [number, number, number]
-}
+  leftClick: [number, number, number];
+  rightClick: [number, number, number, boolean, Vector3, FourFacings, BlockType];
+  torchUpdate: [number, number, number, boolean];
+  repeaterUpdate: [number, number, number, boolean];
+  comparatorUpdate: [number, number, number, number];
+  lampUnlit: [number, number, number];
+};
 
-export type EngineTask = { [K in keyof EngineTaskParams]: [K, EngineTaskParams[K], number] }[keyof EngineTaskParams]
-
+export type EngineTask = {
+  [K in keyof EngineTaskParams]: [K, EngineTaskParams[K], number];
+}[keyof EngineTaskParams];
 
 export interface MapData {
   xLen: number;
@@ -67,24 +84,34 @@ export interface ValidationData {
   timeout: number;
 }
 
-
 export enum BlockType {
-  AirBlock           = "air", 
-  CommandBlock       = "command_block",
-  IronBlock          = "iron_block", 
-  Glass              = "glass", 
-  RedstoneDust       = "redstone_wire", 
-  RedstoneTorch      = "redstone_torch", 
-  RedstoneWallTorch  = "redstone_wall_torch", 
-  RedstoneRepeater   = "repeater",
-  RedstoneLamp       = "redstone_lamp", 
-  Lever              = "lever",
-  RedstoneComparator = "comparator", 
-  Target             = "target"
+  AirBlock = "air",
+  CommandBlock = "command_block",
+  IronBlock = "iron_block",
+  Glass = "glass",
+  RedstoneDust = "redstone_wire",
+  RedstoneTorch = "redstone_torch",
+  RedstoneWallTorch = "redstone_wall_torch",
+  RedstoneRepeater = "repeater",
+  RedstoneLamp = "redstone_lamp",
+  Lever = "lever",
+  RedstoneComparator = "comparator",
+  Target = "target",
 }
 
-
-export type Blocks = AirBlock | CommandBlock | Glass | IronBlock | Lever | RedstoneComparator | RedstoneDust | RedstoneLamp | RedstoneRepeater | RedstoneTorch | RedstoneWallTorch | Target;
+export type Blocks =
+  | AirBlock
+  | CommandBlock
+  | Glass
+  | IronBlock
+  | Lever
+  | RedstoneComparator
+  | RedstoneDust
+  | RedstoneLamp
+  | RedstoneRepeater
+  | RedstoneTorch
+  | RedstoneWallTorch
+  | Target;
 
 export type BlockConstructor = new (options: BlockOptions) => Blocks;
 

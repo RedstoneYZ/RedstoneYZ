@@ -1,31 +1,31 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-'use client'
+"use client";
 
-import { usePathname } from 'next/navigation'
-import { formatDate } from 'pliny/utils/formatDate'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Article } from 'contentlayer/generated'
-import Link from '@/components/Link'
-import Tag from '@/components/Tag'
-import siteMetadata from '@/data/siteMetadata'
-import articleHierarchy from '@/app/articleHierarchy.json'
+import { usePathname } from "next/navigation";
+import { formatDate } from "pliny/utils/formatDate";
+import { CoreContent } from "pliny/utils/contentlayer";
+import type { Article } from "contentlayer/generated";
+import Link from "@/components/Link";
+import Tag from "@/components/Tag";
+import siteMetadata from "@/data/siteMetadata";
+import articleHierarchy from "@/app/articleHierarchy.json";
 
 interface PaginationProps {
-  totalPages: number
-  currentPage: number
+  totalPages: number;
+  currentPage: number;
 }
 interface ListLayoutProps {
-  posts: CoreContent<Article>[]
-  title: string
-  initialDisplayPosts?: CoreContent<Article>[]
-  pagination?: PaginationProps
+  posts: CoreContent<Article>[];
+  title: string;
+  initialDisplayPosts?: CoreContent<Article>[];
+  pagination?: PaginationProps;
 }
 
 function Pagination({ totalPages, currentPage }: PaginationProps) {
-  const pathname = usePathname()
-  const basePath = pathname.split('/')[1]
-  const prevPage = currentPage - 1 > 0
-  const nextPage = currentPage + 1 <= totalPages
+  const pathname = usePathname();
+  const basePath = pathname.split("/")[1];
+  const prevPage = currentPage - 1 > 0;
+  const nextPage = currentPage + 1 <= totalPages;
 
   return (
     <div className="space-y-2 pb-8 pt-6 md:space-y-5">
@@ -58,7 +58,7 @@ function Pagination({ totalPages, currentPage }: PaginationProps) {
         )}
       </nav>
     </div>
-  )
+  );
 }
 
 export default function ListLayoutWithTags({
@@ -67,7 +67,7 @@ export default function ListLayoutWithTags({
   initialDisplayPosts = [],
   pagination,
 }: ListLayoutProps) {
-  const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts
+  const displayPosts = initialDisplayPosts.length > 0 ? initialDisplayPosts : posts;
 
   return (
     <div>
@@ -77,13 +77,13 @@ export default function ListLayoutWithTags({
         </h1>
       </div>
       <div className="flex sm:space-x-24">
-        <div className="px-6 py-4 hidden h-full max-h-screen min-w-[310px] max-w-[310px] flex-wrap overflow-auto rounded bg-gray-50 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
-          <ArticleTable data={articleHierarchy} parent='/article/' title={title}></ArticleTable>
+        <div className="hidden h-full max-h-screen min-w-[310px] max-w-[310px] flex-wrap overflow-auto rounded bg-gray-50 px-6 py-4 pt-5 shadow-md dark:bg-gray-900/70 dark:shadow-gray-800/40 sm:flex">
+          <ArticleTable data={articleHierarchy} parent="/article/" title={title}></ArticleTable>
         </div>
         <RightPanel displayPosts={displayPosts} pagination={pagination}></RightPanel>
       </div>
     </div>
-  )
+  );
 }
 
 function ArticleTable({ data, parent, title }: ArticleTableProps) {
@@ -91,56 +91,61 @@ function ArticleTable({ data, parent, title }: ArticleTableProps) {
 
   return (
     <ul>
-      {
-        'index.mdx' in data && typeof data['index.mdx'] === 'string' ? 
+      {"index.mdx" in data && typeof data["index.mdx"] === "string" ? (
+        <Link
+          href={parent}
+          className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+        >
+          {data["index.mdx"]}
+        </Link>
+      ) : parent === "/article/" ? (
+        pathname.startsWith("/article") ? (
+          <h3 className="font-bold text-primary-500">{title}</h3>
+        ) : (
           <Link
-            href={parent}
-            className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+            href={`/article`}
+            className="font-bold text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
           >
-            {data["index.mdx"]}
-          </Link> : 
-        parent === "/article/" ? 
-          pathname.startsWith('/article') ? (
-            <h3 className="font-bold text-primary-500">{title}</h3>
-          ) : (
-            <Link
-              href={`/article`}
-              className="font-bold text-gray-700 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
-            >
-              {title}
-            </Link>
-          ) :
-          parent
-      }
-      {Object.entries(data).filter(([key]) => key !== "index.mdx").map(([key, value]) => {
-        return (
-          <li key={key} className="mx-5 my-3">
-            {typeof value === "string" ? 
-              <Link
-                href={parent + key.substring(0, key.length - 4)}
-                className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
-              >
-                {value}
-              </Link> : 
-              <ArticleTable data={value} parent={parent + key + "/"} title={title}></ArticleTable>}
-          </li>
+            {title}
+          </Link>
         )
-      })}
+      ) : (
+        parent
+      )}
+      {Object.entries(data)
+        .filter(([key]) => key !== "index.mdx")
+        .map(([key, value]) => {
+          return (
+            <li key={key} className="mx-5 my-3">
+              {typeof value === "string" ? (
+                <Link
+                  href={parent + key.substring(0, key.length - 4)}
+                  className="py-2 text-sm font-medium uppercase text-gray-500 hover:text-primary-500 dark:text-gray-300 dark:hover:text-primary-500"
+                >
+                  {value}
+                </Link>
+              ) : (
+                <ArticleTable data={value} parent={parent + key + "/"} title={title}></ArticleTable>
+              )}
+            </li>
+          );
+        })}
     </ul>
   );
 }
 
 function RightPanel({
-  displayPosts, pagination
+  displayPosts,
+  pagination,
 }: {
-  displayPosts: CoreContent<Article>[],
-  pagination?: PaginationProps
+  displayPosts: CoreContent<Article>[];
+  pagination?: PaginationProps;
 }) {
   return (
     <div>
       <ul>
         {displayPosts.map((post) => {
-          const { path, date, title, summary, tags } = post
+          const { path, date, title, summary, tags } = post;
           return (
             <li key={path} className="py-5">
               <article className="flex flex-col space-y-2 xl:space-y-0">
@@ -161,13 +166,11 @@ function RightPanel({
                       {tags?.map((tag) => <Tag key={tag} text={tag} />)}
                     </div>
                   </div>
-                  <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                    {summary}
-                  </div>
+                  <div className="prose max-w-none text-gray-500 dark:text-gray-400">{summary}</div>
                 </div>
               </article>
             </li>
-          )
+          );
         })}
       </ul>
       {pagination && pagination.totalPages > 1 && (

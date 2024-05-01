@@ -1,24 +1,24 @@
-import { ReactNode } from 'react'
-import Image from '@/components/Image'
-import Bleed from 'pliny/ui/Bleed'
-import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Article } from 'contentlayer/generated'
-import Link from '@/components/Link'
-import PageTitle from '@/components/PageTitle'
-import SectionContainer from '@/components/SectionContainer'
-import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import { ReactNode } from "react";
+import Image from "@/components/Image";
+import Bleed from "pliny/ui/Bleed";
+import { CoreContent } from "pliny/utils/contentlayer";
+import type { Article } from "contentlayer/generated";
+import Link from "@/components/Link";
+import PageTitle from "@/components/PageTitle";
+import SectionContainer from "@/components/SectionContainer";
+import ScrollTopAndComment from "@/components/ScrollTopAndComment";
 
 interface LayoutProps {
-  content: CoreContent<Article>
-  children: ReactNode
-  next?: { path: string; title: string }
-  prev?: { path: string; title: string }
+  content: CoreContent<Article>;
+  children: ReactNode;
+  next?: { path: string; title: string };
+  prev?: { path: string; title: string };
 }
 
 export default function PostMinimal({ content, next, prev, children }: LayoutProps) {
-  const { title, images } = content
+  const { title, images } = content;
   const displayImage =
-    images && images.length > 0 ? images[0] : 'https://picsum.photos/seed/picsum/800/400'
+    images && images.length > 0 ? images[0] : "https://picsum.photos/seed/picsum/800/400";
 
   return (
     <SectionContainer>
@@ -67,5 +67,5 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
         </div>
       </article>
     </SectionContainer>
-  )
+  );
 }

@@ -13,17 +13,17 @@ import RedstoneWallTorch from "./RedstoneWallTorch";
 import Target from "./Target";
 
 export {
-  AirBlock, 
-  Block, 
-  CommandBlock, 
-  IronBlock, 
-  Glass, 
-  Lever, 
-  RedstoneComparator, 
-  RedstoneDust, 
-  RedstoneLamp, 
-  RedstoneRepeater, 
-  RedstoneTorch, 
-  RedstoneWallTorch, 
-  Target
+  AirBlock,
+  Block,
+  CommandBlock,
+  IronBlock,
+  Glass,
+  Lever,
+  RedstoneComparator,
+  RedstoneDust,
+  RedstoneLamp,
+  RedstoneRepeater,
+  RedstoneTorch,
+  RedstoneWallTorch,
+  Target,
 };

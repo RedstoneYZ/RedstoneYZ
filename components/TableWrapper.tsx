@@ -1,7 +1,7 @@
-import { ReactNode } from "react"
+import { ReactNode } from "react";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 const TableWrapper = ({ children }: Props) => {
@@ -9,7 +9,7 @@ const TableWrapper = ({ children }: Props) => {
     <div className="w-full overflow-x-auto">
       <table>{children}</table>
     </div>
-  )
-}
+  );
+};
 
-export default TableWrapper
+export default TableWrapper;

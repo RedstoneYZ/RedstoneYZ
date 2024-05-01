@@ -18,7 +18,7 @@ export default class EnvironmentProgram extends Program {
     super(renderer, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform(['u_mvp', 'sampler']);
+    this.uniform = this.setupUniform(["u_mvp", "sampler"]);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -49,25 +49,36 @@ export default class EnvironmentProgram extends Program {
 
   private getData(): Float32Array {
     const theta = this.renderer.sunAngle;
-    const phi   = this.renderer.seasonAngle;
+    const phi = this.renderer.seasonAngle;
 
     const vs = Matrix4.Multiply(
-      new Float32Array([
-        60,  20,  20, 1, 
-        60,  20, -20, 1, 
-        60, -20, -20, 1, 
-        60, -20,  20, 1, 
-      ]), 
-      Matrix4.RotateY(23.4 * Math.sin(phi) * Math.PI / 180), 
-      Matrix4.RotateZ(theta), 
-      Matrix4.RotateX(25.04 * Math.PI / 180), 
+      new Float32Array([60, 20, 20, 1, 60, 20, -20, 1, 60, -20, -20, 1, 60, -20, 20, 1]),
+      Matrix4.RotateY((23.4 * Math.sin(phi) * Math.PI) / 180),
+      Matrix4.RotateZ(theta),
+      Matrix4.RotateX((25.04 * Math.PI) / 180),
     );
 
     return new Float32Array([
-      vs[ 0], vs[ 1], vs[ 2], 0, 0, 
-      vs[ 4], vs[ 5], vs[ 6], 1, 0, 
-      vs[ 8], vs[ 9], vs[10], 1, 1, 
-      vs[12], vs[13], vs[14], 0, 1, 
+      vs[0],
+      vs[1],
+      vs[2],
+      0,
+      0,
+      vs[4],
+      vs[5],
+      vs[6],
+      1,
+      0,
+      vs[8],
+      vs[9],
+      vs[10],
+      1,
+      1,
+      vs[12],
+      vs[13],
+      vs[14],
+      0,
+      1,
     ]);
   }
 
@@ -123,7 +134,7 @@ export default class EnvironmentProgram extends Program {
       throw new Error("Failed to create main texture.");
     }
 
-    const sun = await new Promise<HTMLImageElement>(res => {
+    const sun = await new Promise<HTMLImageElement>((res) => {
       const image = new Image();
       image.onload = () => res(image);
       image.src = "/static/images/textures/environment/sun.png";
@@ -141,12 +152,11 @@ export default class EnvironmentProgram extends Program {
   }
 
   private get mvp(): Float32Array {
-    const { xyz: { x, y, z } } = this.renderer.controller.player;
+    const {
+      xyz: { x, y, z },
+    } = this.renderer.controller.player;
 
-    return Matrix4.Multiply(
-      Matrix4.Translate(x, y, z), 
-      this.renderer.mvp
-    );
+    return Matrix4.Multiply(Matrix4.Translate(x, y, z), this.renderer.mvp);
   }
 
   protected vsSrc = `#version 300 es

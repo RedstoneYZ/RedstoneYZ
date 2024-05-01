@@ -22,7 +22,7 @@ export default abstract class Program {
     const gl = this.gl;
     const program = gl.createProgram();
     if (!program) {
-      throw new Error('Failed to create program.');
+      throw new Error("Failed to create program.");
     }
 
     const vs = this.createShader(gl.VERTEX_SHADER, this.vsSrc);
@@ -32,13 +32,13 @@ export default abstract class Program {
 
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      throw new Error('Program Link Error\n' + gl.getProgramInfoLog(program)?.toString());
+      throw new Error("Program Link Error\n" + gl.getProgramInfoLog(program)?.toString());
     }
 
     // TODO: Don't validate at build
     gl.validateProgram(program);
     if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-      throw new Error('Program Validate Error\n' + gl.getProgramInfoLog(program)?.toString());
+      throw new Error("Program Validate Error\n" + gl.getProgramInfoLog(program)?.toString());
     }
 
     return program;
@@ -48,13 +48,13 @@ export default abstract class Program {
     const gl = this.gl;
     const shader = gl.createShader(type);
     if (!shader) {
-      throw new Error('Failed to create shader.');
+      throw new Error("Failed to create shader.");
     }
 
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw new Error('Shader Compilation Error\n' + gl.getShaderInfoLog(shader)?.toString());
+      throw new Error("Shader Compilation Error\n" + gl.getShaderInfoLog(shader)?.toString());
     }
 
     return shader;
@@ -62,7 +62,7 @@ export default abstract class Program {
 
   protected setupUniform<T extends string>(uniforms: T[]): any {
     const result: Record<string, WebGLUniformLocation> = {};
-    uniforms.forEach(uniform => {
+    uniforms.forEach((uniform) => {
       const location = this.gl.getUniformLocation(this.program, uniform);
       if (!location) {
         throw new Error(`Failed to get location of ${uniform}`);
