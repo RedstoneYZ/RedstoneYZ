@@ -238,7 +238,7 @@ class Engine {
 
       this.needRender = true;
 
-      this.tick += 1;
+      this.tick += 100;
       if (this.tick % 24000 === 0) {
         this.day++;
       }

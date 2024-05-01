@@ -255,13 +255,15 @@ export default class Renderer {
 
   public get mlp(): Float32Array {
     const theta = this.sunAngle;
+    const phi   = this.seasonAngle;
     const x = this.X_SCALE;
     const y = this.Y_SCALE;
 
     return Matrix4.Multiply(
       Matrix4.RotateY(-Math.PI/2), 
-      Matrix4.RotateZ(-25.04 * Math.PI / 180), // 25.04, 121.512
+      Matrix4.RotateZ(-25.04 * Math.PI / 180), 
       Matrix4.RotateX(theta), 
+      Matrix4.RotateY(-23.4 * Math.sin(phi) * Math.PI / 180), 
       Matrix4.Orthographic(-7*x, 7*x, -7*y, 7*y, -10, 10)
     );
   }

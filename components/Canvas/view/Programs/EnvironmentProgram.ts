@@ -49,6 +49,7 @@ export default class EnvironmentProgram extends Program {
 
   private getData(): Float32Array {
     const theta = this.renderer.sunAngle;
+    const phi   = this.renderer.seasonAngle;
 
     const vs = Matrix4.Multiply(
       new Float32Array([
@@ -57,6 +58,7 @@ export default class EnvironmentProgram extends Program {
         60, -20, -20, 1, 
         60, -20,  20, 1, 
       ]), 
+      Matrix4.RotateY(23.4 * Math.sin(phi) * Math.PI / 180), 
       Matrix4.RotateZ(theta), 
       Matrix4.RotateX(25.04 * Math.PI / 180), 
     );
