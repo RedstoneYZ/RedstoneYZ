@@ -80,7 +80,7 @@ class RedstoneComparator extends Block {
    */
   private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
     if (!normDir || !facingDir) return;
-    
+
     this.states.facing = facingDir ?? 'north';
     this._left = ({ north: 'east', east: 'south', south: 'west', west: 'north' } as const)[facingDir];
     this._right = ({ north: 'west', west: 'south', south: 'east', east: 'north' } as const)[facingDir];

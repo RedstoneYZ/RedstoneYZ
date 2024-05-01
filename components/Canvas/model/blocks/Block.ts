@@ -16,7 +16,7 @@ abstract class Block {
   public bottomSolid: boolean;
   public needSupport: boolean;
   public needBottomSupport: boolean;
-  
+
   public breakable: boolean;
   public transparent: boolean;
   public redirectRedstone: "full" | "line" | "none";
@@ -36,7 +36,7 @@ abstract class Block {
     this.bottomSolid = options.solid || options.bottomSolid || false;
     this.needSupport = options.needSupport || false;
     this.needBottomSupport = options.needBottomSupport || false;
-    
+
     this.breakable = options.breakable || true;
     this.transparent = options.transparent || false;
     this.redirectRedstone = options.redirectRedstone ?? 'none';
@@ -99,7 +99,7 @@ abstract class Block {
    */
   sendPPUpdate() {
     this.engine.needRender = true;
-    
+
     this.PPUpdate();
     Maps.P6DArray.forEach(([, [x, y, z]]) => {
       this.engine.block(this.x + x, this.y + y, this.z + z)?.PPUpdate();

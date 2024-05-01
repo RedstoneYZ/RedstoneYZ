@@ -35,25 +35,25 @@ function NewBlock<T extends Record<string, unknown>>(type: BlockType, options: B
 
     case BlockType.CommandBlock:
       return new CommandBlock(options);
-      
+
     case BlockType.IronBlock:
       return new IronBlock(options);
-      
+
     case BlockType.Glass:
       return new Glass(options);
-      
+
     case BlockType.Lever:
       return new Lever(options);
 
     case BlockType.RedstoneDust:
       return new RedstoneDust(options);
-      
+
     case BlockType.RedstoneLamp:
       return new RedstoneLamp(options);
-      
+
     case BlockType.RedstoneRepeater:
       return new RedstoneRepeater(options);
-      
+
     case BlockType.RedstoneComparator:
       return new RedstoneComparator(options);
 

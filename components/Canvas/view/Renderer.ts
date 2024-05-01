@@ -63,7 +63,7 @@ export default class Renderer {
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.clearColor(0.5, 0.63, 1, 1);
-    
+
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -205,7 +205,7 @@ export default class Renderer {
     const [x, y, z] = Maps.P6DMap[face.cullface];
     const neighbor = this.engine.block(block.x + x, block.y + y, block.z + z);
     if (!neighbor || neighbor.type === BlockType.AirBlock) return true;
-  
+
     const map = {
       south: [0, 1], north: [0, 1], 
       east: [1, 2], west: [1, 2], 

@@ -8,7 +8,7 @@ class RedstoneRepeater extends Block {
 
   constructor(options: BlockOptions) {
     super({ needBottomSupport: true, transparent: true, redirectRedstone: 'line', ...options });
-    
+
     this.type = BlockType.RedstoneRepeater;
     this.states = { delay: 1, facing: 'north', locked: false, powered: false };
     this.setFacing(options.normDir, options.facingDir);
@@ -84,7 +84,7 @@ class RedstoneRepeater extends Block {
    */
   private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
     if (!normDir || !facingDir) return;
-    
+
     this.states.facing = facingDir ?? 'north';
     this._left = ({ north: 'east', east: 'south', south: 'west', west: 'north' } as const)[facingDir];
     this._right = ({ north: 'west', west: 'south', south: 'east', east: 'north' } as const)[facingDir];

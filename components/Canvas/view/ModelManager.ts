@@ -151,7 +151,7 @@ export default class ModelManager {
       while (value.startsWith("#")) {
         value = value.substring(1);
         keys.push(value);
-  
+
         key = value;
         value = model.textures[key];
       }
@@ -326,7 +326,7 @@ export default class ModelManager {
   private expandVertices(from: Vector3, to: Vector3, rotate: Rotation): Vector3[] {
     const f = [from[0] / 16, from[1] / 16, from[2] / 16];
     const t = [to[0] / 16, to[1] / 16, to[2] / 16];
-  
+
     const original: Vector3[] = [
       [f[0], f[1], f[2]], 
       [f[0], f[1], t[2]], 
@@ -337,7 +337,7 @@ export default class ModelManager {
       [t[0], t[1], f[2]], 
       [t[0], t[1], t[2]]
     ];
-  
+
     return original.map(v => rotate([...v, 1]));
   }
 

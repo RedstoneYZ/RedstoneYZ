@@ -30,6 +30,6 @@ export {
   RedstoneTorch, 
   RedstoneWallTorch, 
   Target, 
-  
+
   NewBlock
 };

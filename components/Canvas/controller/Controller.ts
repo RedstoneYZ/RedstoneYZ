@@ -63,7 +63,7 @@ class Controller {
 
       facing.pitch = facing.pitch - (this.prevRefY - cursorY) * 0.0078125;
       facing.pitch = Math.max(Math.min(facing.pitch, Math.PI / 2), -(Math.PI / 2));
-      
+
       this.activeKeys.clear();
     }
 
@@ -114,7 +114,7 @@ class Controller {
     this.engine.addTask(['rightClick', [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock], 0]);
     this.needRender = true;
   }
-  
+
   mouseMove(canvasX: number, canvasY: number): void {
     this.renderer.setLookAt(canvasX, canvasY);
   }
@@ -147,7 +147,7 @@ class Controller {
     if (this.player.velocity > 0) {
       this.needRender = true;
     }
- 
+
     this.player.advance();
   }
 

@@ -31,7 +31,7 @@ abstract class RedstoneTorchBase extends Block {
    */
   override PPUpdate() {
     super.PPUpdate();
-    
+
     const attachedBlock = this.supportingBlock;
     if (!attachedBlock?.internal.power !== this.states.lit) {
       this.engine.addTask(['torchUpdate', [this.x, this.y, this.z, !attachedBlock?.internal.power], 2]);

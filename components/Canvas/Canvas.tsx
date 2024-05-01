@@ -68,7 +68,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     if (e.clientX === 0 && e.clientY === 0) return;
     controller?.adjustAngles(e.clientX, e.clientY);
   }
-  
+
   function handleDragStart(e: React.DragEvent<HTMLCanvasElement>) {
     // 把拖曳的殘影改成看不見的元素
     if (spanRef.current) {
@@ -103,7 +103,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
   //     // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
   //   }
   // }
-  
+
   return (
     <div className="canvas-wrapper">
       <div className="canvas-wrapper-upper">
@@ -119,7 +119,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
           onMouseEnter={handleMouseEnter}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          
+
           draggable={true}
           onDrag={handleDrag}
           onDragStart={handleDragStart}

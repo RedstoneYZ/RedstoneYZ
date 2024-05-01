@@ -53,7 +53,7 @@ class RedstoneDust extends Block {
 
   override sendPPUpdate() {
     this.engine.needRender = true;
-    
+
     this.PPUpdate();
     Maps.P6DArray.forEach(([dir, [x, y, z]]) => {
       const target = this.engine.block(this.x + x, this.y + y, this.z + z);
@@ -77,7 +77,7 @@ class RedstoneDust extends Block {
 
     const oldStates = JSON.parse(JSON.stringify(this.states)) as RedstoneDustState;
     this.internal.power = this.states.east = this.states.west = this.states.south = this.states.north = 0;
-    
+
     Maps.P6DArray.forEach(([dir, [dx, dy, dz]]) => {
       const x = this.x + dx;
       const y = this.y + dy;
@@ -131,7 +131,7 @@ class RedstoneDust extends Block {
     const explicitDir = Maps.P4DArray
       .map(([dir]) => this.states[dir] ? dir : undefined)
       .filter(a => a) as FourFacings[];
-  
+
     if (explicitDir.length === 0) {
       if (this.crossMode) {
         this.states.east = this.states.south = this.states.west = this.states.north = 1;
