@@ -1,29 +1,27 @@
-import { BlockStates } from "../model/types";
+import { BlockState } from "../model/types";
 import { BlockModelRule } from "./types";
 
-export default class BlockStatesManager {
-  private blockStatesCache: { [key: string]: BlockStatesModel };
+export default class BlockStateManager {
+  private blockStatesCache: { [key: string]: BlockStateModel };
 
   constructor() {
     this.blockStatesCache = {};
   }
 
-  get(path: string, states: BlockStates): BlockModelRule[][] {
-    const blockStates = this.getBlockStates(path);
+  get(path: string, states: BlockState): BlockModelRule[][] {
+    const blockStates = this.getBlockState(path);
     const result: BlockModelRule[][] = [];
     for (const rule of blockStates.rules) {
       if ("OR" in rule.when) {
         if (typeof rule.when.OR === "string") break; // never
         for (const r of rule.when.OR) {
-          if (Object.entries(r).every(([k, v]) => `${states[k as keyof BlockStates]}` === v)) {
+          if (Object.entries(r).every(([k, v]) => `${states[k as keyof BlockState]}` === v)) {
             result.push(rule.apply);
             break;
           }
         }
       } else {
-        if (
-          Object.entries(rule.when).every(([k, v]) => `${states[k as keyof BlockStates]}` === v)
-        ) {
+        if (Object.entries(rule.when).every(([k, v]) => `${states[k as keyof BlockState]}` === v)) {
           if (blockStates.singleMatch) {
             return [rule.apply];
           }
@@ -34,20 +32,20 @@ export default class BlockStatesManager {
     return result;
   }
 
-  private getBlockStates(path: string): BlockStatesModel {
+  private getBlockState(path: string): BlockStateModel {
     if (path in this.blockStatesCache) {
       return this.blockStatesCache[path]!;
     }
 
-    const raw_block_states = this.loadRawBlockStates(path);
+    const raw_block_states = this.loadRawBlockState(path);
     return (this.blockStatesCache[path] = this.parseStates(raw_block_states));
   }
 
-  private loadRawBlockStates(path: string): RawBlockStatesModel {
-    return require(`../../../public/json/states/${path}.json`) as RawBlockStatesModel;
+  private loadRawBlockState(path: string): RawBlockStateModel {
+    return require(`../../../public/json/states/${path}.json`) as RawBlockStateModel;
   }
 
-  private parseStates(rawStates: RawBlockStatesModel): BlockStatesModel {
+  private parseStates(rawStates: RawBlockStateModel): BlockStateModel {
     if ("variants" in rawStates)
       return {
         singleMatch: true,
@@ -86,7 +84,7 @@ export default class BlockStatesManager {
     return path;
   }
 
-  private makeRequired(data: RawBlockStatesModelRule[]): BlockModelRule[] {
+  private makeRequired(data: RawBlockStateModelRule[]): BlockModelRule[] {
     return data.map(({ model, x, y, uvlock, weight }) => ({
       model: this.parsePath(model),
       x: x ?? 0,
@@ -97,37 +95,37 @@ export default class BlockStatesManager {
   }
 }
 
-interface BlockStatesModel {
+interface BlockStateModel {
   singleMatch: boolean;
-  rules: BlockStatesModelRule[];
+  rules: BlockStateModelRule[];
 }
 
-interface BlockStatesModelRule {
+interface BlockStateModelRule {
   when: { OR: { [state: string]: string }[] } | { [state: string]: string };
-  apply: Required<RawBlockStatesModelRule>[];
+  apply: Required<RawBlockStateModelRule>[];
 }
 
-type RawBlockStatesModel = RawBlockStatesModelVariants | RawBlockStatesModelMuitipart;
+type RawBlockStateModel = RawBlockStateModelVariants | RawBlockStateModelMuitipart;
 
-interface RawBlockStatesModelVariants {
+interface RawBlockStateModelVariants {
   variants: {
-    [variant: string]: RawBlockStatesModelRule | RawBlockStatesModelRule[];
+    [variant: string]: RawBlockStateModelRule | RawBlockStateModelRule[];
   };
 }
 
-interface RawBlockStatesModelMuitipart {
-  muitipart: RawBlockStatesModelMuitipartCase[];
+interface RawBlockStateModelMuitipart {
+  muitipart: RawBlockStateModelMuitipartCase[];
 }
 
-interface RawBlockStatesModelMuitipartCase {
+interface RawBlockStateModelMuitipartCase {
   when:
     | { OR: { [state: string]: string }[] }
     | { AND: { [state: string]: string }[] }
     | { [state: string]: string };
-  apply: RawBlockStatesModelRule | RawBlockStatesModelRule[];
+  apply: RawBlockStateModelRule | RawBlockStateModelRule[];
 }
 
-interface RawBlockStatesModelRule {
+interface RawBlockStateModelRule {
   model: string;
   x?: number;
   y?: number;

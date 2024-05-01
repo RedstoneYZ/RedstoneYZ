@@ -4,6 +4,7 @@ import {
   BlockInternal,
   BlockOptions,
   BlockSpawnOptions,
+  BlockState,
   BlockType,
   Blocks,
   PowerTransmission,
@@ -32,7 +33,7 @@ abstract class Block {
   public internal: BlockInternal;
 
   public abstract type: BlockType;
-  public abstract states: Record<string, unknown>;
+  public abstract states: BlockState;
 
   constructor(options: BlockOptions) {
     this.engine = options.engine;

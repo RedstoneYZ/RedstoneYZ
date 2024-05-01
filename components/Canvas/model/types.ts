@@ -141,12 +141,14 @@ export interface BlockOptions {
   redirectRedstone?: "full" | "line" | "none";
 }
 
+export type BlockState = Record<string, unknown>;
+
 export interface BlockSpawnOptions {
   x: number;
   y: number;
   z: number;
   type: BlockType;
-  states: Record<string, unknown>;
+  states: BlockState;
   engine: Engine;
   breakable?: boolean;
 }
@@ -154,7 +156,7 @@ export interface BlockSpawnOptions {
 export interface BlockData {
   type: BlockType;
   breakable: boolean;
-  states: Record<string, unknown>;
+  states: BlockState;
 }
 
 export interface PowerTransmission {

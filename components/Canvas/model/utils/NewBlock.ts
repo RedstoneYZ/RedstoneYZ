@@ -1,4 +1,4 @@
-import { BlockOptions, BlockType, Blocks, FourFacings, SixSides } from "../types";
+import { BlockOptions, BlockState, BlockType, Blocks, FourFacings, SixSides } from "../types";
 import {
   AirBlock,
   IronBlock,
@@ -21,12 +21,12 @@ function NewBlock(
   type: BlockType,
   options: BlockOptions & { normDir: SixSides; facingDir: FourFacings },
 ): Blocks;
-function NewBlock<T extends Record<string, unknown>>(
+function NewBlock<T extends BlockState>(
   type: BlockType,
   options: Omit<BlockOptions, "normDir" | "facingDir">,
   states: T,
 ): Blocks;
-function NewBlock<T extends Record<string, unknown>>(
+function NewBlock<T extends BlockState>(
   type: BlockType,
   options: BlockOptions,
   states?: T,

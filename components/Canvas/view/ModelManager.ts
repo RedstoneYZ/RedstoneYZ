@@ -1,15 +1,15 @@
-import { SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
-import BlockStatesManager from "./BlockStatesManager";
+import { BlockState, SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
+import BlockStateManager from "./BlockStateManager";
 import { BlockModel, BlockModelFace, BlockOutline } from "./types";
 
 export default class ModelManager {
-  private blockStatesManager: BlockStatesManager;
+  private blockStatesManager: BlockStateManager;
   private rawModelCache: { [key: string]: RawBlockModel };
   private outlineCache: { [key: string]: BlockOutline[] };
   private modelCache: { [key: string]: BlockModel };
 
   constructor() {
-    this.blockStatesManager = new BlockStatesManager();
+    this.blockStatesManager = new BlockStateManager();
     this.rawModelCache = {};
     this.outlineCache = {};
     this.modelCache = {
@@ -21,7 +21,7 @@ export default class ModelManager {
     };
   }
 
-  get(path: string, states: Record<string, unknown>): BlockModel[] {
+  get(path: string, states: BlockState): BlockModel[] {
     return this.blockStatesManager
       .get(path, states)
       .map((pack) => {
