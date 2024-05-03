@@ -50,7 +50,6 @@ export default abstract class Program {
     if (!shader) {
       throw new Error("Failed to create shader.");
     }
-
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {

@@ -12,6 +12,7 @@ import { BlockModelFace } from "./types";
 import LineProgram from "./Programs/LineProgram";
 import LightProgram from "./Programs/LightProgram";
 import MainProgram from "./Programs/MainProgram";
+import HotBarProgram from "./Programs/HotBarProgram";
 import Matrix4 from "./utils/Matrix4";
 
 export default class Renderer {
@@ -54,6 +55,7 @@ export default class Renderer {
       new MainProgram(this, this.gl),
       new EnvironmentProgram(this, this.gl),
       new LineProgram(this, this.gl),
+      // new HotBarProgram(this, this.gl),
     ];
   }
 
