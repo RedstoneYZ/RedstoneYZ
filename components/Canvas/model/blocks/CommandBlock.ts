@@ -1,16 +1,21 @@
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockType, CommandBlockStates } from "../types";
+import { BlockOptions, BlockType, SixSides } from "../types";
 
 class CommandBlock extends FullBlock {
   public type: BlockType.CommandBlock;
-  public states: CommandBlockStates;
+  public states: CommandBlockState;
 
   constructor(options: BlockOptions) {
     super(options);
 
     this.type = BlockType.CommandBlock;
-    this.states = { power: 0, source: false, conditional: false, facing: 'down' };
+    this.states = { conditional: false, facing: "down" };
   }
 }
+
+type CommandBlockState = {
+  conditional: boolean;
+  facing: SixSides;
+};
 
 export default CommandBlock;

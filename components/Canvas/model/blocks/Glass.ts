@@ -1,18 +1,20 @@
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockStates, BlockType } from "../types";
+import { BlockOptions, BlockType } from "../types";
 
 class Glass extends FullBlock {
   public type: BlockType.Glass;
-  public states: BlockStates;
+  public states: GlassState;
 
   constructor(options: BlockOptions) {
     super({ transparent: true, ...options });
 
     this.type = BlockType.Glass;
-    this.states = { power: 0, source: false };
+    this.states = {};
   }
 
   override PPUpdate() {}
 }
+
+type GlassState = Record<string, never>;
 
 export default Glass;

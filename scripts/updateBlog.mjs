@@ -1,19 +1,19 @@
 import fs from "fs";
 
 fs.writeFileSync(
-  "./app/articleHierarchy.json", 
-  JSON.stringify(readData("./data/article/", "article"), null, 2)
+  "./app/articleHierarchy.json",
+  JSON.stringify(readData("./data/article/", "article"), null, 2),
 );
 
 /**
- * @param {string} path 
+ * @param {string} path
  */
 function readData(fullPath, path) {
   if (path.endsWith(".mdx")) {
-    const content = fs.readFileSync(fullPath).toString().split('\n');
+    const content = fs.readFileSync(fullPath).toString().split("\n");
     for (const line of content) {
-      if (line.startsWith('title')) {
-        const title = line.match(/title\: +(.+)/)[1];
+      if (line.startsWith("title")) {
+        const title = line.match(/title: +(.+)/)[1];
         return title;
       }
     }
@@ -23,9 +23,9 @@ function readData(fullPath, path) {
   if (fs.statSync(fullPath).isDirectory()) {
     const children = fs.readdirSync(fullPath);
     const result = {};
-    children.forEach(child => {
+    children.forEach((child) => {
       result[child] = readData(fullPath + "/" + child, child);
-    })
+    });
     return result;
   }
 

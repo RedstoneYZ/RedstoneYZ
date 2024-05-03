@@ -12,7 +12,7 @@ export interface BlockModelFace {
   normal: Vector3;
   shade: boolean;
   texture: string;
-  cullface: SixSides;
+  cullface: SixSides | undefined;
   tintindex: number;
 }
 

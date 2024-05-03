@@ -1,16 +1,16 @@
-import { BlockOptions, BlockType, FourFacings, RedstoneComparatorStates, SixSides, Vector3 } from "../types";
+import { BlockOptions, BlockType, FourFacings, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
 class RedstoneComparator extends Block {
   public type: BlockType.RedstoneComparator;
-  public states: RedstoneComparatorStates;
+  public states: RedstoneComparatorState;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
+    super({ needBottomSupport: true, transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneComparator;
-    this.states = { power: 0, source: false, facing: 'north', mode: 'compare', powered: false };
+    this.states = { facing: "north", mode: "compare", powered: false };
 
     this.setFacing(options.normDir, options.facingDir);
   }
@@ -23,23 +23,23 @@ class RedstoneComparator extends Block {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
 
-  override powerTowardsBlock(direction: SixSides): { strong: boolean, power: number } {
-    return this.states.powered && direction === this.states.facing ?
-      { strong: true, power: this.states.power } :
-      { strong: false, power: 0 };
+  override powerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
+    return this.states.powered && direction === this.states.facing
+      ? { strong: true, power: this.internal.power }
+      : { strong: false, power: 0 };
   }
 
-  override powerTowardsWire(direction: SixSides): { strong: boolean, power: number } {
-    return this.states.powered && direction === this.states.facing ?
-      { strong: true, power: this.states.power } :
-      { strong: false, power: 0 };
+  override powerTowardsWire(direction: SixSides): { strong: boolean; power: number } {
+    return this.states.powered && direction === this.states.facing
+      ? { strong: true, power: this.internal.power }
+      : { strong: false, power: 0 };
   }
 
   /**
    * 與此紅石中繼器互動一次
    */
   interact() {
-    this.states.mode = this.states.mode === 'compare' ? 'subtract' : 'compare';
+    this.states.mode = this.states.mode === "compare" ? "subtract" : "compare";
     this.sendPPUpdate();
   }
 
@@ -48,8 +48,8 @@ class RedstoneComparator extends Block {
     super.PPUpdate();
 
     const newPower = this.currentPower;
-    if (this.states.power !== newPower) {
-      this.engine.addTask(['comparatorUpdate', [this.x, this.y, this.z, newPower], 2]);
+    if (this.internal.power !== newPower) {
+      this.engine.addTask(["comparatorUpdate", [this.x, this.y, this.z, newPower], 2]);
     }
   }
 
@@ -58,17 +58,17 @@ class RedstoneComparator extends Block {
    * @param power
    */
   comparatorUpdate(power: number) {
-    if (this.currentPower === this.states.power) {
+    if (this.currentPower === this.internal.power) {
       return;
     }
 
-    this.states.power = power;
+    this.internal.power = power;
     this.states.powered = power > 0;
     this.sendPPUpdate();
   }
 
-  private _left: FourFacings = 'east';
-  private _right: FourFacings = 'west';
+  private _left: FourFacings = "east";
+  private _right: FourFacings = "west";
   private _backCoords: Vector3 = [this.x, this.y, this.z + 1];
   private _leftCoords: Vector3 = [this.x - 1, this.y, this.z];
   private _rightCoords: Vector3 = [this.x + 1, this.y, this.z];
@@ -80,10 +80,14 @@ class RedstoneComparator extends Block {
    */
   private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
     if (!normDir || !facingDir) return;
-    
-    this.states.facing = facingDir ?? 'north';
-    this._left = ({ north: 'east', east: 'south', south: 'west', west: 'north' } as const)[facingDir];
-    this._right = ({ north: 'west', west: 'south', south: 'east', east: 'north' } as const)[facingDir];
+
+    this.states.facing = facingDir ?? "north";
+    this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[
+      facingDir
+    ];
+    this._right = ({ north: "west", west: "south", south: "east", east: "north" } as const)[
+      facingDir
+    ];
 
     let x: number, y: number, z: number;
     [x, y, z] = Maps.P4DMap[Maps.ReverseDir[facingDir]];
@@ -109,22 +113,42 @@ class RedstoneComparator extends Block {
 
     let sidePower = 0;
     block = this.engine.block(lx, ly, lz);
-    if (block && [BlockType.RedstoneDust, BlockType.RedstoneRepeater, BlockType.RedstoneComparator].includes(block.type)) {
+    if (
+      block &&
+      [BlockType.RedstoneDust, BlockType.RedstoneRepeater, BlockType.RedstoneComparator].includes(
+        block.type,
+      )
+    ) {
       sidePower = Math.max(sidePower, block.powerTowardsWire(this._right).power ?? 0);
     }
 
     block = this.engine.block(rx, ry, rz);
-    if (block && [BlockType.RedstoneDust, BlockType.RedstoneRepeater, BlockType.RedstoneComparator].includes(block.type)) {
+    if (
+      block &&
+      [BlockType.RedstoneDust, BlockType.RedstoneRepeater, BlockType.RedstoneComparator].includes(
+        block.type,
+      )
+    ) {
       sidePower = Math.max(sidePower, block.powerTowardsWire(this._left).power ?? 0);
     }
 
-    if (this.states.mode === 'subtract') {
+    if (this.states.mode === "subtract") {
       return Math.max(backPower - sidePower, 0);
-    }
-    else {
+    } else {
       return backPower >= sidePower ? backPower : 0;
     }
   }
 }
+
+type RedstoneComparatorState = {
+  /** 紅石比較器的面向方向 */
+  facing: FourFacings;
+
+  /** 紅石比較器的運行模式 */
+  mode: "compare" | "subtract";
+
+  /** 紅石比較器是否被啟動 */
+  powered: boolean;
+};
 
 export default RedstoneComparator;

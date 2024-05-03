@@ -1,15 +1,15 @@
-import { BlockOptions, BlockType, FourFacings, RedstoneWallTorchStates, SixSides, Vector3 } from "../types";
+import { BlockOptions, BlockType, FourFacings, SixSides, Vector3 } from "../types";
 import { Maps } from "../utils";
 import RedstoneTorchBase from "./RedstoneTorchBase";
 
 class RedstoneWallTorch extends RedstoneTorchBase {
-  public override states: RedstoneWallTorchStates;
+  public override states: RedstoneWallTorchState;
 
   constructor(options: BlockOptions) {
-    super({ needSupport: true, transparent: true, redstoneAutoConnect: 'full', ...options });
+    super({ needSupport: true, transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneWallTorch;
-    this.states = { power: 0, source: true, lit: true, facing: 'north' };
+    this.states = { lit: true, facing: "north" };
     this.setFacing(options.normDir, options.facingDir);
   }
 
@@ -27,12 +27,19 @@ class RedstoneWallTorch extends RedstoneTorchBase {
    */
   private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
     if (!normDir || !facingDir) return;
-    if (normDir === 'down' || normDir === 'up') return;
+    if (normDir === "down" || normDir === "up") return;
 
     this.states.facing = normDir;
     const [x, y, z] = Maps.P6DMap[normDir];
     this.supportingBlockCoords = [this.x - x, this.y - y, this.z - z];
   }
 }
+
+type RedstoneWallTorchState = {
+  /** 紅石火把是否被觸發 */
+  lit: boolean;
+  /** 紅石火把面向的方向 */
+  facing: FourFacings;
+};
 
 export default RedstoneWallTorch;

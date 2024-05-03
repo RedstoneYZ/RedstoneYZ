@@ -1,18 +1,34 @@
 import Engine from "./Engine";
-import { AirBlock, CommandBlock, Glass, IronBlock, Lever, RedstoneComparator, RedstoneDust, RedstoneLamp, RedstoneRepeater, RedstoneTorch, RedstoneWallTorch, Target } from "./blocks";
+import {
+  AirBlock,
+  CommandBlock,
+  Glass,
+  IronBlock,
+  Lever,
+  RedstoneComparator,
+  RedstoneDust,
+  RedstoneLamp,
+  RedstoneRepeater,
+  RedstoneTorch,
+  RedstoneWallTorch,
+  Target,
+} from "./blocks";
 
 export type CanvasProps = {
   canvasWidth: number;
   canvasHeight: number;
   storable?: boolean;
   checkable?: boolean;
-} & ({
-  xLen: number;
-  yLen: number;
-  zLen: number;
-} | {
-  preLoadData: MapData;
-})
+} & (
+  | {
+      xLen: number;
+      yLen: number;
+      zLen: number;
+    }
+  | {
+      preLoadData: MapData;
+    }
+);
 
 export interface ControllerOptions {
   canvas: HTMLCanvasElement;
@@ -32,16 +48,17 @@ export interface EngineOptions {
 }
 
 export type EngineTaskParams = {
-  leftClick: [number, number, number], 
-  rightClick: [number, number, number, boolean, Vector3, FourFacings, BlockType], 
-  torchUpdate: [number, number, number, boolean], 
-  repeaterUpdate: [number, number, number, boolean], 
-  comparatorUpdate: [number, number, number, number], 
-  lampUnlit: [number, number, number]
-}
+  leftClick: [number, number, number];
+  rightClick: [number, number, number, boolean, Vector3, FourFacings, BlockType];
+  torchUpdate: [number, number, number, boolean];
+  repeaterUpdate: [number, number, number, boolean];
+  comparatorUpdate: [number, number, number, number];
+  lampUnlit: [number, number, number];
+};
 
-export type EngineTask = { [K in keyof EngineTaskParams]: [K, EngineTaskParams[K], number] }[keyof EngineTaskParams]
-
+export type EngineTask = {
+  [K in keyof EngineTaskParams]: [K, EngineTaskParams[K], number];
+}[keyof EngineTaskParams];
 
 export interface MapData {
   xLen: number;
@@ -67,24 +84,34 @@ export interface ValidationData {
   timeout: number;
 }
 
-
 export enum BlockType {
-  AirBlock           = "air", 
-  CommandBlock       = "command_block",
-  IronBlock          = "iron_block", 
-  Glass              = "glass", 
-  RedstoneDust       = "redstone_wire", 
-  RedstoneTorch      = "redstone_torch", 
-  RedstoneWallTorch  = "redstone_wall_torch", 
-  RedstoneRepeater   = "repeater",
-  RedstoneLamp       = "redstone_lamp", 
-  Lever              = "lever",
-  RedstoneComparator = "comparator", 
-  Target             = "target"
+  AirBlock = "air",
+  CommandBlock = "command_block",
+  IronBlock = "iron_block",
+  Glass = "glass",
+  RedstoneDust = "redstone_wire",
+  RedstoneTorch = "redstone_torch",
+  RedstoneWallTorch = "redstone_wall_torch",
+  RedstoneRepeater = "repeater",
+  RedstoneLamp = "redstone_lamp",
+  Lever = "lever",
+  RedstoneComparator = "comparator",
+  Target = "target",
 }
 
-
-export type Blocks = AirBlock | CommandBlock | Glass | IronBlock | Lever | RedstoneComparator | RedstoneDust | RedstoneLamp | RedstoneRepeater | RedstoneTorch | RedstoneWallTorch | Target;
+export type Blocks =
+  | AirBlock
+  | CommandBlock
+  | Glass
+  | IronBlock
+  | Lever
+  | RedstoneComparator
+  | RedstoneDust
+  | RedstoneLamp
+  | RedstoneRepeater
+  | RedstoneTorch
+  | RedstoneWallTorch
+  | Target;
 
 export type BlockConstructor = new (options: BlockOptions) => Blocks;
 
@@ -104,23 +131,24 @@ export interface BlockOptions {
   breakable?: boolean;
 
   transparent?: boolean;
-  fullBlock?: boolean;
-  fullSupport?: boolean;
-  upperSupport?: boolean;
-  bottomSupport?: boolean;
-  sideSupport?: boolean;
+  solid?: boolean;
+  topSolid?: boolean;
+  bottomSolid?: boolean;
+  sideSolid?: boolean;
   needSupport?: boolean;
   needBottomSupport?: boolean;
 
-  redstoneAutoConnect?: "full" | "line" | "none";
+  redirectRedstone?: "full" | "line" | "none";
 }
+
+export type BlockState = Record<string, unknown>;
 
 export interface BlockSpawnOptions {
   x: number;
   y: number;
   z: number;
   type: BlockType;
-  states: BlockStates;
+  states: BlockState;
   engine: Engine;
   breakable?: boolean;
 }
@@ -128,7 +156,7 @@ export interface BlockSpawnOptions {
 export interface BlockData {
   type: BlockType;
   breakable: boolean;
-  states: BlockStates;
+  states: BlockState;
 }
 
 export interface PowerTransmission {
@@ -136,86 +164,9 @@ export interface PowerTransmission {
   power: number;
 }
 
-export interface BlockStates {
+export interface BlockInternal {
   power: number;
   source: boolean;
-}
-
-export interface CommandBlockStates extends BlockStates {
-  conditional: boolean;
-  facing: SixSides;
-}
-
-export interface LeverStates extends BlockStates {
-  /** 控制桿的附著位置 */
-  face: ThreeFaces;
-
-  /** 控制桿的面向方向 */
-  facing: FourFacings;
-
-  /** 控制桿是否被拉下 */
-  powered: boolean;
-}
-
-export interface RedstoneDustStates extends BlockStates {
-  /** 紅石粉東側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  east: 0 | 1 | 2;
-
-  /** 紅石粉西側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  west: 0 | 1 | 2;
-
-  /** 紅石粉北側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  north: 0 | 1 | 2;
-
-  /** 紅石粉南側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  south: 0 | 1 | 2;
-}
-
-export interface RedstoneTorchBaseStates extends BlockStates {
-  /** 紅石火把是否被觸發 */
-  lit: boolean;
-}
-
-export interface RedstoneTorchStates extends RedstoneTorchBaseStates {}
-
-export interface RedstoneWallTorchStates extends RedstoneTorchBaseStates {
-  /** 紅石火把面向的方向 */
-  facing: FourFacings;
-}
-
-export interface RedstoneRepeaterStates extends BlockStates {
-  /** 紅石中繼器的延遲 */
-  delay: number;
-
-  /** 紅石中繼器的指向 */
-  facing: FourFacings;
-
-  /** 紅石中繼器是否被鎖定 */
-  locked: boolean;
-
-  /** 紅石中繼器是否被激發 */
-  powered: boolean;
-}
-
-export interface RedstoneComparatorStates extends BlockStates {
-  /** 紅石比較器的面向方向 */
-  facing: FourFacings;
-
-  /** 紅石比較器的運行模式 */
-  mode: "compare" | "subtract";
-
-  /** 紅石比較器是否被啟動 */
-  powered: boolean;
-}
-
-export interface RedstoneLampStates extends BlockStates {
-  /** 紅石燈是否被觸發 */
-  lit: boolean;
-}
-
-export interface RedstoneTargetStates extends BlockStates {
-  /** 標靶散發的訊號等級 */
-  power: number;
 }
 
 export type Vector2 = [number, number];

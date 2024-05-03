@@ -1,13 +1,14 @@
-import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
-import { KBarButton } from 'pliny/search/KBarButton'
-import siteMetadata from '@/data/siteMetadata'
+import { AlgoliaButton } from "pliny/search/AlgoliaButton";
+import { KBarButton } from "pliny/search/KBarButton";
+import siteMetadata from "@/data/siteMetadata";
 
 const SearchButton = () => {
-  if (siteMetadata.search?.provider !== 'algolia' && siteMetadata.search?.provider !== 'kbar') {
+  if (siteMetadata.search?.provider !== "algolia" && siteMetadata.search?.provider !== "kbar") {
     return <></>;
   }
 
-  const SearchButtonWrapper = siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
+  const SearchButtonWrapper =
+    siteMetadata.search.provider === "algolia" ? AlgoliaButton : KBarButton;
 
   return (
     <SearchButtonWrapper aria-label="Search">
@@ -27,6 +28,6 @@ const SearchButton = () => {
       </svg>
     </SearchButtonWrapper>
   );
-}
+};
 
-export default SearchButton
+export default SearchButton;

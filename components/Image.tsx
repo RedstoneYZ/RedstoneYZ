@@ -1,4 +1,4 @@
-import NextImage, { ImageProps } from 'next/image'
+import NextImage, { ImageProps } from "next/image";
 
 const Image = ({ ...rest }: ImageProps) => {
   return (
@@ -8,11 +8,10 @@ const Image = ({ ...rest }: ImageProps) => {
         width="0"
         height="0"
         sizes="100vw"
-        style={{ width: '100%', height: 'auto' }}
+        style={{ width: "100%", height: "auto" }}
       />
     </div>
-
   );
-}
+};
 
-export default Image
+export default Image;

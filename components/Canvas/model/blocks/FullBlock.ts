@@ -4,7 +4,7 @@ import Block from "./Block";
 
 abstract class FullBlock extends Block {
   constructor(options: BlockOptions) {
-    super({ fullBlock: true, fullSupport: true, ...options });
+    super({ solid: true, ...options });
   }
 
   override PPUpdate() {
@@ -13,7 +13,8 @@ abstract class FullBlock extends Block {
     const oldPower = this.states.power;
     const oldSource = this.states.source;
 
-    let power = 0, source = false;
+    let power = 0,
+      source = false;
     Maps.P6DArray.forEach(([dir, [x, y, z]]) => {
       const block = this.engine.block(this.x + x, this.y + y, this.z + z);
       const powerStatus = block?.powerTowardsBlock(Maps.ReverseDir[dir]);

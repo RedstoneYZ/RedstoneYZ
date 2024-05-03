@@ -1,18 +1,20 @@
-import { BlockOptions, BlockStates, BlockType } from "../types";
+import { BlockOptions, BlockType } from "../types";
 import Block from "./Block";
 
 class AirBlock extends Block {
   public type: BlockType.AirBlock;
-  public states: BlockStates;
+  public states: AirBlockState;
 
   constructor(options: BlockOptions) {
     super({ transparent: true, ...options });
 
     this.type = BlockType.AirBlock;
-    this.states = { power: 0, source: false };
+    this.states = {};
   }
 
   override PPUpdate() {}
 }
+
+type AirBlockState = Record<string, never>;
 
 export default AirBlock;
