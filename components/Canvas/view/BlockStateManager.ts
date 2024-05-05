@@ -15,13 +15,13 @@ export default class BlockStateManager {
       if ("OR" in rule.when) {
         if (typeof rule.when.OR === "string") break; // never
         for (const r of rule.when.OR) {
-          if (Object.entries(r).every(([k, v]) => `${states[k as keyof BlockState]}` === v)) {
+          if (Object.entries(r).every(([k, v]) => `${states[k]}` === v)) {
             result.push(rule.apply);
             break;
           }
         }
       } else {
-        if (Object.entries(rule.when).every(([k, v]) => `${states[k as keyof BlockState]}` === v)) {
+        if (Object.entries(rule.when).every(([k, v]) => `${states[k]}` === v)) {
           if (blockStates.singleMatch) {
             return [rule.apply];
           }

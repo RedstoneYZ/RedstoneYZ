@@ -51,7 +51,7 @@ export default class MainProgram extends Program {
     gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
     gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
-    const data = this.getBlockVertices();
+    const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, (data.length / 32) * 5, gl.UNSIGNED_SHORT, 0);
 
@@ -118,7 +118,7 @@ export default class MainProgram extends Program {
     return vao;
   }
 
-  private getBlockVertices(): Float32Array {
+  private getData(): Float32Array {
     // TODO: only update block changes
     const vertices: number[] = [];
     for (let x = 0; x < this.renderer.dimensions[0]; x++) {

@@ -121,8 +121,9 @@ class Controller {
     if (!target) return;
 
     const [x, y, z, ...normDir] = target;
-    const facingArray: FourFacings[] = ["south", "east", "north", "west", "south"];
-    const facing = facingArray[Math.round((this.player.facing.pitch * 2) / Math.PI)];
+    const facingArray: FourFacings[] = ["north", "east", "south", "west", "north"];
+    const index = Math.round((this.player.facing.yaw + Math.PI) * 2 / Math.PI);
+    const facing = facingArray[index];
 
     this.engine.addTask([
       "rightClick",

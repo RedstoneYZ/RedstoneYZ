@@ -1,6 +1,7 @@
 import { BlockType } from "../../model/types";
 import Renderer from "../Renderer";
 import Program from "./Program";
+import { glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mlp: WebGLUniformLocation;
@@ -44,7 +45,7 @@ export default class LightProgram extends Program {
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 3) * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 16) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.colorMask(true, true, true, true);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -68,16 +69,28 @@ export default class LightProgram extends Program {
             model.faces.forEach((face) => {
               if (!this.renderer.shouldRender(block, face)) return;
 
-              const { corners: c } = face;
+              const { corners: c, texCoord: t } = face;
+              const offset = this.renderer.textures.sample(face.texture, this.renderer.engine.tick);
+              const [ox1, oy1] = offset;
+
               for (let l = 0; l < 4; ++l) {
-                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z);
+                const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10);
+
+                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, tex1);
               }
             });
           });
         }
       }
     }
-    return new Float32Array(vertices);
+
+    const asFloat32 = new Float32Array(vertices);
+    const asInt32 = new Int32Array(asFloat32.buffer);
+    for (let i = 0; i < asFloat32.length; i += 4) {
+      asInt32[i + 3] = vertices[i + 3];
+    }
+
+    return asFloat32;
   }
 
   private createAbo(): WebGLBuffer {
@@ -102,9 +115,11 @@ export default class LightProgram extends Program {
 
     // TODO: maybe change normal and texcoords to half float
     // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 12, 0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 16, 0);
+    gl.vertexAttribIPointer(1, 1, gl.INT, 16, 12);
 
     gl.enableVertexAttribArray(0);
+    gl.enableVertexAttribArray(1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
@@ -157,18 +172,33 @@ export default class LightProgram extends Program {
   }
 
   protected vsSrc = `#version 300 es
+    ${glUnpackif}
+
     layout(location = 0) in vec3 a_position;
+    layout(location = 1) in int a_texture;
 
     uniform mat4 u_mlp;
 
+    out mediump vec2 v_texcoord;
+
     void main() {
       gl_Position = u_mlp * vec4(a_position, 1.0);
+      v_texcoord.x = unpackif(a_texture, 20, 10) / 128.;
+      v_texcoord.y = unpackif(a_texture, 10, 10) / 128.;
     }
   `;
 
   protected fsSrc = `#version 300 es
     precision mediump float;
+
+    in mediump vec2 v_texcoord;
+
+    uniform sampler2D s_texture;
+
     void main() {
+      if (texture(s_texture, v_texcoord).a < 0.1) {
+        discard;
+      }
     }
   `;
 }
