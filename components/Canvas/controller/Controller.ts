@@ -122,7 +122,7 @@ class Controller {
 
     const [x, y, z, ...normDir] = target;
     const facingArray: FourFacings[] = ["north", "east", "south", "west", "north"];
-    const index = Math.round((this.player.facing.yaw + Math.PI) * 2 / Math.PI);
+    const index = Math.round(((this.player.facing.yaw + Math.PI) * 2) / Math.PI);
     const facing = facingArray[index];
 
     this.engine.addTask([

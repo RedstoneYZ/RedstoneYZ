@@ -209,12 +209,10 @@ export default class Matrix4 {
   }
 
   static ToString(mat: Float32Array): string {
-    return (
-`${mat[0]},\t${mat[1]},\t${mat[2]},\t${mat[3]},
+    return `${mat[0]},\t${mat[1]},\t${mat[2]},\t${mat[3]},
 ${mat[4]},\t${mat[5]},\t${mat[6]},\t${mat[7]},
 ${mat[8]},\t${mat[9]},\t${mat[10]},\t${mat[11]},
-${mat[12]},\t${mat[13]},\t${mat[14]},\t${mat[15]},`
-    );
+${mat[12]},\t${mat[13]},\t${mat[14]},\t${mat[15]},`;
   }
 
   private static _multiply(a: Float32Array, b: Float32Array) {
@@ -235,10 +233,10 @@ ${mat[12]},\t${mat[13]},\t${mat[14]},\t${mat[15]},`
 
 function cos(theta: number) {
   const c = Math.cos(theta);
-  return (-1e-10 < c && c < 1e-10) ? 0 : c;
+  return -1e-10 < c && c < 1e-10 ? 0 : c;
 }
 
 function sin(theta: number) {
   const s = Math.sin(theta);
-  return (-1e-10 < s && s < 1e-10) ? 0 : s;
+  return -1e-10 < s && s < 1e-10 ? 0 : s;
 }

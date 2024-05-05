@@ -38,21 +38,26 @@ export default class ModelManager {
       })
       .map((bs) => {
         const rotateMat = Matrix4.Multiply(
-          Matrix4.Translate(-0.5, -0.5, -0.5), 
-          Matrix4.RotateX(-bs.x / 180 * Math.PI), 
-          Matrix4.RotateY(-bs.y / 180 * Math.PI), 
-          Matrix4.Translate(0.5, 0.5, 0.5), 
+          Matrix4.Translate(-0.5, -0.5, -0.5),
+          Matrix4.RotateX((-bs.x / 180) * Math.PI),
+          Matrix4.RotateY((-bs.y / 180) * Math.PI),
+          Matrix4.Translate(0.5, 0.5, 0.5),
         );
         const rotate: (v: Vector4) => Vector3 = (v: Vector4) => {
           const [x, y, z] = Matrix4.MultiplyVec(rotateMat, v);
           return [x, y, z];
-        }
+        };
         const model = this.getModel(bs.model);
 
         return {
           ambientocclusion: model.ambientocclusion,
           faces: model.faces.map((face) => ({
-            corners: face.corners.map((v) => rotate([...v, 1])) as [Vector3, Vector3, Vector3, Vector3],
+            corners: face.corners.map((v) => rotate([...v, 1])) as [
+              Vector3,
+              Vector3,
+              Vector3,
+              Vector3,
+            ],
             texCoord: face.texCoord, // TODO
             normal: rotate([...face.normal, 0]),
             shade: face.shade,
@@ -61,8 +66,10 @@ export default class ModelManager {
             tintindex: face.tintindex,
           })),
           outline: model.outline.map(({ from, to }) => {
-            const _f = rotate([...from, 1]), _t = rotate([...to, 1]);
-            const f: Vector3 = [0, 0, 0], t: Vector3 = [0, 0, 0];
+            const _f = rotate([...from, 1]),
+              _t = rotate([...to, 1]);
+            const f: Vector3 = [0, 0, 0],
+              t: Vector3 = [0, 0, 0];
             f[0] = _f[0] < _t[0] ? _f[0] : _t[0];
             f[1] = _f[1] < _t[1] ? _f[1] : _t[1];
             f[2] = _f[2] < _t[2] ? _f[2] : _t[2];
