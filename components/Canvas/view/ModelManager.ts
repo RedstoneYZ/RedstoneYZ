@@ -58,18 +58,18 @@ export default class ModelManager {
               Vector3,
               Vector3,
             ],
-            texCoord: face.texCoord, // TODO
+            texCoord: face.texCoord, // TODO: uvlock
             normal: rotate([...face.normal, 0]),
             shade: face.shade,
             texture: face.texture,
-            cullface: face.cullface ? this.rotateFace(face.cullface, bs.x, bs.y) : undefined, // TODO
+            cullface: face.cullface ? this.rotateFace(face.cullface, -bs.x, -bs.y) : undefined,
             tintindex: face.tintindex,
           })),
           outline: model.outline.map(({ from, to }) => {
-            const _f = rotate([...from, 1]),
-              _t = rotate([...to, 1]);
-            const f: Vector3 = [0, 0, 0],
-              t: Vector3 = [0, 0, 0];
+            const _f = rotate([...from, 1]);
+            const _t = rotate([...to, 1]);
+            const f: Vector3 = [0, 0, 0];
+            const t: Vector3 = [0, 0, 0];
             f[0] = _f[0] < _t[0] ? _f[0] : _t[0];
             f[1] = _f[1] < _t[1] ? _f[1] : _t[1];
             f[2] = _f[2] < _t[2] ? _f[2] : _t[2];
@@ -249,25 +249,24 @@ export default class ModelManager {
   }
 
   private rotateFace(face: SixSides, x: number, y: number): SixSides {
-    const yFaces: SixSides[] = ["south", "east", "north", "west"];
     const xFaces: SixSides[] = ["south", "down", "north", "up"];
-    let result = face;
+    const yFaces: SixSides[] = ["south", "east", "north", "west"];
 
-    let index = yFaces.findIndex((v) => v === face);
+    let index = xFaces.findIndex((v) => v === face);
     if (index >= 0) {
-      index += y / 90;
+      index += x / 90 + 4;
       index = index >= 4 ? index - 4 : index;
-      result = yFaces[index];
+      face = xFaces[index];
     }
 
-    index = xFaces.findIndex((v) => v === face);
+    index = yFaces.findIndex((v) => v === face);
     if (index >= 0) {
-      index += x / 90;
+      index += y / 90 + 4;
       index = index >= 4 ? index - 4 : index;
-      result = xFaces[index];
+      face = yFaces[index];
     }
 
-    return result;
+    return face;
   }
 
   private getRotationMatrix(rotation?: RawBlockModelElementRotation): Rotation {

@@ -1,7 +1,7 @@
 import { BlockType } from "../../model/types";
 import type Renderer from "../Renderer";
 import Program from "./Program";
-import { glUnpackif } from "./glImports";
+import { glUnpacki, glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mvp: WebGLUniformLocation;
@@ -118,6 +118,7 @@ export default class MainProgram extends Program {
     return vao;
   }
 
+  private printed = [false, false];
   private getData(): Float32Array {
     // TODO: only update block changes
     const vertices: number[] = [];
@@ -128,6 +129,15 @@ export default class MainProgram extends Program {
           if (!block || block.type === BlockType.AirBlock) continue;
 
           const models = this.renderer.models.get(block.type, block.states);
+
+          if (!this.printed[0] && block.type === BlockType.IronBlock) {
+            console.log("iron", models);
+            this.printed[0] = true;
+          }
+          if (!this.printed[1] && block.type === BlockType.CommandBlock) {
+            console.log("command", models);
+            this.printed[1] = true;
+          }
           models.forEach((model) => {
             model.faces.forEach((face) => {
               if (!this.renderer.shouldRender(block, face)) return;
@@ -137,8 +147,10 @@ export default class MainProgram extends Program {
               const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
               for (let l = 0; l < 4; ++l) {
+                const uOffset = t[l][0] > t[l^2][0] ? 2 : 0;
+                const vOffset = t[l][1] > t[l^2][1] ? 1 : 0;
                 const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
-                const tex2 = ((t[l][1] + oy2) << 20) | (oa << 10) | ob;
+                const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
 
                 vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, n[0], n[1], n[2], tex1, tex2);
               }
@@ -183,6 +195,7 @@ export default class MainProgram extends Program {
   }
 
   protected vsSrc = `#version 300 es
+    ${glUnpacki}
     ${glUnpackif}
 
     layout(location = 0) in vec3 a_position;
@@ -208,7 +221,14 @@ export default class MainProgram extends Program {
       v_texcoord1.y = unpackif(a_texture.s, 10, 10) / 128.;
       v_texcoord2.x = unpackif(a_texture.s,  0, 10) / 128.;
       v_texcoord2.y = unpackif(a_texture.t, 20, 10) / 128.;
-      v_texinter = unpackif(a_texture.t, 10, 10) / unpackif(a_texture.t, 0, 10);
+      v_texinter = unpackif(a_texture.t, 11, 9) / unpackif(a_texture.t, 2, 9);
+
+      bool uOffset = unpacki(a_texture.t, 1, 1) == 0;
+      bool vOffset = unpacki(a_texture.t, 0, 1) == 0;
+      v_texcoord1.x += uOffset ? 0.001 : -0.001;
+      v_texcoord2.x += uOffset ? 0.001 : -0.001;
+      v_texcoord1.y += vOffset ? 0.001 : -0.001;
+      v_texcoord2.y += vOffset ? 0.001 : -0.001;
 
       v_suncosine = max(dot(a_normal, lightnorm), 0.0);
 
@@ -269,5 +289,7 @@ export default class MainProgram extends Program {
  * a_texture.s: 00000000000000000000000000000000
  *                └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
  * a_texture.t: 00000000000000000000000000000000
- *                └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
+ *                └ tex2.y ┘└ int.d ┘└ int.n ┘uv
+ *           u: u offset in (0) / out (1)
+ *           v: v offset in (0) / out (1)
  */
