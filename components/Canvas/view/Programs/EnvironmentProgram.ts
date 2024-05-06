@@ -1,4 +1,4 @@
-import Renderer from "../Renderer";
+import type Renderer from "../Renderer";
 import Matrix4 from "../utils/Matrix4";
 import Program from "./Program";
 

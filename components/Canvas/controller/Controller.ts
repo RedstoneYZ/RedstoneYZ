@@ -1,7 +1,8 @@
 import Engine from "../model/Engine";
 import Renderer from "../view";
 
-import { BlockType, FourFacings, ControllerOptions } from "../model/types";
+import type { FourFacings, ControllerOptions } from "../model/types";
+import { BlockType } from "../model/types";
 import blockNameTable from "../model/utils/blockNameTable";
 import Player from "./Player";
 

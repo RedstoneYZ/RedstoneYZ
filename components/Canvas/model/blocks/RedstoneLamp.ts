@@ -1,6 +1,7 @@
 import { Maps } from "../utils";
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockType } from "../types";
+import type { BlockOptions } from "../types";
+import { BlockType } from "../types";
 
 class RedstoneLamp extends FullBlock {
   public type: BlockType.RedstoneLamp;
@@ -35,7 +36,7 @@ class RedstoneLamp extends FullBlock {
   private _shouldLit() {
     if (this.power) return true;
 
-    const litByPower = Maps.P6DArray.some(([_, [x, y, z]]) => {
+    const litByPower = Maps.P6DArray.some(([, [x, y, z]]) => {
       const block = this.engine.block(this.x + x, this.y + y, this.z + z);
       return block?.internal.power;
     });

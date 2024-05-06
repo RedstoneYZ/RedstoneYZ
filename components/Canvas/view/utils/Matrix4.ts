@@ -1,4 +1,4 @@
-import { Vector4 } from "../../model/types";
+import type { Vector4 } from "../../model/types";
 
 export default class Matrix4 {
   static Identity() {

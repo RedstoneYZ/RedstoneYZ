@@ -1,6 +1,6 @@
-import { BlockState, SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
+import type { BlockState, SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
 import BlockStateManager from "./BlockStateManager";
-import { BlockModel, BlockModelFace, BlockOutline } from "./types";
+import type { BlockModel, BlockModelFace, BlockOutline } from "./types";
 import Matrix4 from "./utils/Matrix4";
 
 export default class ModelManager {

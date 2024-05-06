@@ -1,5 +1,6 @@
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockType } from "../types";
+import type { BlockOptions } from "../types";
+import { BlockType } from "../types";
 
 class Glass extends FullBlock {
   public type: BlockType.Glass;

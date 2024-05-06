@@ -1,5 +1,5 @@
 import { BlockType } from "../../model/types";
-import Renderer from "../Renderer";
+import type Renderer from "../Renderer";
 import Program from "./Program";
 import { glUnpackif } from "./glImports";
 

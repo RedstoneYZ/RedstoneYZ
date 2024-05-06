@@ -1,5 +1,5 @@
-import { BlockState } from "../model/types";
-import { BlockModelRule } from "./types";
+import type { BlockState } from "../model/types";
+import type { BlockModelRule } from "./types";
 
 export default class BlockStateManager {
   private blockStatesCache: { [key: string]: BlockStateModel };

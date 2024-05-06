@@ -1,7 +1,8 @@
 import { Maps } from "../utils";
 import Block from "./Block";
 import { strictEqual } from "../../model/utils";
-import { BlockOptions, BlockType, FourFacings, SixSides } from "../types";
+import type { BlockOptions, FourFacings, SixSides } from "../types";
+import { BlockType } from "../types";
 
 class RedstoneDust extends Block {
   public type: BlockType.RedstoneDust;

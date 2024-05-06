@@ -1,5 +1,5 @@
 import Textures from "@/public/static/images/atlas/texture.json";
-import { Vector2, Vector6 } from "../model/types";
+import type { Vector2, Vector6 } from "../model/types";
 
 export default class TextureManager {
   public factor: Vector2;

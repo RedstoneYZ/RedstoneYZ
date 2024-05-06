@@ -1,4 +1,4 @@
-import Renderer from "../Renderer";
+import type Renderer from "../Renderer";
 
 export default abstract class Program {
   protected renderer: Renderer;

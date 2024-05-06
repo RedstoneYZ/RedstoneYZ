@@ -3,9 +3,10 @@ import Tag from "@/components/Tag";
 import siteMetadata from "@/data/siteMetadata";
 import { formatDate } from "pliny/utils/formatDate";
 import { MDXLayoutRenderer } from "pliny/mdx-components";
-import { Article, Singlepage, allSinglepages } from "contentlayer/generated";
+import type { Article, Singlepage } from "contentlayer/generated";
+import { allSinglepages } from "contentlayer/generated";
 import { components } from "@/components/MDXComponents";
-import { CoreContent } from "pliny/utils/contentlayer";
+import type { CoreContent } from "pliny/utils/contentlayer";
 
 const MAX_DISPLAY = 3;
 

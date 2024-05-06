@@ -1,4 +1,4 @@
-import Renderer from "../Renderer";
+import type Renderer from "../Renderer";
 import Program from "./Program";
 
 interface Uniforms {

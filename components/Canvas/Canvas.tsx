@@ -2,15 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// import Button from "../Button";
-// import Message from "../Message";
-
 import Controller from "./controller/Controller";
 
 import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
-import { CanvasProps } from "./model/types";
+import type { CanvasProps } from "./model/types";
 
-const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
+const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   const [controller, setController] = useState<Controller>();
   const [currentBlock, setCurrentBlock] = useState("");
 
@@ -93,19 +90,6 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     setCurrentBlock(controller?.currentBlockName ?? "");
   }
 
-  // async function handleCheckMap() {
-  //   if (!controller) return;
-
-  //   if (await Engine.validate(controller.engine)) {
-  //     console.log('Pass');
-  //     // Message.send({ content: '恭喜你通過檢查！', type: 'success' });
-  //   }
-  //   else {
-  //     console.log('Fail');
-  //     // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
-  //   }
-  // }
-
   return (
     <div className="canvas-wrapper">
       <div className="canvas-wrapper-upper">
@@ -130,14 +114,6 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
         <span ref={spanRef} style={{ display: "none" }} />
       </div>
       <div className="canvas-wrapper-middle">{currentBlock}</div>
-      {
-        // TODO:
-        // storable || (checkable && controller?.engine.validation) ?
-        //   <div className="canvas-wrapper-lower">
-        //     {checkable && controller?.engine.validation ? <Button type="primary" onClick={handleCheckMap}>檢查地圖</Button> : <></>}
-        //   </div> :
-        //   <></>
-      }
     </div>
   );
 };

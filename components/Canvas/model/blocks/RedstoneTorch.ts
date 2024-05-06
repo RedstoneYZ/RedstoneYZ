@@ -1,4 +1,5 @@
-import { BlockOptions, BlockType } from "../types";
+import type { BlockOptions } from "../types";
+import { BlockType } from "../types";
 import RedstoneTorchBase from "./RedstoneTorchBase";
 
 class RedstoneTorch extends RedstoneTorchBase {

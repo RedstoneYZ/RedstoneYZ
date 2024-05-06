@@ -1,5 +1,5 @@
-import { Vector2, Vector3 } from "../model/types";
-import { PlayerFacing, PlayerXYZ } from "./types";
+import type { Vector2, Vector3 } from "../model/types";
+import type { PlayerFacing, PlayerXYZ } from "./types";
 
 class Player {
   public xyz: PlayerXYZ;

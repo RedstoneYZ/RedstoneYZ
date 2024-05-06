@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import Image from "@/components/Image";
 import Bleed from "pliny/ui/Bleed";
-import { CoreContent } from "pliny/utils/contentlayer";
+import type { CoreContent } from "pliny/utils/contentlayer";
 import type { Article } from "contentlayer/generated";
 import Link from "@/components/Link";
 import PageTitle from "@/components/PageTitle";
