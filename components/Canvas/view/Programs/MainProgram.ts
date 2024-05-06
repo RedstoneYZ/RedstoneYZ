@@ -118,7 +118,6 @@ export default class MainProgram extends Program {
     return vao;
   }
 
-  private printed = [false, false];
   private getData(): Float32Array {
     // TODO: only update block changes
     const vertices: number[] = [];
@@ -130,14 +129,6 @@ export default class MainProgram extends Program {
 
           const models = this.renderer.models.get(block.type, block.states);
 
-          if (!this.printed[0] && block.type === BlockType.IronBlock) {
-            console.log("iron", models);
-            this.printed[0] = true;
-          }
-          if (!this.printed[1] && block.type === BlockType.CommandBlock) {
-            console.log("command", models);
-            this.printed[1] = true;
-          }
           models.forEach((model) => {
             model.faces.forEach((face) => {
               if (!this.renderer.shouldRender(block, face)) return;
