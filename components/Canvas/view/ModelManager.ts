@@ -1,4 +1,4 @@
-import { BlockType, type BlockState, type SixSides, type ThreeAxes, type Vector2, type Vector3, type Vector4 } from "../model/types";
+import type { BlockState, SixSides, ThreeAxes, Vector2, Vector3, Vector4 } from "../model/types";
 import BlockStateManager from "./BlockStateManager";
 import type { BlockModel, BlockModelFace, BlockOutline } from "./types";
 import Matrix4 from "./utils/Matrix4";
@@ -37,14 +37,10 @@ export default class ModelManager {
         return pack[0];
       })
       .map((bs) => {
-        // TODO: WHYYY???
-        const bsx = -bs.x;
-        const bsy = -bs.y + (path === BlockType.RedstoneRepeater || path === BlockType.RedstoneComparator ? 180 : 0);
-
         const rotateMat = Matrix4.Multiply(
           Matrix4.Translate(-0.5, -0.5, -0.5),
-          Matrix4.RotateX((bsx / 180) * Math.PI),
-          Matrix4.RotateY((bsy / 180) * Math.PI),
+          Matrix4.RotateX((-bs.x / 180) * Math.PI),
+          Matrix4.RotateY((-bs.y / 180) * Math.PI),
           Matrix4.Translate(0.5, 0.5, 0.5),
         );
         const rotate: (v: Vector4) => Vector3 = (v: Vector4) => {
@@ -66,7 +62,7 @@ export default class ModelManager {
             normal: rotate([...face.normal, 0]),
             shade: face.shade,
             texture: face.texture,
-            cullface: face.cullface ? this.rotateFace(face.cullface, bsx, bsy) : undefined,
+            cullface: face.cullface ? this.rotateFace(face.cullface, -bs.x, -bs.y) : undefined,
             tintindex: face.tintindex,
           })),
           outline: model.outline.map(({ from, to }) => {
