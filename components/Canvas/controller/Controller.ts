@@ -13,7 +13,7 @@ class Controller {
   public player: Player;
 
   public activeKeys: Set<string>;
-  public hotbar: HotbarItem[];
+  public hotbar: BlockType[];
   public hotbarIndex: number;
 
   public engine: Engine;
@@ -26,19 +26,17 @@ class Controller {
     this.player = new Player();
 
     this.activeKeys = new Set();
-    this.hotbar = this.getHotbar(
-      preLoadData?.availableBlocks ?? [
-        BlockType.CommandBlock,
-        BlockType.IronBlock,
-        BlockType.Glass,
-        BlockType.RedstoneDust,
-        BlockType.RedstoneTorch,
-        BlockType.RedstoneRepeater,
-        BlockType.RedstoneComparator,
-        BlockType.RedstoneLamp,
-        BlockType.Lever,
-      ],
-    );
+    this.hotbar = preLoadData?.availableBlocks ?? [
+      BlockType.CommandBlock,
+      BlockType.IronBlock,
+      BlockType.Glass,
+      BlockType.RedstoneDust,
+      BlockType.RedstoneTorch,
+      BlockType.RedstoneRepeater,
+      BlockType.RedstoneComparator,
+      BlockType.RedstoneLamp,
+      BlockType.Lever,
+    ];
     this.hotbarIndex = 0;
 
     this.engine = preLoadData
@@ -50,8 +48,8 @@ class Controller {
     this.alive = true;
   }
 
-  get currentBlockName() {
-    return this.hotbar[this.hotbarIndex].name;
+  get currentBlockName(): string {
+    return blockNameTable[this.hotbar[this.hotbarIndex]];
   }
 
   /**
@@ -121,6 +119,26 @@ class Controller {
     this.needRender = true;
   }
 
+  middleClick(): void {
+    const target = this.renderer.getTarget();
+    if (!target) return;
+
+    const [x, y, z] = target;
+    const block = this.engine.block(x, y, z);
+    if (!block) return;
+
+    const index = this.hotbar.findIndex(e => e === block.type);
+    if (index < 0) {
+      this.hotbar[this.hotbarIndex] = block.type;
+    }
+    else {
+      this.hotbarIndex = index;
+      this.prevRefWheel = index * 100;
+    }
+
+    this.needRender = true;
+  }
+
   rightClick(shift: boolean): void {
     const target = this.renderer.getTarget();
     if (!target) return;
@@ -132,7 +150,7 @@ class Controller {
 
     this.engine.addTask([
       "rightClick",
-      [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex].block ?? BlockType.AirBlock],
+      [x, y, z, shift, normDir, facing, this.hotbar[this.hotbarIndex] ?? BlockType.AirBlock],
       0,
     ]);
     this.needRender = true;
@@ -173,12 +191,6 @@ class Controller {
 
     this.player.advance();
   };
-
-  private getHotbar(items: BlockType[]): HotbarItem[] {
-    return items.map((block) => {
-      return { block, name: blockNameTable[block] };
-    });
-  }
 
   private readonly validInputs = new Set([
     "w",
@@ -227,11 +239,6 @@ class Controller {
     "*": 7, 
     "(": 8, 
   };
-}
-
-interface HotbarItem {
-  block: BlockType;
-  name: string;
 }
 
 export default Controller;

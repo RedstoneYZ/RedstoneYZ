@@ -77,6 +77,13 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     controller?.leftClick();
   }
 
+  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    controller?.middleClick();
+    setCurrentBlock(controller?.currentBlockName ?? "");
+  }
+
   function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
     e.preventDefault();
     controller?.rightClick(e.shiftKey);
@@ -104,6 +111,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
           draggable={true}
           onDrag={handleDrag}
           onDragStart={handleDragStart}
+          onMouseDown={handleMouseDown}
           onClick={handleClick}
           onContextMenu={handleContextMenu}
           onWheelCapture={handleScroll}
