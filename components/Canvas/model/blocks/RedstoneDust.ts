@@ -1,7 +1,7 @@
 import { Maps } from "../utils";
 import Block from "./Block";
 import { strictEqual } from "../../model/utils";
-import type { BlockOptions, FourFacings, SixSides } from "../types";
+import type { BlockOptions, SixSides } from "../types";
 import { BlockType } from "../types";
 
 class RedstoneDust extends Block {
@@ -14,7 +14,7 @@ class RedstoneDust extends Block {
     super({ needBottomSupport: true, transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneDust;
-    this.states = { east: 1, south: 1, west: 1, north: 1 };
+    this.states = { east: "side", south: "side", west: "side", north: "side" };
     this.crossMode = true;
   }
 
@@ -77,12 +77,8 @@ class RedstoneDust extends Block {
     super.PPUpdate();
 
     const oldStates = JSON.parse(JSON.stringify(this.states)) as RedstoneDustState;
-    this.internal.power =
-      this.states.east =
-      this.states.west =
-      this.states.south =
-      this.states.north =
-        0;
+    this.internal.power = 0;
+    this.states.east = this.states.west = this.states.south = this.states.north = "none";
 
     Maps.P6DArray.forEach(([dir, [dx, dy, dz]]) => {
       const x = this.x + dx;
@@ -112,7 +108,7 @@ class RedstoneDust extends Block {
             "facing" in block.states &&
             [dir as SixSides, Maps.ReverseDir[dir]].includes(block.states.facing))
         ) {
-          this.states[dir] = 1;
+          this.states[dir] = "side";
         }
       }
 
@@ -122,29 +118,29 @@ class RedstoneDust extends Block {
 
       // 側下方的紅石粉
       if (sideDown?.type === BlockType.RedstoneDust && block?.transparent) {
-        this.states[dir] = 1;
+        this.states[dir] = "side";
         this.internal.power = Math.max(this.internal.power, sideDown.power - 1);
       }
 
       // 側上方的紅石粉
       if (sideUp?.type === BlockType.RedstoneDust && above?.transparent) {
-        this.states[dir] = 2;
+        this.states[dir] = "up";
         this.internal.power = Math.max(this.internal.power, sideUp.power - 1);
       }
     });
 
-    const explicitDir = Maps.P4DArray.map(([dir]) => (this.states[dir] ? dir : undefined)).filter(
-      (a) => a,
-    ) as FourFacings[];
+    const explicitDir = Maps.P4DArray
+      .filter(([dir]) => this.states[dir] !== "none")
+      .map(([dir]) => dir);
 
     if (explicitDir.length === 0) {
       if (this.crossMode) {
-        this.states.east = this.states.south = this.states.west = this.states.north = 1;
+        this.states.east = this.states.south = this.states.west = this.states.north = "side";
       }
     } else {
       this.crossMode = true;
       if (explicitDir.length === 1) {
-        this.states[Maps.ReverseDir[explicitDir[0]]] = 1;
+        this.states[Maps.ReverseDir[explicitDir[0]]] = "side";
       }
     }
 
@@ -155,17 +151,17 @@ class RedstoneDust extends Block {
 }
 
 type RedstoneDustState = {
-  /** 紅石粉東側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  east: 0 | 1 | 2;
+  /** 紅石粉東側的連接狀態 */
+  east: "none" | "side" | "up";
 
-  /** 紅石粉西側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  west: 0 | 1 | 2;
+  /** 紅石粉西側的連接狀態 */
+  west: "none" | "side" | "up";
 
-  /** 紅石粉北側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  north: 0 | 1 | 2;
+  /** 紅石粉北側的連接狀態 */
+  north: "none" | "side" | "up";
 
-  /** 紅石粉南側的連接狀態，0 為無，1 為有，2 為有且向上 */
-  south: 0 | 1 | 2;
+  /** 紅石粉南側的連接狀態 */
+  south: "none" | "side" | "up";
 };
 
 export default RedstoneDust;

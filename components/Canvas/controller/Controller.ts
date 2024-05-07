@@ -28,7 +28,7 @@ class Controller {
     this.activeKeys = new Set();
     this.hotbar = this.getHotbar(
       preLoadData?.availableBlocks ?? [
-        BlockType.AirBlock,
+        BlockType.CommandBlock,
         BlockType.IronBlock,
         BlockType.Glass,
         BlockType.RedstoneDust,
@@ -85,16 +85,21 @@ class Controller {
     this.needRender = true;
   }
 
-  private validInputs = new Set(["w", "a", "s", "d", " ", "shift"]);
-
-  addActiveKey(key: string) {
-    if (this.validInputs.has(key)) {
-      this.activeKeys.add(key);
-    }
+  public addActiveKey(key: string) {
+    if (!this.validInputs.has(key)) return false;
+    this.activeKeys.add(key);
+    return true;
   }
 
   removeActiveKey(key: string) {
     this.activeKeys.delete(key);
+  }
+
+  public jumpHotbar(key: string) {
+    if (!(key in this.hotbarMap)) return false;
+    this.hotbarIndex = this.hotbarMap[key as keyof typeof this.hotbarMap];
+    this.prevRefWheel = this.hotbarIndex * 100;
+    return true;
   }
 
   scrollHotbar(deltaY: number): void {
@@ -104,7 +109,6 @@ class Controller {
     this.hotbarIndex =
       ((Math.trunc(this.prevRefWheel / 100) % this.hotbar.length) + this.hotbar.length) %
       this.hotbar.length;
-    this.needRender = true;
   }
 
   leftClick(): void {
@@ -175,6 +179,54 @@ class Controller {
       return { block, name: blockNameTable[block] };
     });
   }
+
+  private readonly validInputs = new Set([
+    "w",
+    "a",
+    "s",
+    "d",
+    " ",
+    "shift",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "!",
+    "@",
+    "#",
+    "$",
+    "%",
+    "^",
+    "&",
+    "*",
+    "(",
+  ]);
+
+  private readonly hotbarMap = {
+    "1": 0, 
+    "2": 1, 
+    "3": 2, 
+    "4": 3, 
+    "5": 4, 
+    "6": 5, 
+    "7": 6, 
+    "8": 7, 
+    "9": 8, 
+    "!": 0, 
+    "@": 1, 
+    "#": 2, 
+    "$": 3, 
+    "%": 4, 
+    "^": 5, 
+    "&": 6, 
+    "*": 7, 
+    "(": 8, 
+  };
 }
 
 interface HotbarItem {

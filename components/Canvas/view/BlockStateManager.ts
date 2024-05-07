@@ -15,13 +15,13 @@ export default class BlockStateManager {
       if ("OR" in rule.when) {
         if (typeof rule.when.OR === "string") break; // never
         for (const r of rule.when.OR) {
-          if (Object.entries(r).every(([k, v]) => `${states[k]}` === v)) {
+          if (Object.entries(r).every(([k, v]) => v.includes(`${states[k]}`))) {
             result.push(rule.apply);
             break;
           }
         }
       } else {
-        if (Object.entries(rule.when).every(([k, v]) => `${states[k]}` === v)) {
+        if (Object.entries(rule.when).every(([k, v]) => v.includes(`${states[k]}`))) {
           if (blockStates.singleMatch) {
             return [rule.apply];
           }
@@ -50,26 +50,61 @@ export default class BlockStateManager {
       return {
         singleMatch: true,
         rules: Object.entries(rawStates.variants).map(([key, _value]) => {
-          const value = "length" in _value ? _value : [_value];
-          return {
-            when: key.length ? Object.fromEntries(key.split(",").map((a) => a.split("="))) : {},
-            apply: this.makeRequired(value),
-          };
+          const apply = this.makeRequired("length" in _value ? _value : [_value]);
+
+          if (key === "") {
+            return { when: {}, apply };
+          }
+
+          const when: Record<string, string[]> = {};
+          key.split(',').forEach((rule) => {
+            const [name, value] = rule.split("=");
+            when[name] = [value];
+          });
+          return { when, apply };
         }),
       };
 
     return {
       singleMatch: false,
-      rules: rawStates.muitipart.map(({ when: _when, apply: _apply }) => {
-        const apply = "length" in _apply ? _apply : [_apply];
-        return {
-          when: !("AND" in _when)
-            ? _when
-            : typeof _when.AND !== "string"
-              ? _when.AND.reduce((a, c) => ({ ...a, ...c }), {})
-              : {},
-          apply: this.makeRequired(apply),
-        };
+      rules: rawStates.multipart.map(({ when: _when, apply: _apply }) => {
+        const apply = this.makeRequired("length" in _apply ? _apply : [_apply]);
+        
+        if ("AND" in _when) {
+          if (typeof _when.AND === "string") {
+            throw new Error("AND property should not have string value.");
+          }
+
+          const when: Record<string, string[]> = {};
+          _when.AND.forEach(rules => {
+            for (const key in rules) {
+              when[key] = rules[key].split("|");
+            }
+          });
+          return { when, apply };
+        }
+
+        if ("OR" in _when) {
+          if (typeof _when.OR === "string") {
+            throw new Error("OR property should not have string value.");
+          }
+
+          const OR: Record<string, string[]>[] = [];
+          _when.OR.forEach(rules => {
+            const rule: Record<string, string[]> = {};
+            for (const key in rules) {
+              rule[key] = rules[key].split("|");
+            }
+            OR.push(rule);
+          });
+          return { when: { OR }, apply };
+        }
+
+        const when: Record<string, string[]> = {};
+        for (const key in _when) {
+          when[key] = _when[key].split("|");
+        }
+        return { when, apply };
       }),
     };
   }
@@ -101,11 +136,11 @@ interface BlockStateModel {
 }
 
 interface BlockStateModelRule {
-  when: { OR: { [state: string]: string }[] } | { [state: string]: string };
-  apply: Required<RawBlockStateModelRule>[];
+  when: { OR: Record<string, string[]>[] } | Record<string, string[]>;
+  apply: BlockModelRule[];
 }
 
-type RawBlockStateModel = RawBlockStateModelVariants | RawBlockStateModelMuitipart;
+type RawBlockStateModel = RawBlockStateModelVariants | RawBlockStateModelMultipart;
 
 interface RawBlockStateModelVariants {
   variants: {
@@ -113,15 +148,15 @@ interface RawBlockStateModelVariants {
   };
 }
 
-interface RawBlockStateModelMuitipart {
-  muitipart: RawBlockStateModelMuitipartCase[];
+interface RawBlockStateModelMultipart {
+  multipart: RawBlockStateModelMultipartCase[];
 }
 
-interface RawBlockStateModelMuitipartCase {
+interface RawBlockStateModelMultipartCase {
   when:
-    | { OR: { [state: string]: string }[] }
-    | { AND: { [state: string]: string }[] }
-    | { [state: string]: string };
+    | { OR: Record<string, string>[] }
+    | { AND: Record<string, string>[] }
+    | Record<string, string>;
   apply: RawBlockStateModelRule | RawBlockStateModelRule[];
 }
 

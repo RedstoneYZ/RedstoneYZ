@@ -1,18 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
 import Controller from "./controller/Controller";
-
-import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
 import type { CanvasProps } from "./model/types";
 
 const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   const [controller, setController] = useState<Controller>();
   const [currentBlock, setCurrentBlock] = useState("");
-
-  // @ts-ignore
-  props.preLoadData = Official_Map_1;
 
   const { current: xLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.xLen);
   const { current: yLen } = useRef("xLen" in props ? props.yLen : props.preLoadData.yLen);
@@ -41,6 +35,9 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       e.preventDefault();
     }
     controller?.addActiveKey(e.key.toLowerCase());
+    if (controller?.jumpHotbar(e.key)) {
+      setCurrentBlock(controller?.currentBlockName ?? "");
+    }
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
