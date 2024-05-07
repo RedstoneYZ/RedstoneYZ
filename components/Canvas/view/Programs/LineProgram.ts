@@ -35,7 +35,7 @@ export default class LineProgram extends Program {
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.LINE_LOOP, (data.length / 3) * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINE_LOOP, (data.length / 12) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
