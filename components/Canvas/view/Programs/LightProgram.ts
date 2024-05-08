@@ -69,8 +69,8 @@ export default class LightProgram extends Program {
             model.faces.forEach((face) => {
               if (!this.renderer.shouldRender(block, face)) return;
 
-              const { corners: c, texCoord: t } = face;
-              const offset = this.renderer.textures.sample(face.texture, this.renderer.engine.tick);
+              const { corners: c, texCoord: t, texture: tex } = face;
+              const offset = this.renderer.textures.sampleBlock(tex, this.renderer.engine.tick);
               const [ox1, oy1] = offset;
 
               for (let l = 0; l < 4; ++l) {

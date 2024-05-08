@@ -1,10 +1,10 @@
 import Textures from "@/public/static/images/atlas/atlas.json";
-import type { Vector2, Vector6 } from "../model/types";
+import { BlockType, type Blocks, type Vector2, type Vector6 } from "../model/types";
 
 export default class TextureManager {
   constructor() {}
 
-  sample(name: string, tick: number = 0): Vector6 {
+  sampleBlock(name: string, tick: number = 0): Vector6 {
     if (!(name in Textures.block)) {
       // TODO: add missing.png
       throw new Error(`Texture ${name} does not exist in texture atlas.`);
@@ -24,6 +24,12 @@ export default class TextureManager {
     const off1 = data.offset[index1];
     const off2 = data.offset[index2];
     return [off1[0], off1[1], off2[0], off2[1], inter, frametime];
+  }
+
+  sampleTint(block: Blocks): Vector2 {
+    const [x, y] = Textures.tint.offset;
+    if (block.type !== BlockType.RedstoneDust) return [x + 15, y + 15];
+    return [x + block.internal.power, y];
   }
 }
 
