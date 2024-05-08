@@ -129,9 +129,9 @@ class RedstoneDust extends Block {
       }
     });
 
-    const explicitDir = Maps.P4DArray
-      .filter(([dir]) => this.states[dir] !== "none")
-      .map(([dir]) => dir);
+    const explicitDir = Maps.P4DArray.filter(([dir]) => this.states[dir] !== "none").map(
+      ([dir]) => dir,
+    );
 
     if (explicitDir.length === 0) {
       if (this.crossMode) {

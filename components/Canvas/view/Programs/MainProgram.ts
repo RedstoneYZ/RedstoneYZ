@@ -141,13 +141,23 @@ export default class MainProgram extends Program {
               const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
               for (let l = 0; l < 4; ++l) {
-                const uOffset = t[l][0] > t[l^2][0] ? 2 : 0;
-                const vOffset = t[l][1] > t[l^2][1] ? 1 : 0;
+                const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
+                const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
                 const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
                 const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
                 const tint = (tx << 10) | ty;
 
-                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, n[0], n[1], n[2], tex1, tex2, tint);
+                vertices.push(
+                  c[l][0] + x,
+                  c[l][1] + y,
+                  c[l][2] + z,
+                  n[0],
+                  n[1],
+                  n[2],
+                  tex1,
+                  tex2,
+                  tint,
+                );
               }
             });
           });

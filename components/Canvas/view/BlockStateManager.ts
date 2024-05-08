@@ -57,7 +57,7 @@ export default class BlockStateManager {
           }
 
           const when: Record<string, string[]> = {};
-          key.split(',').forEach((rule) => {
+          key.split(",").forEach((rule) => {
             const [name, value] = rule.split("=");
             when[name] = [value];
           });
@@ -69,14 +69,14 @@ export default class BlockStateManager {
       singleMatch: false,
       rules: rawStates.multipart.map(({ when: _when, apply: _apply }) => {
         const apply = this.makeRequired("length" in _apply ? _apply : [_apply]);
-        
+
         if ("AND" in _when) {
           if (typeof _when.AND === "string") {
             throw new Error("AND property should not have string value.");
           }
 
           const when: Record<string, string[]> = {};
-          _when.AND.forEach(rules => {
+          _when.AND.forEach((rules) => {
             for (const key in rules) {
               when[key] = rules[key].split("|");
             }
@@ -90,7 +90,7 @@ export default class BlockStateManager {
           }
 
           const OR: Record<string, string[]>[] = [];
-          _when.OR.forEach(rules => {
+          _when.OR.forEach((rules) => {
             const rule: Record<string, string[]> = {};
             for (const key in rules) {
               rule[key] = rules[key].split("|");

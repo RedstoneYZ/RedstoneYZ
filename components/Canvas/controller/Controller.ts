@@ -127,11 +127,10 @@ class Controller {
     const block = this.engine.block(x, y, z);
     if (!block) return;
 
-    const index = this.hotbar.findIndex(e => e === block.type);
+    const index = this.hotbar.findIndex((e) => e === block.type);
     if (index < 0) {
       this.hotbar[this.hotbarIndex] = block.type;
-    }
-    else {
+    } else {
       this.hotbarIndex = index;
       this.prevRefWheel = index * 100;
     }
@@ -220,24 +219,24 @@ class Controller {
   ]);
 
   private readonly hotbarMap = {
-    "1": 0, 
-    "2": 1, 
-    "3": 2, 
-    "4": 3, 
-    "5": 4, 
-    "6": 5, 
-    "7": 6, 
-    "8": 7, 
-    "9": 8, 
-    "!": 0, 
-    "@": 1, 
-    "#": 2, 
-    "$": 3, 
-    "%": 4, 
-    "^": 5, 
-    "&": 6, 
-    "*": 7, 
-    "(": 8, 
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6,
+    "8": 7,
+    "9": 8,
+    "!": 0,
+    "@": 1,
+    "#": 2,
+    $: 3,
+    "%": 4,
+    "^": 5,
+    "&": 6,
+    "*": 7,
+    "(": 8,
   };
 }
 

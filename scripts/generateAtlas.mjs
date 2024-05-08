@@ -5,7 +5,6 @@ const TEXTURE_ROOT = "./public/static/images/textures";
 const ATLAS_ROOT = "./public/static/images/atlas";
 const ATLAS_WIDTH = 256;
 const ATLAS_HEIGHT = 256;
-const UNIT = 16;
 
 new Jimp(ATLAS_WIDTH, ATLAS_HEIGHT, async (error, atlas) => {
   if (error) throw error;
@@ -112,8 +111,6 @@ async function blitEnvironment(atlas, json) {
  * @param {object} json
  */
 async function blitTint(atlas, json) {
-  const LEFT = TINT_LEFT;
-  const TOP = TINT_TOP;
   const DATA = TINT_DATA;
 
   const tint = await Jimp.read(TEXTURE_ROOT + "/tint/tint.png");
