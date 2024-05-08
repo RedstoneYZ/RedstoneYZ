@@ -1,19 +1,16 @@
-import Textures from "@/public/static/images/atlas/texture.json";
+import Textures from "@/public/static/images/atlas/atlas.json";
 import type { Vector2, Vector6 } from "../model/types";
 
 export default class TextureManager {
-  public factor: Vector2;
-  constructor() {
-    this.factor = Textures.factor as Vector2;
-  }
+  constructor() {}
 
   sample(name: string, tick: number = 0): Vector6 {
-    if (!(name in Textures.data)) {
+    if (!(name in Textures.block)) {
       // TODO: add missing.png
       throw new Error(`Texture ${name} does not exist in texture atlas.`);
     }
 
-    const data = Textures.data[name as keyof typeof Textures.data] as TextureData;
+    const data = Textures.block[name as keyof typeof Textures.block] as TextureData;
     if (!("animation" in data && data.animation)) {
       const offset = data.offset[0];
       return [offset[0], offset[1], 0, 0, 1, 1];

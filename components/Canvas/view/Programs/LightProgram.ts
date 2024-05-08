@@ -183,8 +183,8 @@ export default class LightProgram extends Program {
 
     void main() {
       gl_Position = u_mlp * vec4(a_position, 1.0);
-      v_texcoord.x = unpackif(a_texture, 20, 10) / 128.;
-      v_texcoord.y = unpackif(a_texture, 10, 10) / 128.;
+      v_texcoord.x = unpackif(a_texture, 20, 10) / 256.;
+      v_texcoord.y = unpackif(a_texture, 10, 10) / 256.;
     }
   `;
 

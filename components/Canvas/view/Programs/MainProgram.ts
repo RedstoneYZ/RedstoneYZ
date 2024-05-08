@@ -208,10 +208,10 @@ export default class MainProgram extends Program {
     void main() {
       gl_Position = u_mvp * vec4(a_position, 1.0);
 
-      v_texcoord1.x = unpackif(a_texture.s, 20, 10) / 128.;
-      v_texcoord1.y = unpackif(a_texture.s, 10, 10) / 128.;
-      v_texcoord2.x = unpackif(a_texture.s,  0, 10) / 128.;
-      v_texcoord2.y = unpackif(a_texture.t, 20, 10) / 128.;
+      v_texcoord1.x = unpackif(a_texture.s, 20, 10) / 256.;
+      v_texcoord1.y = unpackif(a_texture.s, 10, 10) / 256.;
+      v_texcoord2.x = unpackif(a_texture.s,  0, 10) / 256.;
+      v_texcoord2.y = unpackif(a_texture.t, 20, 10) / 256.;
       v_texinter = unpackif(a_texture.t, 11, 9) / unpackif(a_texture.t, 2, 9);
 
       bool uOffset = unpacki(a_texture.t, 1, 1) == 0;
