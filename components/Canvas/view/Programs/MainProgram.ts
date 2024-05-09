@@ -176,7 +176,7 @@ export default class MainProgram extends Program {
     const atlas = await new Promise<HTMLImageElement>((res) => {
       const image = new Image();
       image.onload = () => res(image);
-      image.src = "/static/images/atlas/atlas.png";
+      image.src = "/images/atlas/atlas.png";
     });
 
     gl.activeTexture(gl.TEXTURE0);

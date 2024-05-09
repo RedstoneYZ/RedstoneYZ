@@ -1,6 +1,6 @@
 MCPATH=$1
 JSONPATH="./public/json"
-TEXPATH="./public/static/images/textures"
+TEXPATH="./public/images/textures"
 
 for file in $JSONPATH/blocks/*
 do

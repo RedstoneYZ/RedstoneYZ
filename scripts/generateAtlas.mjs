@@ -1,8 +1,8 @@
 import fs from "fs";
 import Jimp from "jimp";
 
-const TEXTURE_ROOT = "./public/static/images/textures";
-const ATLAS_ROOT = "./public/static/images/atlas";
+const TEXTURE_ROOT = "./public/images/textures";
+const ATLAS_ROOT = "./public/images/atlas";
 const ATLAS_WIDTH = 256;
 const ATLAS_HEIGHT = 256;
 

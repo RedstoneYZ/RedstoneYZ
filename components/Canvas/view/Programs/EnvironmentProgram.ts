@@ -137,7 +137,7 @@ export default class EnvironmentProgram extends Program {
     const sun = await new Promise<HTMLImageElement>((res) => {
       const image = new Image();
       image.onload = () => res(image);
-      image.src = "/static/images/textures/environment/sun.png";
+      image.src = "/images/textures/environment/sun.png";
     });
 
     gl.activeTexture(gl.TEXTURE2);

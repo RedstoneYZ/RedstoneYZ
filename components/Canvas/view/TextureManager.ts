@@ -1,4 +1,4 @@
-import Textures from "@/public/static/images/atlas/atlas.json";
+import Textures from "@/public/images/atlas/atlas.json";
 import { BlockType, type Blocks, type Vector2, type Vector6 } from "../model/types";
 
 export default class TextureManager {
