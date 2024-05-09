@@ -5,83 +5,45 @@ import type { Vector3, Vector4, Vector6 } from "../model/types";
 import { BlockType } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
-// import TestProgram from "./Programs/TestProgram";
-import EnvironmentProgram from "./Programs/EnvironmentProgram";
-import type Program from "./Programs/Program";
 import TextureManager from "./TextureManager";
 import type { BlockModelFace } from "./types";
-import LineProgram from "./Programs/LineProgram";
-import LightProgram from "./Programs/LightProgram";
-import MainProgram from "./Programs/MainProgram";
 import Matrix4 from "./utils/Matrix4";
+import ProgramManager from "./ProgramManager";
 
 export default class Renderer {
   public controller: Controller;
   public engine: Engine;
   public dimensions: Vector3;
-  public canvas: HTMLCanvasElement;
 
-  public textures: TextureManager;
   public models: ModelHandler;
+  public programs: ProgramManager;
+  public textures: TextureManager;
 
-  public WIDTH: number;
-  public HEIGHT: number;
-  public X_SCALE: number;
-  public Y_SCALE: number;
-
-  private gl: WebGL2RenderingContext;
-
-  public programs: Program[];
+  public canvasW: number;
+  public canvasH: number;
+  public scaleX: number;
+  public scaleY: number;
 
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
-    this.canvas = canvas;
     this.dimensions = dimensions;
     this.engine = controller.engine;
 
-    this.textures = new TextureManager();
+    this.canvasW = canvas.width;
+    this.canvasH = canvas.height;
+    this.scaleX = this.canvasW > this.canvasH ? this.canvasW / this.canvasH : 1;
+    this.scaleY = this.canvasW > this.canvasH ? 1 : this.canvasH / this.canvasW;
+
     this.models = new ModelHandler();
-
-    this.WIDTH = canvas.width;
-    this.HEIGHT = canvas.height;
-    this.X_SCALE = this.WIDTH > this.HEIGHT ? this.WIDTH / this.HEIGHT : 1;
-    this.Y_SCALE = this.WIDTH > this.HEIGHT ? 1 : this.HEIGHT / this.WIDTH;
-
-    this.gl = this.initGL();
-
-    this.programs = [
-      new LightProgram(this, this.gl),
-      // new TestProgram(this, this.gl),
-      new MainProgram(this, this.gl),
-      new EnvironmentProgram(this, this.gl),
-      new LineProgram(this, this.gl),
-    ];
+    this.programs = new ProgramManager(this, canvas);
+    this.textures = new TextureManager();
   }
 
   startRendering(func?: () => any): void {
-    const gl = this.gl;
-
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.CULL_FACE);
-    gl.clearColor(0.5, 0.63, 1, 1);
-
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    gl.enable(gl.POLYGON_OFFSET_FILL);
-    gl.polygonOffset(2, 20);
-
     const draw = async () => {
       if (this.needRender) {
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        let allSuccess = true;
-        for (const program of this.programs) {
-          const success = program.draw();
-          allSuccess &&= success;
-        }
-
-        if (allSuccess) {
+        const success = this.programs.draw();
+        if (success) {
           this.resetNeedRender();
         }
       }
@@ -104,9 +66,9 @@ export default class Renderer {
   }
 
   private get eyeDir(): Vector4 {
-    const screenX = (this.lookAtX / this.WIDTH - 0.5) * 2 * this.X_SCALE;
-    const screenY = (0.5 - this.lookAtY / this.HEIGHT) * 2 * this.Y_SCALE;
-    return Matrix4.MultiplyVec(this.mvInv, [screenX, screenY, -1, 0]);
+    const screenX = (this.lookAtX / this.canvasW - 0.5) * 2 * this.scaleX;
+    const screenY = (0.5 - this.lookAtY / this.canvasH) * 2 * this.scaleY;
+    return Matrix4.MultiplyVec(this.programs.mvInv, [screenX, screenY, -1, 0]);
   }
 
   getTarget(): Vector6 | null {
@@ -199,7 +161,6 @@ export default class Renderer {
     return [...target.block, ...target.normal] as Vector6;
   }
 
-  // TODO: rewrite to match cullface in data
   public shouldRender(block: Block, face: BlockModelFace) {
     if (!face.cullface) return true;
 
@@ -239,72 +200,6 @@ export default class Renderer {
     }
 
     return true;
-  }
-
-  public get sunAngle(): number {
-    const tick = this.engine.tick % 24000;
-    return (tick * Math.PI) / 12000;
-  }
-
-  public get seasonAngle(): number {
-    const tick = this.engine.tick % (24000 * 96);
-    return (tick * Math.PI) / (24000 * 48);
-  }
-
-  public get mvp(): Float32Array {
-    const {
-      xyz: { x, y, z },
-      facing: { yaw, pitch },
-    } = this.controller.player;
-
-    return Matrix4.Multiply(
-      Matrix4.Translate(-x, -y, -z),
-      Matrix4.RotateY(yaw - Math.PI),
-      Matrix4.RotateX(-pitch),
-      Matrix4.Perspective(0.2 * this.X_SCALE, 0.2 * this.Y_SCALE, 0.1, 100),
-    );
-  }
-
-  public get mlp(): Float32Array {
-    const theta = this.sunAngle;
-    const phi = this.seasonAngle;
-    const x = this.X_SCALE;
-    const y = this.Y_SCALE;
-
-    return Matrix4.Multiply(
-      Matrix4.RotateY(-Math.PI / 2),
-      Matrix4.RotateZ((-25.04 * Math.PI) / 180),
-      Matrix4.RotateX(theta),
-      Matrix4.RotateY((-23.4 * Math.sin(phi) * Math.PI) / 180),
-      Matrix4.Orthographic(-7 * x, 7 * x, -7 * y, 7 * y, -10, 10),
-    );
-  }
-
-  public indices = new Uint16Array(
-    Array.from({ length: 4096 }, (_, i) => {
-      i <<= 2;
-      return [i, i + 1, i + 2, i + 3, 65535];
-    }).flat(),
-  );
-
-  private get mvInv(): Float32Array {
-    const {
-      xyz: { x, y, z },
-      facing: { yaw, pitch },
-    } = this.controller.player;
-    return Matrix4.Multiply(
-      Matrix4.RotateX(pitch),
-      Matrix4.RotateY(Math.PI - yaw),
-      Matrix4.Translate(x, y, z),
-    );
-  }
-
-  private initGL(): WebGL2RenderingContext {
-    const gl = this.canvas.getContext("webgl2", { alpha: false });
-    if (!gl) {
-      throw new Error("Your browser does not support webgl2 canvas.");
-    }
-    return gl;
   }
 
   private get needRender() {

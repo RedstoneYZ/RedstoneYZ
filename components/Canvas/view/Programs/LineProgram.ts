@@ -1,4 +1,4 @@
-import type Renderer from "../Renderer";
+import ProgramManager from "../ProgramManager";
 import Program from "./Program";
 
 interface Uniforms {
@@ -12,8 +12,8 @@ export default class LineProgram extends Program {
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    super(renderer, gl);
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    super(parent, gl);
 
     this.program = this.createProgram();
     this.uniform = this.setupUniform(["u_mvp"]);
@@ -31,7 +31,7 @@ export default class LineProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.parent.mvp);
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
@@ -45,14 +45,14 @@ export default class LineProgram extends Program {
   }
 
   private getData(): Float32Array {
-    const target = this.renderer.getTarget();
+    const target = this.parent.renderer.getTarget();
     if (!target) return new Float32Array();
 
     const [x, y, z] = target;
-    const block = this.renderer.engine.block(x, y, z);
+    const block = this.parent.engine.block(x, y, z);
     if (!block) return new Float32Array();
 
-    const models = this.renderer.models.get(block.type, block.states);
+    const models = this.parent.renderer.models.get(block.type, block.states);
     const result: number[] = [];
 
     models.forEach(({ outline }) => {
@@ -168,7 +168,7 @@ export default class LineProgram extends Program {
     gl.enableVertexAttribArray(0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.parent.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 

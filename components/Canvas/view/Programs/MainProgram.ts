@@ -1,5 +1,5 @@
-import { BlockType } from "../../model/types";
-import type Renderer from "../Renderer";
+import type ProgramManager from "../ProgramManager";
+import { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
 import { glUnpacki, glUnpackif } from "./glImports";
 
@@ -19,8 +19,8 @@ export default class MainProgram extends Program {
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    super(renderer, gl);
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    super(parent, gl);
 
     this.program = this.createProgram();
     this.uniform = this.setupUniform([
@@ -47,11 +47,12 @@ export default class MainProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
-    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.parent.mvp);
+    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.parent.mlp);
     gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
-    const data = this.getData();
+    const rawData = this.parent.getData(this.processRaw);
+    const data = this.processData(rawData);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, (data.length / 36) * 5, gl.UNSIGNED_SHORT, 0);
 
@@ -63,7 +64,7 @@ export default class MainProgram extends Program {
   }
 
   private getLightNorm(): Float32Array {
-    const theta = this.renderer.sunAngle;
+    const theta = this.parent.sunAngle;
     return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
   }
 
@@ -72,7 +73,7 @@ export default class MainProgram extends Program {
     const gl = this.gl;
 
     gl.useProgram(this.program);
-    gl.uniform2iv(uniform.screensize, [this.renderer.WIDTH, this.renderer.HEIGHT]);
+    gl.uniform2iv(uniform.screensize, [this.parent.renderer.canvasW, this.parent.renderer.canvasH]);
     gl.uniform1i(uniform.s_texture, 0);
     gl.uniform1i(uniform.s_shadow, 1);
     gl.useProgram(null);
@@ -113,66 +114,55 @@ export default class MainProgram extends Program {
     gl.enableVertexAttribArray(3);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.parent.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
     return vao;
   }
 
-  private getData(): Float32Array {
-    // TODO: only update block changes
-    const vertices: number[] = [];
-    for (let x = 0; x < this.renderer.dimensions[0]; x++) {
-      for (let y = 0; y < this.renderer.dimensions[1]; y++) {
-        for (let z = 0; z < this.renderer.dimensions[2]; z++) {
-          const block = this.renderer.engine.block(x, y, z);
-          if (!block || block.type === BlockType.AirBlock) continue;
+  private processRaw: DataProcessor<number> = function (_c, engine, renderer, block, data) {
+    const models = renderer.models.get(block.type, block.states);
+    models.forEach((model) => {
+      model.faces.forEach((face) => {
+        if (!renderer.shouldRender(block, face)) return;
 
-          const models = this.renderer.models.get(block.type, block.states);
+        const { corners: c, texCoord: t, normal: n, texture: tex } = face;
+        const offset = renderer.textures.sampleBlock(tex, engine.tick);
+        const [tx, ty] = renderer.textures.sampleTint(block);
+        const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
-          models.forEach((model) => {
-            model.faces.forEach((face) => {
-              if (!this.renderer.shouldRender(block, face)) return;
+        for (let l = 0; l < 4; ++l) {
+          const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
+          const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
+          const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
+          const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
+          const tint = (tx << 10) | ty;
 
-              const { corners: c, texCoord: t, normal: n, texture: tex } = face;
-              const offset = this.renderer.textures.sampleBlock(tex, this.renderer.engine.tick);
-              const [tx, ty] = this.renderer.textures.sampleTint(block);
-              const [ox1, oy1, ox2, oy2, oa, ob] = offset;
-
-              for (let l = 0; l < 4; ++l) {
-                const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
-                const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
-                const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
-                const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
-                const tint = (tx << 10) | ty;
-
-                vertices.push(
-                  c[l][0] + x,
-                  c[l][1] + y,
-                  c[l][2] + z,
-                  n[0],
-                  n[1],
-                  n[2],
-                  tex1,
-                  tex2,
-                  tint,
-                );
-              }
-            });
-          });
+          data.push(
+            c[l][0] + block.x,
+            c[l][1] + block.y,
+            c[l][2] + block.z,
+            n[0],
+            n[1],
+            n[2],
+            tex1,
+            tex2,
+            tint,
+          );
         }
-      }
-    }
+      });
+    });
+  }
 
-    const asFloat32 = new Float32Array(vertices);
+  private processData(data: number[]): Float32Array {
+    const asFloat32 = new Float32Array(data);
     const asInt32 = new Int32Array(asFloat32.buffer);
     for (let i = 0; i < asFloat32.length; i += 9) {
-      asInt32[i + 6] = vertices[i + 6];
-      asInt32[i + 7] = vertices[i + 7];
-      asInt32[i + 8] = vertices[i + 8];
+      asInt32[i + 6] = data[i + 6];
+      asInt32[i + 7] = data[i + 7];
+      asInt32[i + 8] = data[i + 8];
     }
-
     return asFloat32;
   }
 

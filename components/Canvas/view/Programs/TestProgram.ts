@@ -1,4 +1,4 @@
-import type Renderer from "../Renderer";
+import ProgramManager from "../ProgramManager";
 import Program from "./Program";
 
 interface Uniforms {
@@ -11,8 +11,8 @@ export default class TestProgram extends Program {
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    super(renderer, gl);
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    super(parent, gl);
 
     this.program = this.createProgram();
     this.abo = this.createAbo();
