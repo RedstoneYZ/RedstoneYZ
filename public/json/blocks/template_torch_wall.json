@@ -1,7 +1,4 @@
 {
-    "facing": true,
-    "prerotation": 1,
-
     "ambientocclusion": false,
     "textures": {
         "particle": "#torch"
