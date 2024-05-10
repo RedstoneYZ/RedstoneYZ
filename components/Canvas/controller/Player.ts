@@ -82,6 +82,10 @@ class Player {
     this.move([0, -1, 0]);
   }
 
+  moveStop() {
+    this.speed = {x : 0, y : 0, z : 0}
+  }
+
   private move([dx, dy, dz]: Vector3) {
     this.speed.x += dx * this.acc;
     this.speed.y += dy * this.acc;
