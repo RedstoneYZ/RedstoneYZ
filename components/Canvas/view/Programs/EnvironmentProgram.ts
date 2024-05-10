@@ -1,4 +1,4 @@
-import ProgramManager from "../ProgramManager";
+import type ProgramManager from "../ProgramManager";
 import Matrix4 from "../utils/Matrix4";
 import Program from "./Program";
 

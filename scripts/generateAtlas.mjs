@@ -79,8 +79,6 @@ async function blitBlock(ctx, json) {
  * @param {object} json
  */
 async function blitEnvironment(ctx, json) {
-  const LEFT = ENVIRONMENT_LEFT;
-  const TOP = ENVIRONMENT_TOP;
   const DATA = ENVIRONMENT_DATA;
 
   const root = TEXTURE_ROOT + "/environment";
@@ -93,7 +91,7 @@ async function blitEnvironment(ctx, json) {
     const {
       offset: [x, y],
     } = DATA[`moon_${i}`];
-    ctx.drawImage(moon, (x - LEFT) % 32, i < 4 ? 0 : 32, 32, 32, x, y, 32, 32);
+    ctx.drawImage(moon, (i % 4) * 32, i < 4 ? 0 : 32, 32, 32, x, y, 32, 32);
   }
 
   const sun = await loadImage(root + "/sun.png");

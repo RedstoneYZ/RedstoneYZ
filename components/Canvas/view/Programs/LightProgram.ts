@@ -1,5 +1,5 @@
 import type ProgramManager from "../ProgramManager";
-import { DataProcessor } from "../ProgramManager";
+import type { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
 import { glUnpackif } from "./glImports";
 
@@ -85,7 +85,7 @@ export default class LightProgram extends Program {
         }
       });
     });
-  }
+  };
 
   private processData(data: number[]): Float32Array {
     const asFloat32 = new Float32Array(data);
@@ -140,7 +140,13 @@ export default class LightProgram extends Program {
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.parent.textures[0], 0);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.DEPTH_ATTACHMENT,
+      gl.TEXTURE_2D,
+      this.parent.textures[0],
+      0,
+    );
     gl.drawBuffers([gl.NONE]);
     gl.readBuffer(gl.NONE);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

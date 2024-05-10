@@ -1,5 +1,5 @@
 import type ProgramManager from "../ProgramManager";
-import { DataProcessor } from "../ProgramManager";
+import type { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
 import { glUnpacki, glUnpackif } from "./glImports";
 
@@ -151,7 +151,7 @@ export default class MainProgram extends Program {
         }
       });
     });
-  }
+  };
 
   private processData(data: number[]): Float32Array {
     const asFloat32 = new Float32Array(data);

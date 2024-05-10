@@ -1,4 +1,4 @@
-import ProgramManager from "../ProgramManager";
+import type ProgramManager from "../ProgramManager";
 import Program from "./Program";
 
 interface Uniforms {

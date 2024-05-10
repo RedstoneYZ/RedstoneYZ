@@ -83,7 +83,7 @@ class Player {
   }
 
   moveStop() {
-    this.speed = {x : 0, y : 0, z : 0}
+    this.speed = { x: 0, y: 0, z: 0 };
   }
 
   private move([dx, dy, dz]: Vector3) {

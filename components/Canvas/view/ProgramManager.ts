@@ -1,6 +1,7 @@
-import Controller from "../controller/Controller";
-import Engine from "../model/Engine";
-import { BlockType, Blocks } from "../model/types";
+import type Controller from "../controller/Controller";
+import type Engine from "../model/Engine";
+import type { Blocks } from "../model/types";
+import { BlockType } from "../model/types";
 import EnvironmentProgram from "./Programs/EnvironmentProgram";
 import LightProgram from "./Programs/LightProgram";
 import LineProgram from "./Programs/LineProgram";
@@ -22,10 +23,10 @@ export default class ProgramManager {
     this.controller = renderer.controller;
     this.engine = renderer.engine;
     this.renderer = renderer;
-    
+
     this.gl = this.initGL(canvas);
 
-    this.createTextures().then(textures => {
+    this.createTextures().then((textures) => {
       this.textures = textures;
       this.programs = [
         new LightProgram(this, this.gl),
