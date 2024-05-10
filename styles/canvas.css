@@ -1,24 +1,30 @@
 .canvas-wrapper {
-  border: 3px #D2A46B solid;
+  border: 3px rgb(186, 186, 186) solid;
   border-radius: 0.3em;
   width: max-content;
 }
 
+.canvas-wrapper-f3 {
+  background-color: rgb(179, 179, 179);
+
+  position: absolute;
+  padding: 5px 10px;
+  top: 10px;
+  left: 10px;
+
+  user-select: none;
+}
+
 .canvas-wrapper-upper {
-  text-align: center;
+  position: relative;
 }
 
 .canvas-wrapper-middle {
   text-align: center;
+  padding: 5px;
 }
 
-.canvas-wrapper-lower {
-  padding-top: 5px;
-  padding-bottom: 10px;
-  text-align: center;
-}
-
-.canvas:focus {
+.canvas-wrapper:focus {
   padding: 0;
   outline: 0;
 }

@@ -205,7 +205,7 @@ class Engine {
   /**
    * 開始模擬遊戲
    */
-  startTicking(): void {
+  startTicking(tickFunc: () => void): void {
     if (this._interval) {
       clearInterval(this._interval);
       this._interval = undefined;
@@ -264,6 +264,8 @@ class Engine {
       if (this.tick % 24000 === 0) {
         this.day++;
       }
+
+      tickFunc();
     }, 50);
   }
 

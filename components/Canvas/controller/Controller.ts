@@ -56,8 +56,8 @@ class Controller {
    * 初始化
    * @param canvas
    */
-  start(): void {
-    this.engine.startTicking();
+  start(tickFunc: () => void): void {
+    this.engine.startTicking(tickFunc);
     this.renderer.startRendering(this.physics);
   }
 

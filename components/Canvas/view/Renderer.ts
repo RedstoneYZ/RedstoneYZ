@@ -24,6 +24,9 @@ export default class Renderer {
   public scaleX: number;
   public scaleY: number;
 
+  public mspf: number;
+  public maxMspf: number;
+
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
     this.dimensions = dimensions;
@@ -37,15 +40,25 @@ export default class Renderer {
     this.models = new ModelHandler();
     this.programs = new ProgramManager(this, canvas);
     this.textures = new TextureManager();
+
+    this.mspf = 0;
+    this.maxMspf = 0;
   }
 
+  private lastFrameTime: number = window.performance.now();
   startRendering(func?: () => any): void {
     const draw = async () => {
+      const time = window.performance.now();
+
       if (this.needRender) {
         const success = this.programs.draw();
         if (success) {
           this.resetNeedRender();
         }
+
+        this.mspf = 0.25 * (time - this.lastFrameTime) + 0.75 * this.mspf;
+        this.maxMspf = 0.25 * (window.performance.now() - time) + 0.75 * this.maxMspf;
+        this.lastFrameTime = time;
       }
 
       func?.();
