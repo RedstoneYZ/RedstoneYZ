@@ -1,8 +1,8 @@
 import { sleep, strictEqual } from "./utils";
-import { AirBlock, Block, IronBlock, Lever, NewBlock, RedstoneLamp } from ".";
+import type { Lever, RedstoneLamp } from ".";
+import { AirBlock, Block, IronBlock, NewBlock } from ".";
 import blockNameTable from "./utils/blockNameTable";
-import {
-  BlockType,
+import type {
   Blocks,
   EngineOptions,
   EngineTask,
@@ -11,6 +11,7 @@ import {
   ValidationData,
   Vector3,
 } from "./types";
+import { BlockType } from "./types";
 
 class Engine {
   public xLen: number;

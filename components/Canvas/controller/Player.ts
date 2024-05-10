@@ -1,5 +1,5 @@
-import { Vector2, Vector3 } from "../model/types";
-import { PlayerFacing, PlayerXYZ } from "./types";
+import type { Vector2, Vector3 } from "../model/types";
+import type { PlayerFacing, PlayerXYZ } from "./types";
 
 class Player {
   public xyz: PlayerXYZ;
@@ -12,7 +12,7 @@ class Player {
 
   constructor() {
     this.xyz = { x: 0, y: 2, z: 0 };
-    this.facing = { direction: "south", yaw: 0, pitch: 0 };
+    this.facing = { yaw: 0, pitch: 0 };
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;

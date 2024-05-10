@@ -1,4 +1,5 @@
-import { BlockOptions, BlockType, FourFacings, SixSides, Vector3 } from "../types";
+import type { BlockOptions, FourFacings, SixSides, Vector3 } from "../types";
+import { BlockType } from "../types";
 import { Maps } from "../utils";
 import RedstoneTorchBase from "./RedstoneTorchBase";
 

@@ -1,4 +1,4 @@
-import Renderer from "../Renderer";
+import ProgramManager from "../ProgramManager";
 import Matrix4 from "../utils/Matrix4";
 import Program from "./Program";
 
@@ -14,8 +14,8 @@ export default class EnvironmentProgram extends Program {
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    super(renderer, gl);
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    super(parent, gl);
 
     this.program = this.createProgram();
     this.uniform = this.setupUniform(["u_mvp", "sampler"]);
@@ -48,8 +48,8 @@ export default class EnvironmentProgram extends Program {
   }
 
   private getData(): Float32Array {
-    const theta = this.renderer.sunAngle;
-    const phi = this.renderer.seasonAngle;
+    const theta = this.parent.sunAngle;
+    const phi = this.parent.seasonAngle;
 
     const vs = Matrix4.Multiply(
       new Float32Array([60, 20, 20, 1, 60, 20, -20, 1, 60, -20, -20, 1, 60, -20, 20, 1]),
@@ -120,7 +120,7 @@ export default class EnvironmentProgram extends Program {
     gl.enableVertexAttribArray(1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.parent.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
@@ -137,7 +137,7 @@ export default class EnvironmentProgram extends Program {
     const sun = await new Promise<HTMLImageElement>((res) => {
       const image = new Image();
       image.onload = () => res(image);
-      image.src = "/static/images/textures/environment/sun.png";
+      image.src = "/images/textures/environment/sun.png";
     });
 
     gl.activeTexture(gl.TEXTURE2);
@@ -154,9 +154,9 @@ export default class EnvironmentProgram extends Program {
   private get mvp(): Float32Array {
     const {
       xyz: { x, y, z },
-    } = this.renderer.controller.player;
+    } = this.parent.controller.player;
 
-    return Matrix4.Multiply(Matrix4.Translate(x, y, z), this.renderer.mvp);
+    return Matrix4.Multiply(Matrix4.Translate(x, y, z), this.parent.mvp);
   }
 
   protected vsSrc = `#version 300 es

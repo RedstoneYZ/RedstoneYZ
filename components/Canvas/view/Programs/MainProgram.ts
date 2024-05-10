@@ -1,7 +1,7 @@
-import { BlockType } from "../../model/types";
-import Renderer from "../Renderer";
+import type ProgramManager from "../ProgramManager";
+import { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
-import { glUnpackif } from "./glImports";
+import { glUnpacki, glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mvp: WebGLUniformLocation;
@@ -19,8 +19,8 @@ export default class MainProgram extends Program {
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    super(renderer, gl);
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    super(parent, gl);
 
     this.program = this.createProgram();
     this.uniform = this.setupUniform([
@@ -47,13 +47,14 @@ export default class MainProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.renderer.mvp);
-    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
+    gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.parent.mvp);
+    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.parent.mlp);
     gl.uniform3fv(this.uniform.lightnorm, this.getLightNorm());
 
-    const data = this.getBlockVertices();
+    const rawData = this.parent.getData(this.processRaw);
+    const data = this.processData(rawData);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 32) * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 36) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -63,7 +64,7 @@ export default class MainProgram extends Program {
   }
 
   private getLightNorm(): Float32Array {
-    const theta = this.renderer.sunAngle;
+    const theta = this.parent.sunAngle;
     return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
   }
 
@@ -72,7 +73,7 @@ export default class MainProgram extends Program {
     const gl = this.gl;
 
     gl.useProgram(this.program);
-    gl.uniform2iv(uniform.screensize, [this.renderer.WIDTH, this.renderer.HEIGHT]);
+    gl.uniform2iv(uniform.screensize, [this.parent.renderer.canvasW, this.parent.renderer.canvasH]);
     gl.uniform1i(uniform.s_texture, 0);
     gl.uniform1i(uniform.s_shadow, 1);
     gl.useProgram(null);
@@ -102,59 +103,66 @@ export default class MainProgram extends Program {
 
     // TODO: maybe change normal and texcoords to half float
     // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 32, 0);
-    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 32, 12);
-    gl.vertexAttribIPointer(2, 2, gl.INT, 32, 24);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 36, 0);
+    gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 36, 12);
+    gl.vertexAttribIPointer(2, 2, gl.INT, 36, 24);
+    gl.vertexAttribIPointer(3, 1, gl.INT, 36, 32);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
     gl.enableVertexAttribArray(2);
+    gl.enableVertexAttribArray(3);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.parent.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
     return vao;
   }
 
-  private getBlockVertices(): Float32Array {
-    // TODO: only update block changes
-    const vertices: number[] = [];
-    for (let x = 0; x < this.renderer.dimensions[0]; x++) {
-      for (let y = 0; y < this.renderer.dimensions[1]; y++) {
-        for (let z = 0; z < this.renderer.dimensions[2]; z++) {
-          const block = this.renderer.engine.block(x, y, z);
-          if (!block || block.type === BlockType.AirBlock) continue;
+  private processRaw: DataProcessor<number> = function (_c, engine, renderer, block, data) {
+    const models = renderer.models.get(block.type, block.states);
+    models.forEach((model) => {
+      model.faces.forEach((face) => {
+        if (!renderer.shouldRender(block, face)) return;
 
-          const models = this.renderer.models.get(block.type, block.states);
-          models.forEach((model) => {
-            model.faces.forEach((face) => {
-              if (!this.renderer.shouldRender(block, face)) return;
+        const { corners: c, texCoord: t, normal: n, texture: tex } = face;
+        const offset = renderer.textures.sampleBlock(tex, engine.tick);
+        const [tx, ty] = renderer.textures.sampleTint(block);
+        const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
-              const { corners: c, texCoord: t, normal: n } = face;
-              const offset = this.renderer.textures.sample(face.texture, this.renderer.engine.tick);
-              const [ox1, oy1, ox2, oy2, oa, ob] = offset;
+        for (let l = 0; l < 4; ++l) {
+          const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
+          const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
+          const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
+          const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
+          const tint = (tx << 10) | ty;
 
-              for (let l = 0; l < 4; ++l) {
-                const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
-                const tex2 = ((t[l][1] + oy2) << 20) | (oa << 10) | ob;
-
-                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, n[0], n[1], n[2], tex1, tex2);
-              }
-            });
-          });
+          data.push(
+            c[l][0] + block.x,
+            c[l][1] + block.y,
+            c[l][2] + block.z,
+            n[0],
+            n[1],
+            n[2],
+            tex1,
+            tex2,
+            tint,
+          );
         }
-      }
-    }
+      });
+    });
+  }
 
-    const asFloat32 = new Float32Array(vertices);
+  private processData(data: number[]): Float32Array {
+    const asFloat32 = new Float32Array(data);
     const asInt32 = new Int32Array(asFloat32.buffer);
-    for (let i = 0; i < asFloat32.length; i += 8) {
-      asInt32[i + 6] = vertices[i + 6];
-      asInt32[i + 7] = vertices[i + 7];
+    for (let i = 0; i < asFloat32.length; i += 9) {
+      asInt32[i + 6] = data[i + 6];
+      asInt32[i + 7] = data[i + 7];
+      asInt32[i + 8] = data[i + 8];
     }
-
     return asFloat32;
   }
 
@@ -168,7 +176,7 @@ export default class MainProgram extends Program {
     const atlas = await new Promise<HTMLImageElement>((res) => {
       const image = new Image();
       image.onload = () => res(image);
-      image.src = "/static/images/atlas/atlas.png";
+      image.src = "/images/atlas/atlas.png";
     });
 
     gl.activeTexture(gl.TEXTURE0);
@@ -183,38 +191,54 @@ export default class MainProgram extends Program {
   }
 
   protected vsSrc = `#version 300 es
+    ${glUnpacki}
     ${glUnpackif}
 
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in mediump vec3 a_normal;
     layout(location = 2) in ivec2 a_texture;
+    layout(location = 3) in int a_tint;
 
     uniform mat4 u_mvp;
     uniform mat4 u_mlp;
     uniform vec3 lightnorm;
+    uniform sampler2D s_texture;
 
     out mediump vec2 v_texcoord1;
     out mediump vec2 v_texcoord2;
     out mediump float v_texinter;
     out mediump float v_suncosine;
     out mediump vec3 v_shadowcoord;
+    flat out mediump vec3 v_tint;
 
     const vec3 la = vec3(0.1, 0.1, 0.2);
 
     void main() {
       gl_Position = u_mvp * vec4(a_position, 1.0);
 
-      v_texcoord1.x = unpackif(a_texture.s, 20, 10) / 128.;
-      v_texcoord1.y = unpackif(a_texture.s, 10, 10) / 128.;
-      v_texcoord2.x = unpackif(a_texture.s,  0, 10) / 128.;
-      v_texcoord2.y = unpackif(a_texture.t, 20, 10) / 128.;
-      v_texinter = unpackif(a_texture.t, 10, 10) / unpackif(a_texture.t, 0, 10);
+      v_texcoord1.x = unpackif(a_texture.s, 20, 10) / 256.;
+      v_texcoord1.y = unpackif(a_texture.s, 10, 10) / 256.;
+      v_texcoord2.x = unpackif(a_texture.s,  0, 10) / 256.;
+      v_texcoord2.y = unpackif(a_texture.t, 20, 10) / 256.;
+      v_texinter = unpackif(a_texture.t, 11, 9) / unpackif(a_texture.t, 2, 9);
+
+      bool uOffset = unpacki(a_texture.t, 1, 1) == 0;
+      bool vOffset = unpacki(a_texture.t, 0, 1) == 0;
+      v_texcoord1.x += uOffset ? 0.001 : -0.001;
+      v_texcoord2.x += uOffset ? 0.001 : -0.001;
+      v_texcoord1.y += vOffset ? 0.001 : -0.001;
+      v_texcoord2.y += vOffset ? 0.001 : -0.001;
 
       v_suncosine = max(dot(a_normal, lightnorm), 0.0);
 
       vec4 lightcoord = u_mlp * vec4(a_position, 1.0);
       v_shadowcoord = lightcoord.xyz / lightcoord.w;
       v_shadowcoord = v_shadowcoord * 0.5 + 0.5;
+
+      vec2 tint;
+      tint.x = (unpackif(a_tint, 10, 10) + 0.5) / 256.;
+      tint.y = (unpackif(a_tint,  0, 10) + 0.5) / 256.;
+      v_tint = texture(s_texture, tint).rgb;
     }
   `;
 
@@ -226,6 +250,7 @@ export default class MainProgram extends Program {
     in mediump float v_texinter;
     in mediump float v_suncosine;
     in mediump vec3 v_shadowcoord;
+    flat in mediump vec3 v_tint;
 
     uniform highp vec3 lightnorm;
     uniform ivec2 screensize;
@@ -257,7 +282,7 @@ export default class MainProgram extends Program {
       shadow *= 0.11;
 
       vec3 factor = max(v_suncosine * shadow * light_color, 0.25 * ambient_color);
-      fragColor = vec4(texel.rgb * factor, texel.a);
+      fragColor = vec4(texel.rgb * v_tint * factor, texel.a);
     }
   `;
 }
@@ -269,5 +294,7 @@ export default class MainProgram extends Program {
  * a_texture.s: 00000000000000000000000000000000
  *                └ tex1.x ┘└ tex1.y ┘└ tex2.x ┘
  * a_texture.t: 00000000000000000000000000000000
- *                └ tex2.y ┘└ inpo.d ┘└ inpo.n ┘
+ *                └ tex2.y ┘└ int.d ┘└ int.n ┘uv
+ *           u: u offset in (0) / out (1)
+ *           v: v offset in (0) / out (1)
  */

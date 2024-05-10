@@ -1,16 +1,16 @@
 import { NewBlock, Maps } from "../utils";
-import {
+import type {
   BlockData,
   BlockInternal,
   BlockOptions,
   BlockSpawnOptions,
   BlockState,
-  BlockType,
   Blocks,
   PowerTransmission,
   SixSides,
 } from "../types";
-import Engine from "../Engine";
+import { BlockType } from "../types";
+import type Engine from "../Engine";
 
 /**
  * 代表一個方塊
@@ -93,14 +93,14 @@ abstract class Block {
   /**
    * 取得此方塊對指定方向導線元件外的方塊的能量輸出情形，只能被導線元件（紅石粉、紅石中繼器、紅石比較器）以外的方塊呼叫
    */
-  powerTowardsBlock(_direction: SixSides): PowerTransmission {
+  powerTowardsBlock(_: SixSides): PowerTransmission {
     return { strong: false, power: 0 };
   }
 
   /**
    * 取得此方塊對指定方向導線元件的能量輸出情形，只能被導線元件（紅石粉、紅石中繼器、紅石比較器）呼叫
    */
-  powerTowardsWire(_direction: SixSides): PowerTransmission {
+  powerTowardsWire(_: SixSides): PowerTransmission {
     return { strong: this.internal.source, power: this.internal.power };
   }
 

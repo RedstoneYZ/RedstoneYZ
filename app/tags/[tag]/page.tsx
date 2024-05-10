@@ -4,7 +4,7 @@ import ListLayout from "@/layouts/ListLayoutWithTreeStructure";
 import { allArticles } from "contentlayer/generated";
 import tagData from "app/tag-data.json";
 import { genPageMetadata } from "app/seo";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag);

@@ -1,4 +1,5 @@
-import { BlockOptions, BlockType, FourFacings, SixSides, Vector3 } from "../types";
+import type { BlockOptions, FourFacings, SixSides, Vector3 } from "../types";
+import { BlockType } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 
@@ -85,9 +86,10 @@ class RedstoneRepeater extends Block {
    * @param normDir 指定面的法向量方向
    * @param facingDir 與觀察視角最接近的軸向量方向
    */
-  private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
-    if (!normDir || !facingDir) return;
+  private setFacing(_normDir?: SixSides, facingDir?: FourFacings) {
+    if (!facingDir) return;
 
+    facingDir = Maps.ReverseDir[facingDir];
     this.states.facing = facingDir ?? "north";
     this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[
       facingDir

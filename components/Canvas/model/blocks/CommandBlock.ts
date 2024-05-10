@@ -1,5 +1,6 @@
 import FullBlock from "./FullBlock";
-import { BlockOptions, BlockType, SixSides } from "../types";
+import type { BlockOptions, SixSides } from "../types";
+import { BlockType } from "../types";
 
 class CommandBlock extends FullBlock {
   public type: BlockType.CommandBlock;

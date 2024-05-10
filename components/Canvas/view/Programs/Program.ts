@@ -1,7 +1,7 @@
-import Renderer from "../Renderer";
+import type ProgramManager from "../ProgramManager";
 
 export default abstract class Program {
-  protected renderer: Renderer;
+  protected parent: ProgramManager;
 
   protected gl: WebGL2RenderingContext;
   protected ready: boolean;
@@ -12,8 +12,8 @@ export default abstract class Program {
 
   public abstract draw(): boolean;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    this.renderer = renderer;
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    this.parent = parent;
     this.gl = gl;
     this.ready = false;
   }

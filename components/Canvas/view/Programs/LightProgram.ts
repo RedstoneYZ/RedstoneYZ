@@ -1,6 +1,7 @@
-import { BlockType } from "../../model/types";
-import Renderer from "../Renderer";
+import type ProgramManager from "../ProgramManager";
+import { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
+import { glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mlp: WebGLUniformLocation;
@@ -15,8 +16,8 @@ export default class LightProgram extends Program {
   private vao: WebGLVertexArrayObject;
   private fbo: WebGLFramebuffer;
 
-  constructor(renderer: Renderer, gl: WebGL2RenderingContext) {
-    super(renderer, gl);
+  constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
+    super(parent, gl);
 
     this.program = this.createProgram();
     this.shadowMap = this.createShadowMap();
@@ -38,13 +39,14 @@ export default class LightProgram extends Program {
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
     gl.colorMask(false, false, false, false);
 
-    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.renderer.mlp);
+    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.parent.mlp);
 
     gl.clear(gl.DEPTH_BUFFER_BIT);
 
-    const data = this.getData();
+    const rawData = this.parent.getData(this.processRaw);
+    const data = this.processData(rawData);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 3) * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 16) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.colorMask(true, true, true, true);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -55,29 +57,31 @@ export default class LightProgram extends Program {
     return true;
   }
 
-  private getData(): Float32Array {
-    const vertices: number[] = [];
-    for (let x = 0; x < this.renderer.dimensions[0]; x++) {
-      for (let y = 0; y < this.renderer.dimensions[1]; y++) {
-        for (let z = 0; z < this.renderer.dimensions[2]; z++) {
-          const block = this.renderer.engine.block(x, y, z);
-          if (!block || block.type === BlockType.AirBlock) continue;
+  private processRaw: DataProcessor<number> = function (_c, _e, renderer, block, data) {
+    const models = renderer.models.get(block.type, block.states);
+    models.forEach((model) => {
+      model.faces.forEach((face) => {
+        if (!renderer.shouldRender(block, face)) return;
 
-          const models = this.renderer.models.get(block.type, block.states);
-          models.forEach((model) => {
-            model.faces.forEach((face) => {
-              if (!this.renderer.shouldRender(block, face)) return;
+        const { corners: c, texCoord: t, texture: tex } = face;
+        const offset = renderer.textures.sampleBlock(tex, renderer.engine.tick);
+        const [ox1, oy1] = offset;
 
-              const { corners: c } = face;
-              for (let l = 0; l < 4; ++l) {
-                vertices.push(c[l][0] + x, c[l][1] + y, c[l][2] + z);
-              }
-            });
-          });
+        for (let l = 0; l < 4; ++l) {
+          const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10);
+          data.push(c[l][0] + block.x, c[l][1] + block.y, c[l][2] + block.z, tex1);
         }
-      }
+      });
+    });
+  }
+
+  private processData(data: number[]): Float32Array {
+    const asFloat32 = new Float32Array(data);
+    const asInt32 = new Int32Array(asFloat32.buffer);
+    for (let i = 0; i < asFloat32.length; i += 4) {
+      asInt32[i + 3] = data[i + 3];
     }
-    return new Float32Array(vertices);
+    return asFloat32;
   }
 
   private createAbo(): WebGLBuffer {
@@ -102,12 +106,14 @@ export default class LightProgram extends Program {
 
     // TODO: maybe change normal and texcoords to half float
     // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 12, 0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 16, 0);
+    gl.vertexAttribIPointer(1, 1, gl.INT, 16, 12);
 
     gl.enableVertexAttribArray(0);
+    gl.enableVertexAttribArray(1);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.renderer.indices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.parent.indices), gl.STATIC_DRAW);
 
     gl.bindVertexArray(null);
 
@@ -149,26 +155,41 @@ export default class LightProgram extends Program {
       gl.TEXTURE_2D,
       1,
       gl.DEPTH_COMPONENT16,
-      this.renderer.WIDTH,
-      this.renderer.HEIGHT,
+      this.parent.renderer.canvasW,
+      this.parent.renderer.canvasH,
     );
 
     return texture;
   }
 
   protected vsSrc = `#version 300 es
+    ${glUnpackif}
+
     layout(location = 0) in vec3 a_position;
+    layout(location = 1) in int a_texture;
 
     uniform mat4 u_mlp;
 
+    out mediump vec2 v_texcoord;
+
     void main() {
       gl_Position = u_mlp * vec4(a_position, 1.0);
+      v_texcoord.x = unpackif(a_texture, 20, 10) / 256.;
+      v_texcoord.y = unpackif(a_texture, 10, 10) / 256.;
     }
   `;
 
   protected fsSrc = `#version 300 es
     precision mediump float;
+
+    in mediump vec2 v_texcoord;
+
+    uniform sampler2D s_texture;
+
     void main() {
+      if (texture(s_texture, v_texcoord).a < 0.1) {
+        discard;
+      }
     }
   `;
 }

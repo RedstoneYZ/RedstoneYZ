@@ -1,5 +1,5 @@
-import Engine from "./Engine";
-import {
+import type Engine from "./Engine";
+import type {
   AirBlock,
   CommandBlock,
   Glass,
