@@ -13,8 +13,10 @@ export default class ProgramManager {
   public controller: Controller;
   public engine: Engine;
   public renderer: Renderer;
+  public textures: WebGLTexture[];
   private gl: WebGL2RenderingContext;
   private programs: Program[];
+  private ready: boolean;
 
   constructor(renderer: Renderer, canvas: HTMLCanvasElement) {
     this.controller = renderer.controller;
@@ -22,16 +24,23 @@ export default class ProgramManager {
     this.renderer = renderer;
     
     this.gl = this.initGL(canvas);
-    this.programs = [
-      new LightProgram(this, this.gl),
-      // new TestProgram(this, this.gl),
-      new MainProgram(this, this.gl),
-      new EnvironmentProgram(this, this.gl),
-      new LineProgram(this, this.gl),
-    ];
+
+    this.createTextures().then(textures => {
+      this.textures = textures;
+      this.programs = [
+        new LightProgram(this, this.gl),
+        // new TestProgram(this, this.gl),
+        new MainProgram(this, this.gl),
+        new EnvironmentProgram(this, this.gl),
+        new LineProgram(this, this.gl),
+      ];
+      this.ready = true;
+    });
   }
 
   public draw(): boolean {
+    if (!this.ready) return false;
+
     const gl = this.gl;
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -61,6 +70,71 @@ export default class ProgramManager {
     gl.polygonOffset(2, 20);
 
     return gl;
+  }
+
+  private async createTextures(): Promise<WebGLTexture[]> {
+    const gl = this.gl;
+
+    const texture0 = gl.createTexture();
+    if (!texture0) {
+      throw new Error("Failed to create main texture.");
+    }
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture0);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+    gl.texStorage2D(
+      gl.TEXTURE_2D,
+      1,
+      gl.DEPTH_COMPONENT16,
+      this.renderer.canvasW,
+      this.renderer.canvasH,
+    );
+
+    const texture1 = gl.createTexture();
+    if (!texture1) {
+      throw new Error("Failed to create main texture.");
+    }
+
+    const atlas = await new Promise<HTMLImageElement>((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.src = "/images/atlas/atlas.png";
+    });
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, texture1);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas);
+
+    const texture2 = gl.createTexture();
+    if (!texture2) {
+      throw new Error("Failed to create main texture.");
+    }
+
+    const sun = await new Promise<HTMLImageElement>((res) => {
+      const image = new Image();
+      image.onload = () => res(image);
+      image.src = "/images/textures/environment/sun.png";
+    });
+
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, texture2);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sun);
+
+    return [texture0, texture1, texture2];
   }
 
   public getData<T>(func: DataProcessor<T>): T[] {

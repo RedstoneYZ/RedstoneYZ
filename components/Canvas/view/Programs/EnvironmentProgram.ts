@@ -22,9 +22,7 @@ export default class EnvironmentProgram extends Program {
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
-    this.createSprite().then(() => {
-      this.ready = true;
-    });
+    this.ready = true;
   }
 
   public draw(): boolean {
@@ -48,6 +46,10 @@ export default class EnvironmentProgram extends Program {
   }
 
   private getData(): Float32Array {
+    let [tx, ty] = this.parent.renderer.textures.sampleEnvironment("sun");
+    tx /= 256;
+    ty /= 256;
+
     const theta = this.parent.sunAngle;
     const phi = this.parent.seasonAngle;
 
@@ -62,23 +64,23 @@ export default class EnvironmentProgram extends Program {
       vs[0],
       vs[1],
       vs[2],
-      0,
-      0,
+      tx + 0.001,
+      ty + 0.001,
       vs[4],
       vs[5],
       vs[6],
-      1,
-      0,
+      tx + 0.124,
+      ty + 0.001,
       vs[8],
       vs[9],
       vs[10],
-      1,
-      1,
+      tx + 0.124,
+      ty + 0.124,
       vs[12],
       vs[13],
       vs[14],
-      0,
-      1,
+      tx + 0.001,
+      ty + 0.124,
     ]);
   }
 
@@ -87,7 +89,7 @@ export default class EnvironmentProgram extends Program {
     const gl = this.gl;
 
     gl.useProgram(this.program);
-    gl.uniform1i(uniform.sampler, 2);
+    gl.uniform1i(uniform.sampler, 1);
     gl.useProgram(null);
 
     return uniform;
@@ -125,30 +127,6 @@ export default class EnvironmentProgram extends Program {
     gl.bindVertexArray(null);
 
     return vao;
-  }
-
-  private async createSprite(): Promise<WebGLTexture> {
-    const gl = this.gl;
-    const texture = gl.createTexture();
-    if (!texture) {
-      throw new Error("Failed to create main texture.");
-    }
-
-    const sun = await new Promise<HTMLImageElement>((res) => {
-      const image = new Image();
-      image.onload = () => res(image);
-      image.src = "/images/textures/environment/sun.png";
-    });
-
-    gl.activeTexture(gl.TEXTURE2);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sun);
-
-    return texture;
   }
 
   private get mvp(): Float32Array {

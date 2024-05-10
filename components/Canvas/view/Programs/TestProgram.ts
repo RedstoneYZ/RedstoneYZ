@@ -43,7 +43,7 @@ export default class TestProgram extends Program {
     const gl = this.gl;
 
     gl.useProgram(this.program);
-    gl.uniform1i(uniform.sampler, 1);
+    gl.uniform1i(uniform.sampler, 0);
     gl.useProgram(null);
 
     return uniform;

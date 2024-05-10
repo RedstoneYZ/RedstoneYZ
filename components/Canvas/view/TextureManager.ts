@@ -26,6 +26,15 @@ export default class TextureManager {
     return [off1[0], off1[1], off2[0], off2[1], inter, frametime];
   }
 
+  sampleEnvironment(path: string): Vector2 {
+    if (!(path in Textures.environment)) {
+      throw new Error(`Texture ${path} does not exist in texture atlas.`);
+    }
+
+    const [x, y] = Textures.environment[path as keyof typeof Textures.environment].offset;
+    return [x, y];
+  }
+
   sampleTint(block: Blocks): Vector2 {
     const [x, y] = Textures.tint.offset;
     if (block.type !== BlockType.RedstoneDust) return [x + 15, y + 15];

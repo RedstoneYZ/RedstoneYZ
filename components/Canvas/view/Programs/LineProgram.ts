@@ -188,8 +188,6 @@ export default class LineProgram extends Program {
   protected fsSrc = `#version 300 es
     precision mediump float;
 
-    uniform sampler2D sampler;
-
     out vec4 fragColor;
 
     void main() {
