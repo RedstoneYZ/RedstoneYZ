@@ -16,7 +16,6 @@
   - `esbuild`。
   - `gray-matter`：輸入特定格式的字串（通常是一篇文章）後，可以得到一個容易處理的物件。
   - `image-size`：用來取得各種圖檔的長寬。
-  - `jimp`：圖片編輯套件，用於生成材質總表。
   - `next`。
   - `next-contentlayer`。
   - `next-themes`：支援深色模式。

@@ -1,28 +1,30 @@
 import fs from "fs";
-import Jimp from "jimp";
+import { createCanvas, loadImage } from "canvas";
 
 const TEXTURE_ROOT = "./public/images/textures";
 const ATLAS_ROOT = "./public/images/atlas";
 const ATLAS_WIDTH = 256;
 const ATLAS_HEIGHT = 256;
 
-new Jimp(ATLAS_WIDTH, ATLAS_HEIGHT, async (error, atlas) => {
-  if (error) throw error;
+(async () => {
+  const canvas = createCanvas(ATLAS_WIDTH, ATLAS_HEIGHT);
+  const ctx = canvas.getContext("2d");
 
   const json = {};
-  await blitBlock(atlas, json);
-  await blitEnvironment(atlas, json);
-  await blitTint(atlas, json);
+  await blitBlock(ctx, json);
+  await blitEnvironment(ctx, json);
+  await blitTint(ctx, json);
 
-  atlas.write(ATLAS_ROOT + "/atlas.png");
+  const buffer = canvas.toBuffer("image/png");
+  fs.writeFileSync(ATLAS_ROOT + "/atlas.png", buffer);
   fs.writeFileSync(ATLAS_ROOT + "/atlas.json", JSON.stringify(json));
-});
+})();
 
 /**
- * @param {Jimp} atlas
+ * @param {CanvasRenderingContext2D} ctx
  * @param {object} json
  */
-async function blitBlock(atlas, json) {
+async function blitBlock(ctx, json) {
   const UNIT = 16;
 
   const root = TEXTURE_ROOT + "/block";
@@ -31,12 +33,12 @@ async function blitBlock(atlas, json) {
 
   const images = {};
   for (const png of pngs) {
-    const image = await Jimp.read(root + "/" + png);
-    if (image.getWidth() !== UNIT) {
+    const image = await loadImage(root + "/" + png);
+    if (image.width !== UNIT) {
       throw new Error("Unexpected aspect: " + png);
     }
 
-    const nFrame = image.getHeight() / UNIT;
+    const nFrame = image.height / UNIT;
     images[png.substring(0, png.length - 4)] = { image, nFrame };
   }
   for (const mcmeta of mcmetas) {
@@ -53,7 +55,7 @@ async function blitBlock(atlas, json) {
     const image = images[texName];
     const offset = [];
     for (let i = 0; i < image.nFrame; i++) {
-      atlas.blit(image.image, x, y, 0, i * UNIT, UNIT, UNIT);
+      ctx.drawImage(image.image, 0, i * UNIT, UNIT, UNIT, x, y, UNIT, UNIT);
       offset.push([x, y]);
 
       x += UNIT;
@@ -73,54 +75,54 @@ async function blitBlock(atlas, json) {
 }
 
 /**
- * @param {Jimp} atlas
+ * @param {CanvasRenderingContext2D} ctx
  * @param {object} json
  */
-async function blitEnvironment(atlas, json) {
+async function blitEnvironment(ctx, json) {
   const LEFT = ENVIRONMENT_LEFT;
   const TOP = ENVIRONMENT_TOP;
   const DATA = ENVIRONMENT_DATA;
 
   const root = TEXTURE_ROOT + "/environment";
 
-  const moon = await Jimp.read(root + "/moon_phases.png");
-  if (moon.getWidth() !== 128 || moon.getHeight() !== 64) {
+  const moon = await loadImage(root + "/moon_phases.png");
+  if (moon.width !== 128 || moon.height !== 64) {
     throw new Error("Unexpected aspect: moon_phases.png");
   }
   for (let i = 0; i < 8; i++) {
     const {
       offset: [x, y],
     } = DATA[`moon_${i}`];
-    atlas.blit(moon, x, y, x - LEFT, y - TOP, 32, 32);
+    ctx.drawImage(moon, (x - LEFT) % 32, i < 4 ? 0 : 32, 32, 32, x, y, 32, 32);
   }
 
-  const sun = await Jimp.read(root + "/sun.png");
-  if (sun.getWidth() !== 32 || sun.getHeight() !== 32) {
+  const sun = await loadImage(root + "/sun.png");
+  if (sun.width !== 32 || sun.height !== 32) {
     throw new Error("Unexpected aspect: sun.png");
   }
   const {
     offset: [x, y],
   } = DATA.sun;
-  atlas.blit(sun, x, y, 0, 0, 32, 32);
+  ctx.drawImage(sun, 0, 0, 32, 32, x, y, 32, 32);
 
   json.environment = DATA;
 }
 
 /**
- * @param {Jimp} atlas
+ * @param {CanvasRenderingContext2D} ctx
  * @param {object} json
  */
-async function blitTint(atlas, json) {
+async function blitTint(ctx, json) {
   const DATA = TINT_DATA;
 
-  const tint = await Jimp.read(TEXTURE_ROOT + "/tint/tint.png");
-  if (tint.getWidth() !== 16 || tint.getHeight() !== 16) {
+  const tint = await loadImage(TEXTURE_ROOT + "/tint/tint.png");
+  if (tint.width !== 16 || tint.height !== 16) {
     throw new Error("Unexpected aspect: tint.png");
   }
   const {
     offset: [x, y],
   } = DATA;
-  atlas.blit(tint, x, y, 0, 0, 16, 16);
+  ctx.drawImage(tint, 0, 0, 16, 16, x, y, 16, 16);
 
   json.tint = DATA;
 }
