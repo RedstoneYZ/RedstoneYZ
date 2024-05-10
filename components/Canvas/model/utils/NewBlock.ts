@@ -1,4 +1,5 @@
-import { BlockOptions, BlockState, BlockType, Blocks, FourFacings, SixSides } from "../types";
+import type { BlockOptions, BlockState, Blocks, FourFacings, SixSides } from "../types";
+import { BlockType } from "../types";
 import {
   AirBlock,
   IronBlock,

@@ -5,7 +5,6 @@ export interface PlayerXYZ {
 }
 
 export interface PlayerFacing {
-  direction: "north" | "east" | "south" | "west";
   yaw: number;
   pitch: number;
 }

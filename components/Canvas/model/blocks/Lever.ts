@@ -1,4 +1,5 @@
-import { BlockOptions, BlockType, FourFacings, SixSides, ThreeFaces, Vector3 } from "../types";
+import type { BlockOptions, FourFacings, SixSides, ThreeFaces, Vector3 } from "../types";
+import { BlockType } from "../types";
 import { Maps } from "../utils";
 import Block from "./Block";
 

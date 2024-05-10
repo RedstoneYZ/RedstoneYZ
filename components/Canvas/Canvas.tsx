@@ -1,21 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-// import Button from "../Button";
-// import Message from "../Message";
-
 import Controller from "./controller/Controller";
+import type { CanvasProps } from "./model/types";
 
-import Official_Map_1 from "@/public/json/levels/Official Map 1.json";
-import { CanvasProps } from "./model/types";
-
-const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: CanvasProps) => {
+const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   const [controller, setController] = useState<Controller>();
   const [currentBlock, setCurrentBlock] = useState("");
-
-  // @ts-ignore
-  props.preLoadData = Official_Map_1;
 
   const { current: xLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.xLen);
   const { current: yLen } = useRef("xLen" in props ? props.yLen : props.preLoadData.yLen);
@@ -44,6 +35,9 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
       e.preventDefault();
     }
     controller?.addActiveKey(e.key.toLowerCase());
+    if (controller?.jumpHotbar(e.key)) {
+      setCurrentBlock(controller?.currentBlockName ?? "");
+    }
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
@@ -83,6 +77,13 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     controller?.leftClick();
   }
 
+  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+    if (e.button !== 1) return;
+    e.preventDefault();
+    controller?.middleClick();
+    setCurrentBlock(controller?.currentBlockName ?? "");
+  }
+
   function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
     e.preventDefault();
     controller?.rightClick(e.shiftKey);
@@ -92,19 +93,6 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
     controller?.scrollHotbar(e.deltaY);
     setCurrentBlock(controller?.currentBlockName ?? "");
   }
-
-  // async function handleCheckMap() {
-  //   if (!controller) return;
-
-  //   if (await Engine.validate(controller.engine)) {
-  //     console.log('Pass');
-  //     // Message.send({ content: '恭喜你通過檢查！', type: 'success' });
-  //   }
-  //   else {
-  //     console.log('Fail');
-  //     // Message.send({ content: '很抱歉，但你沒有通過檢查 :(', type: 'error' });
-  //   }
-  // }
 
   return (
     <div className="canvas-wrapper">
@@ -123,6 +111,7 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
           draggable={true}
           onDrag={handleDrag}
           onDragStart={handleDragStart}
+          onMouseDown={handleMouseDown}
           onClick={handleClick}
           onContextMenu={handleContextMenu}
           onWheelCapture={handleScroll}
@@ -130,14 +119,6 @@ const Canvas = ({ canvasHeight, canvasWidth, storable, checkable, ...props }: Ca
         <span ref={spanRef} style={{ display: "none" }} />
       </div>
       <div className="canvas-wrapper-middle">{currentBlock}</div>
-      {
-        // TODO:
-        // storable || (checkable && controller?.engine.validation) ?
-        //   <div className="canvas-wrapper-lower">
-        //     {checkable && controller?.engine.validation ? <Button type="primary" onClick={handleCheckMap}>檢查地圖</Button> : <></>}
-        //   </div> :
-        //   <></>
-      }
     </div>
   );
 };

@@ -8,8 +8,8 @@ const siteMetadata = {
   theme: 'system', // system, dark or light
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
   siteRepo: 'https://github.com/RedstoneYZ/RedstoneYZ',
-  siteLogo: '/static/images/logo/logo2-cherry-tree.png',
-  socialBanner: '/static/images/twitter-card.png',
+  siteLogo: '/images/logo/logo2-cherry-tree.png',
+  socialBanner: '/images/twitter-card.png',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'redstoneYZ@gmail.com',
   github: 'https://https://github.com/RedstoneYZ',

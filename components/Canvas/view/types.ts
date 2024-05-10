@@ -1,4 +1,4 @@
-import { SixSides, Vector2, Vector3 } from "../model/types";
+import type { SixSides, Vector2, Vector3 } from "../model/types";
 
 export interface BlockModel {
   ambientocclusion: boolean;

@@ -10,19 +10,19 @@ draft: false
 
 ## 二進位加法
 在開始進入正題以前，先幫大家簡單介紹一下二進位加法。假設我們現在要計算 7 + 5 是多少，首先我們會需要把 7 和 5 轉換成二進位表示法，分別是 111 與 101。接下來再用我們熟悉的直式加法來計算 7 + 5 的和，只是因為我們是在二進位中計算加法，所以只要和超過 2 就需要進位。
-<Image src="/static/images/tutorials/adder/add-example-0.png" alt="二進位加法" width={500} priority />
+<Image src="/images/tutorials/adder/add-example-0.png" alt="二進位加法" width={500} priority />
 
 第一步，計算第一位數 1 + 1 = 2，因為和超過 2 了，所以就需要向第二位數進一。
-<Image src="/static/images/tutorials/adder/add-example-1.png" alt="二進位加法 第一位數" width={500} />
+<Image src="/images/tutorials/adder/add-example-1.png" alt="二進位加法 第一位數" width={500} />
 
 第二步，計算第二位數 1 + 0 = 1，再加上剛剛從第一位數來的進位，1 + 1 = 2，最後的和還是超過 2，所以要向第三位數進一。
-<Image src="/static/images/tutorials/adder/add-example-2.png" alt="二進位加法 第二位數" width={500} />
+<Image src="/images/tutorials/adder/add-example-2.png" alt="二進位加法 第二位數" width={500} />
 
 第三步，計算第三位數 1 + 1 = 2，再加上第二位數的進位，2 + 1 = 3，最後的和也超過 2 了，所以要向第四位數進一。
-<Image src="/static/images/tutorials/adder/add-example-3.png" alt="二進位加法 第三位數" width={500} />
+<Image src="/images/tutorials/adder/add-example-3.png" alt="二進位加法 第三位數" width={500} />
 
 最後一步，計算第四位數 0 + 0 = 0，再加上前面的進位，0 + 1 = 1，因為比 2 小，所以不需要再進位了。
-<Image src="/static/images/tutorials/adder/add-example-4.png" alt="二進位加法 第四位數" width={500} />
+<Image src="/images/tutorials/adder/add-example-4.png" alt="二進位加法 第四位數" width={500} />
 
 因此我們可以得到最終的結果 1100，也就是十進位中的 12。
 
@@ -41,7 +41,7 @@ draft: false
 眼尖的你可能會發現，輸出 X 似乎就是 A 和 B 經過 AND Gate 之後的結果，而輸出 Y 是 A 和 B 經過 XOR Gate 之後的結果。因此，所謂半加器，其實就是一個 AND Gate 和一個 XOR Gate 而已。
 
 下圖是一個遊戲中實作出來的半加器，因為之後這個半加器會與另一個半加器合成為單位數全加器，而多個單位數全加器還會合併成多位數的全加器，為了合併方便，所以半加器的結構並沒有很直覺好懂，不過我們有用不同的顏色標記每個方塊的充能狀態分別代表的布林值，讓你跟圖片做對照。
-<Image src="/static/images/tutorials/adder/half-adder.png" alt="各個角度的半加器" width={500} />
+<Image src="/images/tutorials/adder/half-adder.png" alt="各個角度的半加器" width={500} />
 
 - 淺藍色：A
 - 粉紅色：B
@@ -62,7 +62,7 @@ draft: false
 雖然因為布林變數變得有點多，有點難觀察出布林公式，但不能否認的是，輸出 S 可以表示成 X OR (Y AND C)，而輸出 T 可以表示成 Y XOR C。從這兩個式子就可以看出，餵給第二個半加器的兩個輸入應該要是 Y 和 C，這樣一來，它可以產出 Y AND C、Y XOR C 兩個輸出了，最後再把 X 和 Y AND C 用紅石粉相連，就可以得到 S 了。
 
 下圖就是利用兩個半加器所組成的一個全加器，這邊同樣也用不同顏色的方塊來表示不同的充能狀態：
-<Image src="/static/images/tutorials/adder/full-adder.png" alt="各個角度的全加器" width={500} />
+<Image src="/images/tutorials/adder/full-adder.png" alt="各個角度的全加器" width={500} />
 
 - 橘色：S = X OR (Y AND C)
 - 黃色：Y
@@ -75,7 +75,7 @@ draft: false
 
 ## 多位數加法器
 有了單位數的加法器以後，只需要將加法器緊緊並排，就可以得到多位數加法器了，而下圖是一個四位數加法器的例子，可以計算 0~15 + 0~15 之內的加法運算。
-<Image src="/static/images/tutorials/adder/4-bits-adder.png" alt="四位數全加器" width={500} />
+<Image src="/images/tutorials/adder/4-bits-adder.png" alt="四位數全加器" width={500} />
 
 ## 隨堂不小考
 在下面的模擬 Minecraft 中是一個全加器，這次的文章沒有小考，祝大家跟全加器玩得愉快！
