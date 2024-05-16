@@ -71,7 +71,7 @@ export default class MainProgram extends Program {
     const gl = this.gl;
 
     gl.useProgram(this.program);
-    gl.uniform2iv(uniform.screensize, [this.parent.renderer.canvasW, this.parent.renderer.canvasH]);
+    gl.uniform2fv(uniform.screensize, [this.parent.renderer.canvasW, this.parent.renderer.canvasH]);
     gl.uniform1i(uniform.s_shadow, 0);
     gl.uniform1i(uniform.s_texture, 1);
     gl.useProgram(null);
@@ -227,7 +227,7 @@ export default class MainProgram extends Program {
     flat in mediump vec3 v_tint;
 
     uniform highp vec3 lightnorm;
-    uniform ivec2 screensize;
+    uniform vec2 screensize;
 
     uniform sampler2D s_texture;
     uniform sampler2D s_shadow;
@@ -237,23 +237,45 @@ export default class MainProgram extends Program {
     const vec3 light_color = vec3(1.1, 1.1, 1.0);
     const vec3 ambient_color = vec3(0.8, 0.8, 1.0);
 
+    vec2 round_half(vec2 v) {
+      vec2 vv = v * screensize;
+      vec2 halfV = vec2(0.5, 0.5);
+      return (round(vv + halfV) - halfV) / screensize;
+    }
+
+    float shadow(vec2 offset) {
+      vec2 size = 1. / screensize;
+      float shadow = 0.;
+      for (int x = -1; x <= 1; ++x) {
+        for (int y = -1; y <= 1; ++y) {
+          vec2 xy = v_shadowcoord.xy + offset + (vec2(x, y)) * size;
+          float depth = texture(s_shadow, xy).r;
+          shadow += v_shadowcoord.z > depth ? 0.3 : 1.0;
+        }
+      }
+      return shadow * 0.11;
+    }
+
     void main() {
       vec4 texel1 = texture(s_texture, v_texcoord1);
       vec4 texel2 = texture(s_texture, v_texcoord2);
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      vec2 size = 1. / vec2(screensize);
+      vec2 xy = round_half(v_shadowcoord.xy);
+      vec2 diff = (floor(v_shadowcoord.xy - xy) * 2. + 1.) / screensize;
 
-      float shadow = 0.;
-      for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
-          vec2 xy = v_shadowcoord.xy + vec2(x, y) * size;
-          float depth = texture(s_shadow, xy).r;
-          shadow += v_shadowcoord.z > depth ? 0.3 : 1.0;
-        }
-      }
-      shadow *= 0.11;
+      float curShadow = shadow(vec2(0., 0.));
+      float horShadow = shadow(vec2(diff.x, 0.));
+      float verShadow = shadow(vec2(0., diff.y));
+      float diaShadow = shadow(diff);
+
+      float u = abs(v_shadowcoord.x - xy.x) * screensize.x;
+      float v = 1. - abs(v_shadowcoord.y - xy.y) * screensize.y;
+      
+      float uShadowTop = u * horShadow + (1. - u) * curShadow;
+      float uShadowBtm = u * diaShadow + (1. - u) * verShadow;
+      float shadow = v * uShadowTop + (1. - v) * uShadowBtm;
 
       vec3 factor = max(v_suncosine * shadow * light_color, 0.25 * ambient_color);
       fragColor = vec4(texel.rgb * v_tint * factor, texel.a);
