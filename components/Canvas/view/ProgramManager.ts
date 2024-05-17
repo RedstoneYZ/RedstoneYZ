@@ -5,6 +5,7 @@ import EnvironmentProgram from "./Programs/EnvironmentProgram";
 import LightProgram from "./Programs/LightProgram";
 import LineProgram from "./Programs/LineProgram";
 import MainProgram from "./Programs/MainProgram";
+import HotBarProgram from "./Programs/HotBarProgram";
 import type Program from "./Programs/Program";
 import type Renderer from "./Renderer";
 import Matrix4 from "./utils/Matrix4";
@@ -28,6 +29,7 @@ export default class ProgramManager {
       new MainProgram(this, this.gl),
       new EnvironmentProgram(this, this.gl),
       new LineProgram(this, this.gl),
+      new HotBarProgram(this, this.gl)
     ];
   }
 
