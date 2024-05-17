@@ -26,6 +26,16 @@ export default class TextureManager {
     return [off1[0], off1[1], off2[0], off2[1], inter, frametime];
   }
 
+  sampleItem(name: string): Vector2 {
+    if (!(name in Textures.item)) {
+      if(!(name in Textures.block)) throw new Error(`Texture ${name} does not exist in texture atlas.`);
+      return [-1, -1];
+    }
+
+    const [x, y] = Textures.item[name as keyof typeof Textures.item].offset;
+    return [x, y];
+  }
+
   sampleEnvironment(path: string): Vector2 {
     if (!(path in Textures.environment)) {
       throw new Error(`Texture ${path} does not exist in texture atlas.`);
