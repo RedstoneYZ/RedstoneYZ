@@ -189,7 +189,6 @@ export default class MainProgram extends Program {
 
     uniform mat4 u_mvp;
     uniform mat4 u_mlp;
-    uniform vec3 u_lightnorm;
     uniform vec3 u_playerpos;
     uniform sampler2D s_texture;
 
@@ -197,6 +196,9 @@ export default class MainProgram extends Program {
     out mediump vec2 v_texcoord2;
     out mediump float v_texinter;
     out mediump float v_suncosine;
+    flat out mediump vec3 v_tangentu;
+    flat out mediump vec3 v_tangentv;
+    flat out mediump vec3 v_tangentn;
     out mediump vec3 v_tanplayerpos;
     out mediump vec3 v_tanfrgmntpos; 
     out mediump vec3 v_shadowcoord;
@@ -220,19 +222,15 @@ export default class MainProgram extends Program {
       v_texcoord1.y += vOffset ? 0.0005 : -0.0005;
       v_texcoord2.y += vOffset ? 0.0005 : -0.0005;
 
-      vec3 tangentU;
-      vec3 tangentV;
-      vec3 tangentN;
-      tangentU.x = unpackif(a_tangent.s, 20, 10) / 511. - 1.;
-      tangentU.y = unpackif(a_tangent.s, 10, 10) / 511. - 1.;
-      tangentU.z = unpackif(a_tangent.s,  0, 10) / 511. - 1.;
-      tangentV.x = unpackif(a_tangent.t, 20, 10) / 511. - 1.;
-      tangentV.y = unpackif(a_tangent.t, 10, 10) / 511. - 1.;
-      tangentV.z = unpackif(a_tangent.t,  0, 10) / 511. - 1.;
-      tangentN = cross(tangentV, tangentU);
-      v_suncosine = max(dot(tangentN, u_lightnorm), 0.0);
+      v_tangentu.x = unpackif(a_tangent.s, 20, 10) / 511. - 1.;
+      v_tangentu.y = unpackif(a_tangent.s, 10, 10) / 511. - 1.;
+      v_tangentu.z = unpackif(a_tangent.s,  0, 10) / 511. - 1.;
+      v_tangentv.x = unpackif(a_tangent.t, 20, 10) / 511. - 1.;
+      v_tangentv.y = unpackif(a_tangent.t, 10, 10) / 511. - 1.;
+      v_tangentv.z = unpackif(a_tangent.t,  0, 10) / 511. - 1.;
+      v_tangentn = cross(v_tangentv, v_tangentu);
 
-      mat3 tangentSpace = transpose(mat3(tangentU, tangentV, tangentN));
+      mat3 tangentSpace = transpose(mat3(v_tangentu, v_tangentv, v_tangentn));
       v_tanplayerpos = tangentSpace * u_playerpos;
       v_tanfrgmntpos = tangentSpace * a_position.xyz; 
 
@@ -254,13 +252,16 @@ export default class MainProgram extends Program {
     in mediump vec2 v_texcoord2;
     in mediump float v_texinter;
     in mediump float v_suncosine;
+    flat in mediump vec3 v_tangentu;
+    flat in mediump vec3 v_tangentv;
+    flat in mediump vec3 v_tangentn;
     in mediump vec3 v_tanplayerpos;
     in mediump vec3 v_tanfrgmntpos; 
     in mediump vec3 v_shadowcoord;
     flat in mediump vec3 v_tint;
 
     uniform vec2 screensize;
-
+    uniform vec3 u_lightnorm;
     uniform sampler2D s_texture;
     uniform sampler2D s_shadow;
 
@@ -268,34 +269,15 @@ export default class MainProgram extends Program {
 
     const vec3 light_color = vec3(1.1, 1.1, 1.0);
     const vec3 ambient_color = vec3(0.8, 0.8, 1.0);
-    
-    vec2 parallexOffset() {
-      const float layerCount = 30.;
-      float layerDepth = 1.0 / layerCount;
 
-      vec3 eyeDir = normalize(v_tanplayerpos - v_tanfrgmntpos);
-      vec2 delta = eyeDir.xy * 0.002 / layerCount;
-
-      vec2 curTexCoords = v_texcoord1;
-      vec4 color = texture(s_texture, curTexCoords);
-      float newDepth = 1. - max(max(color.r, color.g), color.b);
-
-      vec2 result;
-      float currentDepth = 0.;
-      while (currentDepth < newDepth) {
-        result -= delta;
-        color = texture(s_texture, curTexCoords + result);
-        newDepth = 1. - max(max(color.r, color.g), color.b);
-        currentDepth += layerDepth;
-      }
-
-      return result;
+    float brightness(vec4 v) {
+      return max(max(v.r, v.g), v.b);
     }
 
-    vec2 round_half(vec2 v) {
-      vec2 vv = v * screensize;
+    vec2 round_half(vec2 v, vec2 size) {
+      vec2 vv = v * size;
       vec2 halfV = vec2(0.5, 0.5);
-      return (round(vv + halfV) - halfV) / screensize;
+      return (round(vv + halfV) - halfV) / size;
     }
 
     float shadow(vec2 offset) {
@@ -311,14 +293,54 @@ export default class MainProgram extends Program {
       return shadow * 0.11;
     }
 
+    vec3 parallexOffset() {
+      const float layerCount = 15.;
+      float layerDepth = 1.0 / layerCount;
+
+      vec3 eyeDir = normalize(v_tanplayerpos - v_tanfrgmntpos);
+      vec2 delta = eyeDir.xy * 0.002 / layerCount;
+
+      vec2 curTexCoords = v_texcoord1;
+      vec4 color = texture(s_texture, curTexCoords);
+      float oldDepth = -1.;
+      float newDepth = 1. - brightness(color);
+
+      vec2 result;
+      float currentDepth = 0.;
+      while (currentDepth <= newDepth) {
+        result -= delta;
+        color = texture(s_texture, curTexCoords + result);
+        oldDepth = newDepth;
+        newDepth = 1. - brightness(color);
+        currentDepth += layerDepth;
+      }
+
+      vec3 normal = -v_tangentu;
+      if (newDepth < oldDepth) {
+        vec2 texcoord = curTexCoords + result;
+        vec2 center = round_half(texcoord, vec2(256., 256.));
+        vec2 diff = texcoord - center;
+
+        if (abs(diff.x) > abs(diff.y)) {
+          normal = dot(eyeDir, v_tangentu) > 0. ? v_tangentu : -v_tangentu;
+        }
+        else {
+          normal = dot(eyeDir, v_tangentv) > 0. ? v_tangentv : -v_tangentv;
+        }
+      }
+
+      normal = normalize(normal + 3. * v_tangentn);
+      return vec3(result, max(dot(normal, u_lightnorm), 0.0));
+    }
+
     void main() {
-      vec2 texOffset = parallexOffset();
-      vec4 texel1 = texture(s_texture, v_texcoord1 + texOffset);
-      vec4 texel2 = texture(s_texture, v_texcoord2 + texOffset);
+      vec3 parallex = parallexOffset();
+      vec4 texel1 = texture(s_texture, v_texcoord1 + parallex.xy);
+      vec4 texel2 = texture(s_texture, v_texcoord2 + parallex.xy);
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      vec2 xy = round_half(v_shadowcoord.xy);
+      vec2 xy = round_half(v_shadowcoord.xy, screensize);
       vec2 diff = (floor(v_shadowcoord.xy - xy) * 2. + 1.) / screensize;
 
       float curShadow = shadow(vec2(0., 0.));
@@ -333,8 +355,10 @@ export default class MainProgram extends Program {
       float uShadowBtm = u * diaShadow + (1. - u) * verShadow;
       float shadow = v * uShadowTop + (1. - v) * uShadowBtm;
 
+      float suncosine = max(dot(v_tangentn, u_lightnorm), 0.0);
+
       vec3 ambient = 0.25 * ambient_color;
-      vec3 light = v_suncosine * shadow * light_color * (vec3(1, 1, 1) - ambient);
+      vec3 light = parallex.z * shadow * light_color * (vec3(1, 1, 1) - ambient);
       fragColor = vec4(texel.rgb * v_tint * (ambient + light), texel.a);
     }
   `;

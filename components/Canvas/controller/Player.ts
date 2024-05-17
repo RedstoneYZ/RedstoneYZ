@@ -16,7 +16,7 @@ class Player {
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;
-    this.maxSpeed = 0.15;
+    this.maxSpeed = 0.01;
     this.friction = 0.9375;
   }
 
