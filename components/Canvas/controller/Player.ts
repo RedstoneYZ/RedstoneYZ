@@ -11,13 +11,17 @@ class Player {
   private friction: number;
 
   constructor() {
-    this.xyz = { x: 1.6, y: 1.5, z: 1.5 };
-    this.facing = { yaw: -Math.PI / 5, pitch: -0.4 };
+    this.xyz = { x: 1.8, y: 2.5, z: 1.7 };
+    this.facing = { yaw: -0.6, pitch: -0.8 };
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;
     this.maxSpeed = 0.15;
     this.friction = 0.9375;
+  }
+
+  get xyzv(): Vector3 {
+    return [this.xyz.x, this.xyz.y, this.xyz.z];
   }
 
   get facingNormal2(): Vector2 {

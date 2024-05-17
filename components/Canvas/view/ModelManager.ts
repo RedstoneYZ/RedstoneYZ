@@ -59,7 +59,7 @@ export default class ModelManager {
               Vector3,
             ],
             texCoord: face.texCoord, // TODO: uvlock
-            normal: rotate([...face.normal, 0]),
+            tangent: [rotate([...face.tangent[0], 0]), rotate([...face.tangent[1], 0])],
             shade: face.shade,
             texture: face.texture,
             cullface: face.cullface ? this.rotateFace(face.cullface, -bs.x, -bs.y) : undefined,
@@ -195,7 +195,7 @@ export default class ModelManager {
     model.elements.forEach(({ from, to, rotation, shade, faces }) => {
       const rotate = this.getRotationMatrix(rotation);
       const vertices = this.expandVertices(from, to, rotate);
-      const normals = this.getNormals(rotate);
+      const tangent = this.getTangent(rotate);
 
       for (const _key in faces) {
         const key = _key as SixSides;
@@ -217,7 +217,7 @@ export default class ModelManager {
         modelFaces.push({
           corners: [vertices[v[0]], vertices[v[1]], vertices[v[2]], vertices[v[3]]],
           texCoord: texCoord,
-          normal: normals[key],
+          tangent: [tangent.u[key], tangent.v[key]],
           shade: shade ?? true,
           texture: face.texture,
           cullface: face.cullface,
@@ -323,14 +323,24 @@ export default class ModelManager {
     return original.map((v) => rotate([...v, 1]));
   }
 
-  private getNormals(rotate: Rotation): Record<SixSides, Vector3> {
+  private getTangent(rotate: Rotation): Record<"u" | "v", Record<SixSides, Vector3>> {
     return {
-      east: rotate([1, 0, 0, 0]),
-      west: rotate([-1, 0, 0, 0]),
-      up: rotate([0, 1, 0, 0]),
-      down: rotate([0, -1, 0, 0]),
-      south: rotate([0, 0, 1, 0]),
-      north: rotate([0, 0, -1, 0]),
+      u: {
+        east: rotate([0, 0, -1, 0]),
+        west: rotate([0, 0, 1, 0]),
+        up: rotate([1, 0, 0, 0]),
+        down: rotate([1, 0, 0, 0]),
+        south: rotate([1, 0, 0, 0]),
+        north: rotate([-1, 0, 0, 0]),
+      }, 
+      v: {
+        east: rotate([0, -1, 0, 0]),
+        west: rotate([0, -1, 0, 0]),
+        up: rotate([0, 0, 1, 0]),
+        down: rotate([0, 0, -1, 0]),
+        south: rotate([0, -1, 0, 0]),
+        north: rotate([0, -1, 0, 0]),
+      }
     };
   }
 

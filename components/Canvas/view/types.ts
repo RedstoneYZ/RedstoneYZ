@@ -9,7 +9,7 @@ export interface BlockModel {
 export interface BlockModelFace {
   corners: [Vector3, Vector3, Vector3, Vector3];
   texCoord: [Vector2, Vector2, Vector2, Vector2];
-  normal: Vector3;
+  tangent: [Vector3, Vector3];
   shade: boolean;
   texture: string;
   cullface: SixSides | undefined;
