@@ -1,4 +1,4 @@
-import ProgramManager from "../ProgramManager";
+import type ProgramManager from "../ProgramManager";
 import Program from "./Program";
 
 interface Uniforms {
@@ -34,10 +34,9 @@ export default class HotBarProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
-
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, 4, gl.UNSIGNED_SHORT, 0);
-    console.log(this.parent.controller.hotbarIndex)
+    console.log(this.parent.controller.hotbarIndex);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
     gl.useProgram(null);
@@ -53,8 +52,14 @@ export default class HotBarProgram extends Program {
       Matrix4.RotateZ(theta),
       Matrix4.RotateX((25.04 * Math.PI) / 180),
     );*/
-    const canvasWidth = this.parent.renderer.canvasW, canvasHeight = this.parent.renderer.canvasH;
-    const gui_pos = new Float32Array([0.23 * canvasWidth, 0.77 * canvasWidth,  (canvasHeight - 10) - 0.07 * canvasWidth, canvasHeight - 10]) // x1, x2, y1, y2
+    const canvasWidth = this.parent.renderer.canvasW,
+      canvasHeight = this.parent.renderer.canvasH;
+    const gui_pos = new Float32Array([
+      0.23 * canvasWidth,
+      0.77 * canvasWidth,
+      canvasHeight - 10 - 0.07 * canvasWidth,
+      canvasHeight - 10,
+    ]); // x1, x2, y1, y2
     return new Float32Array([
       gui_pos[0],
       gui_pos[2],
@@ -144,8 +149,6 @@ export default class HotBarProgram extends Program {
 
     return texture;
   }
-
-  
 
   protected vsSrc = `#version 300 es
     layout(location = 0) in vec2 a_position;

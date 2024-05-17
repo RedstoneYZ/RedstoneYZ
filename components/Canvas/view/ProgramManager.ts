@@ -35,7 +35,7 @@ export default class ProgramManager {
         new MainProgram(this, this.gl),
         new EnvironmentProgram(this, this.gl),
         new LineProgram(this, this.gl),
-        new HotBarProgram(this, this.gl)
+        new HotBarProgram(this, this.gl),
       ];
       this.ready = true;
     });

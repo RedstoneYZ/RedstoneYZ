@@ -332,7 +332,7 @@ export default class ModelManager {
         down: rotate([1, 0, 0, 0]),
         south: rotate([1, 0, 0, 0]),
         north: rotate([-1, 0, 0, 0]),
-      }, 
+      },
       v: {
         east: rotate([0, -1, 0, 0]),
         west: rotate([0, -1, 0, 0]),
@@ -340,7 +340,7 @@ export default class ModelManager {
         down: rotate([0, 0, -1, 0]),
         south: rotate([0, -1, 0, 0]),
         north: rotate([0, -1, 0, 0]),
-      }
+      },
     };
   }
 
