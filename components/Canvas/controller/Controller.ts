@@ -56,8 +56,8 @@ class Controller {
    * 初始化
    * @param canvas
    */
-  start(): void {
-    this.engine.startTicking();
+  start(tickFunc: () => void): void {
+    this.engine.startTicking(tickFunc);
     this.renderer.startRendering(this.physics);
   }
 
@@ -166,27 +166,27 @@ class Controller {
 
   private physics = () => {
     if (this.activeKeys.has("w")) {
-      if(this.activeKeys.has("s")) this.player.moveStop();
+      if (this.activeKeys.has("s")) this.player.moveStop();
       else this.player.moveForward();
     }
     if (this.activeKeys.has("s")) {
-      if(this.activeKeys.has("w")) this.player.moveStop();
+      if (this.activeKeys.has("w")) this.player.moveStop();
       else this.player.moveBackward();
     }
     if (this.activeKeys.has("a")) {
-      if(this.activeKeys.has("d")) this.player.moveStop();
+      if (this.activeKeys.has("d")) this.player.moveStop();
       else this.player.moveLeft();
     }
     if (this.activeKeys.has("d")) {
-      if(this.activeKeys.has("a")) this.player.moveStop();
+      if (this.activeKeys.has("a")) this.player.moveStop();
       else this.player.moveRight();
     }
     if (this.activeKeys.has(" ")) {
-      if(this.activeKeys.has("shift")) this.player.moveStop();
+      if (this.activeKeys.has("shift")) this.player.moveStop();
       else this.player.moveUp();
     }
     if (this.activeKeys.has("shift")) {
-      if(this.activeKeys.has(" ")) this.player.moveStop();
+      if (this.activeKeys.has(" ")) this.player.moveStop();
       else this.player.moveDown();
     }
 

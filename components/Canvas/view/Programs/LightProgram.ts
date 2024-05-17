@@ -1,10 +1,11 @@
 import type ProgramManager from "../ProgramManager";
-import { DataProcessor } from "../ProgramManager";
+import type { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
 import { glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mlp: WebGLUniformLocation;
+  s_texture: WebGLUniformLocation;
 }
 
 export default class LightProgram extends Program {
@@ -20,12 +21,12 @@ export default class LightProgram extends Program {
     super(parent, gl);
 
     this.program = this.createProgram();
-    this.shadowMap = this.createShadowMap();
+    // this.shadowMap = this.createShadowMap();
     this.abo = this.createAbo();
     this.vao = this.createVao();
     this.fbo = this.createFbo();
 
-    this.uniform = this.setupUniform(["u_mlp"]);
+    this.uniform = this.setupUniform(["u_mlp", "s_texture"]);
     this.ready = true;
   }
 
@@ -57,6 +58,17 @@ export default class LightProgram extends Program {
     return true;
   }
 
+  protected override setupUniform<T extends string>(uniforms: T[]): Uniforms {
+    const uniform = super.setupUniform(uniforms) as Uniforms;
+    const gl = this.gl;
+
+    gl.useProgram(this.program);
+    gl.uniform1i(uniform.s_texture, 1);
+    gl.useProgram(null);
+
+    return uniform;
+  }
+
   private processRaw: DataProcessor<number> = function (_c, _e, renderer, block, data) {
     const models = renderer.models.get(block.type, block.states);
     models.forEach((model) => {
@@ -73,7 +85,7 @@ export default class LightProgram extends Program {
         }
       });
     });
-  }
+  };
 
   private processData(data: number[]): Float32Array {
     const asFloat32 = new Float32Array(data);
@@ -128,38 +140,18 @@ export default class LightProgram extends Program {
     }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this.shadowMap, 0);
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.DEPTH_ATTACHMENT,
+      gl.TEXTURE_2D,
+      this.parent.textures[0],
+      0,
+    );
     gl.drawBuffers([gl.NONE]);
     gl.readBuffer(gl.NONE);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     return fbo;
-  }
-
-  private createShadowMap(): WebGLTexture {
-    const gl = this.gl;
-    const texture = gl.createTexture();
-    if (!texture) {
-      throw new Error("Failed to create main texture.");
-    }
-
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
-    gl.texStorage2D(
-      gl.TEXTURE_2D,
-      1,
-      gl.DEPTH_COMPONENT16,
-      this.parent.renderer.canvasW,
-      this.parent.renderer.canvasH,
-    );
-
-    return texture;
   }
 
   protected vsSrc = `#version 300 es

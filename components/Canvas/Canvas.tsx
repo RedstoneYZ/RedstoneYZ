@@ -3,10 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Controller from "./controller/Controller";
 import type { CanvasProps } from "./model/types";
+import "styles/canvas.css";
 
 const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   const [controller, setController] = useState<Controller>();
   const [currentBlock, setCurrentBlock] = useState("");
+  const [fps, setFps] = useState(0);
+  const [maxFps, setMaxFps] = useState(0);
 
   const { current: xLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.xLen);
   const { current: yLen } = useRef("xLen" in props ? props.yLen : props.preLoadData.yLen);
@@ -24,7 +27,11 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
 
     const canvas = canvasRef.current;
     const controller = new Controller({ canvas, xLen, yLen, zLen, mapName, preLoadData });
-    controller.start();
+    controller.start(() => {
+      setFps(Math.round(1000 / controller.renderer.mspf));
+      setMaxFps(Math.round(1000 / controller.renderer.maxMspf));
+    });
+
     setController(controller);
     setCurrentBlock(controller.currentBlockName);
     return () => controller.destroy();
@@ -116,6 +123,9 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
           onContextMenu={handleContextMenu}
           onWheelCapture={handleScroll}
         />
+        <div className="canvas-wrapper-f3">
+          {fps} fps / {maxFps} max fps
+        </div>
         <span ref={spanRef} style={{ display: "none" }} />
       </div>
       <div className="canvas-wrapper-middle">{currentBlock}</div>
