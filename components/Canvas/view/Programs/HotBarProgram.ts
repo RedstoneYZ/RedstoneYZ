@@ -12,6 +12,7 @@ export default class HotBarProgram extends Program {
   private uniform: Uniforms;
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
+  private attiArraylen: number;
 
   constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
     super(parent, gl);
@@ -35,7 +36,7 @@ export default class HotBarProgram extends Program {
 
 
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, 54, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, this.attiArraylen, gl.UNSIGNED_SHORT, 0);
     console.log(this.parent.controller.hotbarIndex)
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -52,6 +53,7 @@ export default class HotBarProgram extends Program {
     const hotbarIndex = this.parent.controller.hotbarIndex;
     const gui_pos = new Float32Array([x_offset, x_offset + 9 * edge,  y_offset - edge, y_offset]) // x1, x2, y1, y2
     const sel_pos = new Float32Array([x_offset + (hotbarIndex - 0.05) * edge, x_offset + hotbarIndex * edge + 1.05 * edge,  y_offset - 1.05 * edge, y_offset + 0.05 * edge]) // x1, x2, y1, y2
+
     let attiArray = [
       gui_pos[0],
       gui_pos[2],
@@ -100,19 +102,47 @@ export default class HotBarProgram extends Program {
       let [tx, ty] = this.parent.renderer.textures.sampleItem(item);
       if(tx === -1) { // need to sample block
         let blockdata = this.parent.renderer.textures.sampleBlock(item, 0);
-        tx = blockdata[0];
-        ty = blockdata[1];
+        tx = blockdata[0] / 256;
+        ty = blockdata[1] / 256;
+        /*          (0, 0)
+         *                     0(0.5 edge, 0.1 edge)
+         *                     /                    \
+         *        1(0.14 edge, 0.28 edge)  2(0.86 edge, 0.28 edge)
+         *        |            \                    /            |
+         *        |            3(0.5 edge, 0.46 edge)            |
+         *        |                      |                       |
+         *        4(0.14 edge, 0.72 edge)| 5(0.86 edge, 0.72 edge)
+         *               \               |               /
+         *                     6(0.5 edge, 0.9 edge)
+         */
+
+        const index = this.parent.controller.hotbar.indexOf(item);
+        attiArray.push(x_offset + (index + 0.86) * edge , y_offset - 0.72 * edge, 2, tx, ty);
+        attiArray.push(x_offset + (index + 0.5) * edge , y_offset - 0.9 * edge, 2, tx + 0.0625, ty);
+        attiArray.push(x_offset + (index + 0.14) * edge , y_offset - 0.72 * edge, 2, tx + 0.0625, ty + 0.0625);
+        attiArray.push(x_offset + (index + 0.5) * edge , y_offset - 0.54 * edge, 2, tx, ty + 0.0625);
+        
+        attiArray.push(x_offset + (index + 0.14) * edge , y_offset - 0.72 * edge, 2, tx, ty);
+        attiArray.push(x_offset + (index + 0.14) * edge , y_offset - 0.28 * edge, 2, tx + 0.0625, ty);
+        attiArray.push(x_offset + (index + 0.5) * edge , y_offset - 0.1 * edge, 2, tx + 0.0625, ty + 0.0625);
+        attiArray.push(x_offset + (index + 0.5) * edge , y_offset - 0.54 * edge, 2, tx, ty + 0.0625);
+
+        attiArray.push(x_offset + (index + 0.86) * edge , y_offset - 0.72 * edge, 2, tx, ty);
+        attiArray.push(x_offset + (index + 0.5) * edge , y_offset - 0.54 * edge, 2, tx + 0.0625, ty);
+        attiArray.push(x_offset + (index + 0.5) * edge , y_offset - 0.1 * edge, 2, tx + 0.0625, ty + 0.0625);
+        attiArray.push(x_offset + (index + 0.86) * edge , y_offset - 0.28 * edge, 2, tx, ty + 0.0625);
       }
-      tx /= 256;
-      ty /= 256;
-      
-      const index = this.parent.controller.hotbar.indexOf(item);
-      attiArray.push(x_offset + (index + 1 - 0.1) * edge , y_offset - 0.9 * edge, 2, tx, ty);
-      attiArray.push(x_offset + (index + 0.1) * edge , y_offset - 0.9 * edge, 2, tx + 0.0625, ty);
-      attiArray.push(x_offset + (index + 0.1) * edge , y_offset - 0.1 * edge, 2, tx + 0.0625, ty + 0.0625);
-      attiArray.push(x_offset + (index + 1 - 0.1) * edge , y_offset - 0.1 * edge, 2, tx, ty + 0.0625);
+      else {
+        tx /= 256;
+        ty /= 256;
+        const index = this.parent.controller.hotbar.indexOf(item);
+        attiArray.push(x_offset + (index + 1 - 0.1) * edge , y_offset - 0.9 * edge, 2, tx, ty);
+        attiArray.push(x_offset + (index + 0.1) * edge , y_offset - 0.9 * edge, 2, tx + 0.0625, ty);
+        attiArray.push(x_offset + (index + 0.1) * edge , y_offset - 0.1 * edge, 2, tx + 0.0625, ty + 0.0625);
+        attiArray.push(x_offset + (index + 1 - 0.1) * edge , y_offset - 0.1 * edge, 2, tx, ty + 0.0625);
+      }
     }
-    
+    this.attiArraylen = Math.round(attiArray.length / 20 + attiArray.length / 5 - 1);
     return new Float32Array(attiArray);
   }
 
