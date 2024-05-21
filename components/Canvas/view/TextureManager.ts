@@ -28,7 +28,8 @@ export default class TextureManager {
 
   sampleItem(name: string): Vector2 {
     if (!(name in Textures.item)) {
-      if(!(name in Textures.block)) throw new Error(`Texture ${name} does not exist in texture atlas.`);
+      if (!(name in Textures.block))
+        throw new Error(`Texture ${name} does not exist in texture atlas.`);
       return [-1, -1];
     }
 

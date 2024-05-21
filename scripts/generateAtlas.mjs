@@ -85,7 +85,7 @@ async function blitItem(ctx, json) {
 
   const root = TEXTURE_ROOT + "/item";
   const files = fs.readdirSync(root);
-  const [pngs, mcmetas] = partition(files, (file) => file.endsWith(".png"));
+  const [pngs] = partition(files, (file) => file.endsWith(".png"));
 
   const images = {};
   for (const png of pngs) {
@@ -93,7 +93,7 @@ async function blitItem(ctx, json) {
     if (image.width !== UNIT) {
       throw new Error("Unexpected aspect: " + png);
     }
-    
+
     const nFrame = image.height / UNIT;
     images[png.substring(0, png.length - 4)] = { image, nFrame };
   }

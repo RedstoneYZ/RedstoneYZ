@@ -63,8 +63,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
         if (canvasRef.current && document.pointerLockElement !== canvasRef.current) {
           window.addEventListener("wheel", preventDefault, { passive: false });
           canvasRef.current.requestPointerLock();
-        }
-        else {
+        } else {
           controller?.leftClick();
         }
         break;
