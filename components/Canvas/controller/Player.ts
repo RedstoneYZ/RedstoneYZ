@@ -16,8 +16,8 @@ class Player {
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;
-    this.maxSpeed = 0.0625;
-    this.friction = 0.9375;
+    this.maxSpeed = 0.125;
+    this.friction = 0.875;
   }
 
   get xyzv(): Vector3 {
@@ -35,7 +35,6 @@ class Player {
     const sy = Math.sin(-this.facing.yaw);
     const cp = Math.cos(-this.facing.pitch);
     const sp = Math.sin(-this.facing.pitch);
-    console.log(sy * cp, -sp, cy * cp);
     return [sy * cp, -sp, cy * cp];
   }
 
@@ -53,7 +52,7 @@ class Player {
     this.speed.y *= this.friction;
     this.speed.z *= this.friction;
 
-    if (this.velocity < 1e-2) {
+    if (this.velocity < 1e-4) {
       this.speed.x = this.speed.y = this.speed.z = 0;
     }
   }
@@ -84,10 +83,6 @@ class Player {
 
   moveDown() {
     this.move([0, -1, 0]);
-  }
-
-  moveStop() {
-    this.speed = { x: 0, y: 0, z: 0 };
   }
 
   private move([dx, dy, dz]: Vector3) {

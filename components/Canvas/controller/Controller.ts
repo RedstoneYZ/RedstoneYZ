@@ -154,28 +154,22 @@ class Controller {
 
   private physics = () => {
     if (this.activeKeys.has("w")) {
-      if (this.activeKeys.has("s")) this.player.moveStop();
-      else this.player.moveForward();
+      this.player.moveForward();
     }
     if (this.activeKeys.has("s")) {
-      if (this.activeKeys.has("w")) this.player.moveStop();
-      else this.player.moveBackward();
+      this.player.moveBackward();
     }
     if (this.activeKeys.has("a")) {
-      if (this.activeKeys.has("d")) this.player.moveStop();
-      else this.player.moveLeft();
+      this.player.moveLeft();
     }
     if (this.activeKeys.has("d")) {
-      if (this.activeKeys.has("a")) this.player.moveStop();
-      else this.player.moveRight();
+      this.player.moveRight();
     }
     if (this.activeKeys.has(" ")) {
-      if (this.activeKeys.has("shift")) this.player.moveStop();
-      else this.player.moveUp();
+      this.player.moveUp();
     }
     if (this.activeKeys.has("shift")) {
-      if (this.activeKeys.has(" ")) this.player.moveStop();
-      else this.player.moveDown();
+      this.player.moveDown();
     }
 
     if (this.player.velocity > 0) {
