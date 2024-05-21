@@ -12,6 +12,8 @@ const ATLAS_HEIGHT = 256;
 
   const json = {};
   await blitBlock(ctx, json);
+  await blitItem(ctx, json);
+  await blitGui(ctx);
   await blitEnvironment(ctx, json);
   await blitTint(ctx, json);
 
@@ -72,6 +74,68 @@ async function blitBlock(ctx, json) {
   }
 
   json.block = data;
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {object} json
+ */
+async function blitItem(ctx, json) {
+  const UNIT = 16;
+
+  const root = TEXTURE_ROOT + "/item";
+  const files = fs.readdirSync(root);
+  const [pngs, mcmetas] = partition(files, (file) => file.endsWith(".png"));
+
+  const images = {};
+  for (const png of pngs) {
+    const image = await loadImage(root + "/" + png);
+    if (image.width !== UNIT) {
+      throw new Error("Unexpected aspect: " + png);
+    }
+    
+    const nFrame = image.height / UNIT;
+    images[png.substring(0, png.length - 4)] = { image, nFrame };
+  }
+
+  const data = {};
+
+  let x = 0;
+  let y = 96;
+
+  for (const texName in images) {
+    const image = images[texName];
+    ctx.drawImage(image.image, 0, 0, UNIT, UNIT, x, y, UNIT, UNIT);
+    const offset = [x, y];
+    x += UNIT;
+    if (x >= ATLAS_WIDTH) {
+      x -= ATLAS_WIDTH;
+      y += UNIT;
+    }
+
+    data[texName] = { offset };
+  }
+
+  json.item = data;
+}
+
+/**
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {object} json
+ */
+async function blitGui(ctx) {
+  const root = TEXTURE_ROOT + "/gui";
+  const offset_y = 128;
+  const HotBar = await loadImage(root + "/hotbar.png");
+  if (HotBar.width !== 180 || HotBar.height !== 20) {
+    throw new Error("Unexpected aspect: hotbar.png");
+  }
+  ctx.drawImage(HotBar, 0, offset_y, 180, 20);
+  const HotBarSelection = await loadImage(root + "/hotbar_selection.png");
+  if (HotBarSelection.width !== 22 || HotBarSelection.height !== 22) {
+    throw new Error("Unexpected aspect: hotbar_selection.png");
+  }
+  ctx.drawImage(HotBarSelection, 180, offset_y, 22, 22);
 }
 
 /**
