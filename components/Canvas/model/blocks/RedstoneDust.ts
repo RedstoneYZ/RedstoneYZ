@@ -22,10 +22,6 @@ class RedstoneDust extends Block {
     return this.internal.power;
   }
 
-  get color() {
-    return [105 + 10 * this.internal.power, 0, 0];
-  }
-
   override get supportingBlock() {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
@@ -76,7 +72,8 @@ class RedstoneDust extends Block {
   override PPUpdate() {
     super.PPUpdate();
 
-    const oldStates = JSON.parse(JSON.stringify(this.states)) as RedstoneDustState;
+    const oldStates = structuredClone(this.states);
+    const oldInternal = structuredClone(this.internal);
     this.internal.power = 0;
     this.states.east = this.states.west = this.states.south = this.states.north = "none";
 
@@ -87,15 +84,14 @@ class RedstoneDust extends Block {
       const block = this.engine.block(x, y, z);
       if (!block) return;
 
-      // 相鄰方塊是強充能方塊則充能製相同等級
-      const { strong } = block.powerTowardsWire(Maps.ReverseDir[dir]);
-      let { power } = block.powerTowardsWire(Maps.ReverseDir[dir]);
-      if (strong) {
+      // 相鄰方塊是強充能方塊則充能至相同等級
+      const transmit = block.powerTowardsWire(Maps.ReverseDir[dir]);
+      if (transmit.strong) {
         // 如果是紅石粉，訊號要遞減
         if (block.type === BlockType.RedstoneDust) {
-          power--;
+          transmit.power--;
         }
-        this.internal.power = Math.max(this.internal.power, power);
+        this.internal.power = Math.max(this.internal.power, transmit.power);
       }
 
       if (dir === "up" || dir === "down") return;
@@ -144,7 +140,7 @@ class RedstoneDust extends Block {
       }
     }
 
-    if (!strictEqual(oldStates, this.states)) {
+    if (!strictEqual(oldStates, this.states) || !strictEqual(oldInternal, this.internal)) {
       this.sendPPUpdate();
     }
   }
