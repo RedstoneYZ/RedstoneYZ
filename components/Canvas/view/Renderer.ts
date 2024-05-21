@@ -167,6 +167,7 @@ export default class Renderer {
     const [x, y, z] = Maps.P6DMap[face.cullface];
     const neighbor = this.engine.block(block.x + x, block.y + y, block.z + z);
     if (!neighbor || neighbor.type === BlockType.AirBlock) return true;
+    if (block.type !== BlockType.Glass && neighbor.type === BlockType.Glass) return true;
 
     const map = {
       south: [0, 1],

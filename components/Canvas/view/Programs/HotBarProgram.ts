@@ -36,7 +36,6 @@ export default class HotBarProgram extends Program {
 
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, this.attiArraylen, gl.UNSIGNED_SHORT, 0);
-    console.log(this.parent.controller.hotbarIndex)
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
     gl.useProgram(null);
