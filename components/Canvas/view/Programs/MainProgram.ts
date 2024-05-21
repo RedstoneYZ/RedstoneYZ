@@ -200,7 +200,7 @@ export default class MainProgram extends Program {
     flat out mediump vec3 v_tangentv;
     flat out mediump vec3 v_tangentn;
     out mediump vec3 v_tanplayerpos;
-    out mediump vec3 v_tanfrgmntpos; 
+    out mediump vec3 v_tanfrgmntpos;
     out mediump vec3 v_shadowcoord;
     flat out mediump vec3 v_tint;
 
