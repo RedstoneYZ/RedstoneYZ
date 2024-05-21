@@ -61,25 +61,17 @@ class Controller {
     this.renderer.startRendering(this.physics);
   }
 
-  private prevRefX = 0;
-  private prevRefY = 0;
   private prevRefWheel = 0;
 
-  adjustAngles(cursorX: number, cursorY: number, init: boolean = false): void {
-    if (!init) {
-      const facing = this.player.facing;
-      facing.yaw = facing.yaw + (this.prevRefX - cursorX) * 0.0078125;
-      facing.yaw += facing.yaw < -Math.PI ? Math.PI * 2 : 0;
-      facing.yaw += Math.PI < facing.yaw ? -Math.PI * 2 : 0;
+  adjustAngles(deltaX: number, deltaY: number): void {
+    const facing = this.player.facing;
+    facing.yaw = facing.yaw + deltaX * 0.00390625;
+    facing.yaw += facing.yaw < -Math.PI ? Math.PI * 2 : 0;
+    facing.yaw += Math.PI < facing.yaw ? -Math.PI * 2 : 0;
 
-      facing.pitch = facing.pitch - (this.prevRefY - cursorY) * 0.0078125;
-      facing.pitch = Math.max(Math.min(facing.pitch, Math.PI / 2), -(Math.PI / 2));
+    facing.pitch = facing.pitch - deltaY * 0.00390625;
+    facing.pitch = Math.max(Math.min(facing.pitch, Math.PI / 2), -(Math.PI / 2));
 
-      this.activeKeys.clear();
-    }
-
-    this.prevRefX = cursorX;
-    this.prevRefY = cursorY;
     this.needRender = true;
   }
 
@@ -153,10 +145,6 @@ class Controller {
       0,
     ]);
     this.needRender = true;
-  }
-
-  mouseMove(canvasX: number, canvasY: number): void {
-    this.renderer.setLookAt(canvasX, canvasY);
   }
 
   destroy(): void {

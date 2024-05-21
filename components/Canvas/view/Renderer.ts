@@ -1,7 +1,7 @@
 import type Controller from "../controller/Controller";
 import type { Block } from "../model";
 import type Engine from "../model/Engine";
-import type { Vector3, Vector4, Vector6 } from "../model/types";
+import type { Vector3, Vector6 } from "../model/types";
 import { BlockType } from "../model/types";
 import { Maps } from "../model/utils";
 import ModelHandler from "./ModelManager";
@@ -71,22 +71,9 @@ export default class Renderer {
     requestAnimationFrame(draw);
   }
 
-  private lookAtX: number = 0;
-  private lookAtY: number = 0;
-  setLookAt(canvasX: number, canvasY: number): void {
-    this.lookAtX = canvasX;
-    this.lookAtY = canvasY;
-  }
-
-  private get eyeDir(): Vector4 {
-    const screenX = (this.lookAtX / this.canvasW - 0.5) * 2 * this.scaleX;
-    const screenY = (0.5 - this.lookAtY / this.canvasH) * 2 * this.scaleY;
-    return Matrix4.MultiplyVec(this.programs.mvInv, [screenX, screenY, -1, 0]);
-  }
-
   getTarget(): Vector6 | null {
     const xyz = this.controller.player.xyz;
-    const eyeDir = this.eyeDir;
+    const eyeDir = Matrix4.MultiplyVec(this.programs.mvInv, [0, 0, -1, 0]);
 
     const target = { block: [0, 0, 0], normal: [0, 0, 0], d: Infinity };
     for (let x = 0; x < this.dimensions[0]; x++) {

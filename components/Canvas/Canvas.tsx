@@ -25,6 +25,12 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    document?.addEventListener?.("pointerlockchange", () => {
+      if (document.pointerLockElement !== canvasRef.current) {
+        window.removeEventListener("wheel", preventDefault, false);
+      }
+    });
+
     const canvas = canvasRef.current;
     const controller = new Controller({ canvas, xLen, yLen, zLen, mapName, preLoadData });
     controller.start(() => {
@@ -51,49 +57,34 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     controller?.removeActiveKey(e.key.toLowerCase());
   }
 
-  function handleMouseEnter() {
-    window.addEventListener("wheel", preventDefault, { passive: false });
+  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+    switch (e.button) {
+      case 0:
+        if (canvasRef.current && document.pointerLockElement !== canvasRef.current) {
+          window.addEventListener("wheel", preventDefault, { passive: false });
+          canvasRef.current.requestPointerLock();
+        }
+        else {
+          controller?.leftClick();
+        }
+        break;
+
+      case 1:
+        e.preventDefault();
+        controller?.middleClick();
+        setCurrentBlock(controller?.currentBlockName ?? "");
+        break;
+
+      case 2:
+        controller?.rightClick(e.shiftKey);
+        break;
+    }
   }
 
   function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
-    if (canvasRef.current) {
-      const p = getPosition(canvasRef.current, e);
-      controller?.mouseMove(p.x, p.y);
+    if (canvasRef.current && document.pointerLockElement === canvasRef.current) {
+      controller?.adjustAngles(e.movementX, e.movementY);
     }
-  }
-
-  function handleMouseLeave() {
-    window.removeEventListener("wheel", preventDefault, false);
-  }
-
-  function handleDrag(e: React.DragEvent<HTMLCanvasElement>) {
-    // 拖曳結束前的最後一個事件的座標會是 (0, 0)，因為會嚴重影響到畫面，所以直接擋掉
-    if (e.clientX === 0 && e.clientY === 0) return;
-    controller?.adjustAngles(e.clientX, e.clientY);
-  }
-
-  function handleDragStart(e: React.DragEvent<HTMLCanvasElement>) {
-    // 把拖曳的殘影改成看不見的元素
-    if (spanRef.current) {
-      e.dataTransfer.setDragImage(spanRef.current, 0, 0);
-    }
-    controller?.adjustAngles(e.clientX, e.clientY, true);
-  }
-
-  function handleClick() {
-    controller?.leftClick();
-  }
-
-  function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
-    if (e.button !== 1) return;
-    e.preventDefault();
-    controller?.middleClick();
-    setCurrentBlock(controller?.currentBlockName ?? "");
-  }
-
-  function handleContextMenu(e: React.MouseEvent<HTMLCanvasElement>) {
-    e.preventDefault();
-    controller?.rightClick(e.shiftKey);
   }
 
   function handleScroll(e: React.WheelEvent<HTMLCanvasElement>) {
@@ -112,15 +103,8 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
           tabIndex={0}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
-          onMouseEnter={handleMouseEnter}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          draggable={true}
-          onDrag={handleDrag}
-          onDragStart={handleDragStart}
           onMouseDown={handleMouseDown}
-          onClick={handleClick}
-          onContextMenu={handleContextMenu}
+          onMouseMove={handleMouseMove}
           onWheelCapture={handleScroll}
         />
         <div className="canvas-wrapper-f3">
@@ -132,14 +116,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     </div>
   );
 };
-
-function getPosition(canvas: HTMLCanvasElement, event: React.MouseEvent<HTMLCanvasElement>) {
-  const p = canvas.getBoundingClientRect();
-  return {
-    x: event.clientX - p.left,
-    y: event.clientY - p.top,
-  };
-}
 
 function preventDefault(e: WheelEvent) {
   e.preventDefault();
