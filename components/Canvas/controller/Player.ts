@@ -11,8 +11,8 @@ class Player {
   private friction: number;
 
   constructor() {
-    this.xyz = { x: 1.8, y: 2.5, z: 1.7 };
-    this.facing = { yaw: -0.6, pitch: -0.8 };
+    this.xyz = { x: 1.95, y: 2.1, z: 1.95 };
+    this.facing = { yaw: -0.7, pitch: -0.8 };
 
     this.speed = { x: 0, y: 0, z: 0 };
     this.acc = 0.03125;

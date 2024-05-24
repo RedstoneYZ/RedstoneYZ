@@ -53,7 +53,7 @@ export default class MainProgram extends Program {
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 32) * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 36) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -102,10 +102,10 @@ export default class MainProgram extends Program {
 
     // TODO: maybe change normal and texcoords to half float
     // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 32, 0);
-    gl.vertexAttribIPointer(1, 2, gl.INT, 32, 12);
-    gl.vertexAttribIPointer(2, 2, gl.INT, 32, 20);
-    gl.vertexAttribIPointer(3, 1, gl.INT, 32, 28);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 36, 0);
+    gl.vertexAttribIPointer(1, 2, gl.INT, 36, 12);
+    gl.vertexAttribIPointer(2, 3, gl.INT, 36, 20);
+    gl.vertexAttribIPointer(3, 1, gl.INT, 36, 32);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
@@ -139,9 +139,14 @@ export default class MainProgram extends Program {
 
             const uu = u.map((a) => (a + 1) * 511);
             const vv = v.map((a) => (a + 1) * 511);
-            const tangU = (uu[0] << 20) | (uu[1] << 10) | uu[2];
-            const tangV = (vv[0] << 20) | (vv[1] << 10) | vv[2];
+            const tanU = (uu[0] << 20) | (uu[1] << 10) | uu[2];
+            const tanV = (vv[0] << 20) | (vv[1] << 10) | vv[2];
             const [ox1, oy1, ox2, oy2, oa, ob] = offset;
+            const minS = Math.min(...t.map(([a]) => a));
+            const minT = Math.min(...t.map(([,a]) => a));
+            const w = Math.max(...t.map(([a]) => a)) - minS;
+            const h = Math.max(...t.map(([,a]) => a)) - minT;
+            const tex3 = ((minS + ox1) << 20) | ((minT + oy1) << 10) | (w << 5) | h;
 
             for (let l = 0; l < 4; ++l) {
               const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
@@ -150,7 +155,7 @@ export default class MainProgram extends Program {
               const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
               const tint = (tx << 10) | ty;
 
-              data.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, tangU, tangV, tex1, tex2, tint);
+              data.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, tanU, tanV, tex1, tex2, tex3, tint);
             }
           });
         });
@@ -159,12 +164,13 @@ export default class MainProgram extends Program {
 
     const asFloat32 = new Float32Array(data);
     const asInt32 = new Int32Array(asFloat32.buffer);
-    for (let i = 0; i < asFloat32.length; i += 8) {
+    for (let i = 0; i < asFloat32.length; i += 9) {
       asInt32[i + 3] = data[i + 3];
       asInt32[i + 4] = data[i + 4];
       asInt32[i + 5] = data[i + 5];
       asInt32[i + 6] = data[i + 6];
       asInt32[i + 7] = data[i + 7];
+      asInt32[i + 8] = data[i + 8];
     }
     return asFloat32;
   }
@@ -175,7 +181,7 @@ export default class MainProgram extends Program {
 
     layout(location = 0) in vec3 a_position;
     layout(location = 1) in ivec2 a_tangent;
-    layout(location = 2) in ivec2 a_texture;
+    layout(location = 2) in ivec3 a_texture;
     layout(location = 3) in int a_tint;
 
     uniform mat4 u_mvp;
@@ -190,6 +196,7 @@ export default class MainProgram extends Program {
     flat out mediump vec3 v_tangentu;
     flat out mediump vec3 v_tangentv;
     flat out mediump vec3 v_tangentn;
+    flat out mediump vec4 v_texbound;
     out mediump vec3 v_tanplayerpos;
     out mediump vec3 v_tanfrgmntpos;
     out mediump vec3 v_shadowcoord;
@@ -212,6 +219,11 @@ export default class MainProgram extends Program {
       v_texcoord2.x += uOffset ? 0.0005 : -0.0005;
       v_texcoord1.y += vOffset ? 0.0005 : -0.0005;
       v_texcoord2.y += vOffset ? 0.0005 : -0.0005;
+
+      v_texbound.x = unpackif(a_texture.z, 20, 10) / 256. + 0.0005;
+      v_texbound.y = unpackif(a_texture.z, 10, 10) / 256. + 0.0005;
+      v_texbound.z = v_texbound.x + unpackif(a_texture.z, 5, 5) / 256. - 0.001;
+      v_texbound.w = v_texbound.y + unpackif(a_texture.z, 0, 5) / 256. - 0.001;
 
       v_tangentu.x = unpackif(a_tangent.s, 20, 10) / 511. - 1.;
       v_tangentu.y = unpackif(a_tangent.s, 10, 10) / 511. - 1.;
@@ -246,8 +258,9 @@ export default class MainProgram extends Program {
     flat in mediump vec3 v_tangentu;
     flat in mediump vec3 v_tangentv;
     flat in mediump vec3 v_tangentn;
+    flat in mediump vec4 v_texbound;
     in mediump vec3 v_tanplayerpos;
-    in mediump vec3 v_tanfrgmntpos; 
+    in mediump vec3 v_tanfrgmntpos;
     in mediump vec3 v_shadowcoord;
     flat in mediump vec3 v_tint;
 
@@ -324,10 +337,16 @@ export default class MainProgram extends Program {
       return vec3(result, max(dot(normal, u_lightnorm), 0.0));
     }
 
+    vec4 boundedSample(vec2 texcoord) {
+      texcoord.x = min(max(v_texbound.x, texcoord.x), v_texbound.z);
+      texcoord.y = min(max(v_texbound.y, texcoord.y), v_texbound.w);
+      return texture(s_texture, texcoord);
+    }
+
     void main() {
       vec3 parallex = parallexOffset();
-      vec4 texel1 = texture(s_texture, v_texcoord1 + parallex.xy);
-      vec4 texel2 = texture(s_texture, v_texcoord2 + parallex.xy);
+      vec4 texel1 = boundedSample(v_texcoord1 + parallex.xy);
+      vec4 texel2 = boundedSample(v_texcoord2 + parallex.xy);
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
