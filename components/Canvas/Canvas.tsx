@@ -7,7 +7,6 @@ import "styles/canvas.css";
 
 const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   const [controller, setController] = useState<Controller>();
-  const [currentBlock, setCurrentBlock] = useState("");
   const [fps, setFps] = useState(0);
   const [maxFps, setMaxFps] = useState(0);
 
@@ -39,7 +38,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     });
 
     setController(controller);
-    setCurrentBlock(controller.currentBlockName);
     return () => controller.destroy();
   }, [xLen, yLen, zLen, mapName, preLoadData]);
 
@@ -48,9 +46,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       e.preventDefault();
     }
     controller?.addActiveKey(e.key.toLowerCase());
-    if (controller?.jumpHotbar(e.key)) {
-      setCurrentBlock(controller?.currentBlockName ?? "");
-    }
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
@@ -71,7 +66,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       case 1:
         e.preventDefault();
         controller?.middleClick();
-        setCurrentBlock(controller?.currentBlockName ?? "");
         break;
 
       case 2:
@@ -88,7 +82,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
 
   function handleScroll(e: React.WheelEvent<HTMLCanvasElement>) {
     controller?.scrollHotbar(e.deltaY);
-    setCurrentBlock(controller?.currentBlockName ?? "");
   }
 
   return (
@@ -111,7 +104,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
         </div>
         <span ref={spanRef} style={{ display: "none" }} />
       </div>
-      <div className="canvas-wrapper-middle">{currentBlock}</div>
     </div>
   );
 };

@@ -19,11 +19,6 @@
   position: relative;
 }
 
-.canvas-wrapper-middle {
-  text-align: center;
-  padding: 5px;
-}
-
 .canvas-wrapper:focus {
   padding: 0;
   outline: 0;
