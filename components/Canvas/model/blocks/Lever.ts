@@ -40,6 +40,7 @@ class Lever extends Block {
   interact() {
     this.states.powered = !this.states.powered;
     this.internal.source = this.states.powered;
+    this.internal.power = this.states.powered ? 15 : 0;
     this.sendPPUpdate();
   }
 

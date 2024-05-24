@@ -57,7 +57,10 @@ class Controller {
    * @param canvas
    */
   start(tickFunc: () => void): void {
-    this.engine.startTicking(tickFunc);
+    this.engine.startTicking(() => {
+      tickFunc();
+      this.renderer.updatePlayground();
+    });
     this.renderer.startRendering(this.physics);
   }
 

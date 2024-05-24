@@ -1,5 +1,4 @@
 import type ProgramManager from "../ProgramManager";
-import type { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
 import { glUnpacki, glUnpackif } from "./glImports";
 
@@ -52,8 +51,7 @@ export default class MainProgram extends Program {
     gl.uniform3fv(this.uniform.u_lightnorm, this.getLightNorm());
     gl.uniform3fv(this.uniform.u_playerpos, this.parent.controller.player.xyzv);
 
-    const rawData = this.parent.getData(this.processRaw);
-    const data = this.processData(rawData);
+    const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, (data.length / 32) * 5, gl.UNSIGNED_SHORT, 0);
 
@@ -122,50 +120,43 @@ export default class MainProgram extends Program {
     return vao;
   }
 
-  private processRaw: DataProcessor<number> = function (_c, engine, renderer, block, data) {
-    const models = renderer.models.get(block.type, block.states);
-    models.forEach((model) => {
-      model.faces.forEach((face) => {
-        if (!renderer.shouldRender(block, face)) return;
+  private getData(): Float32Array {
+    const textures = this.parent.renderer.textures;
+    const engine = this.parent.engine;
+    const data: number[] = [];
+    this.parent.renderer.pg.forEach((layer, x) => {
+      layer.forEach((column, y) => {
+        column.forEach(({ exposedFaces }, z) => {
+          exposedFaces.forEach((face) => {
+            const {
+              corners: c,
+              texCoord: t,
+              tangent: [u, v],
+              texture: tex,
+            } = face;
+            const offset = textures.sampleBlock(tex, engine.tick);
+            const [tx, ty] = textures.sampleTint(engine.block(x, y, z)!);
 
-        const {
-          corners: c,
-          texCoord: t,
-          tangent: [u, v],
-          texture: tex,
-        } = face;
-        const offset = renderer.textures.sampleBlock(tex, engine.tick);
-        const [tx, ty] = renderer.textures.sampleTint(block);
+            const uu = u.map((a) => (a + 1) * 511);
+            const vv = v.map((a) => (a + 1) * 511);
+            const tangU = (uu[0] << 20) | (uu[1] << 10) | uu[2];
+            const tangV = (vv[0] << 20) | (vv[1] << 10) | vv[2];
+            const [ox1, oy1, ox2, oy2, oa, ob] = offset;
 
-        const uu = u.map((a) => (a + 1) * 511);
-        const vv = v.map((a) => (a + 1) * 511);
-        const tangU = (uu[0] << 20) | (uu[1] << 10) | uu[2];
-        const tangV = (vv[0] << 20) | (vv[1] << 10) | vv[2];
-        const [ox1, oy1, ox2, oy2, oa, ob] = offset;
+            for (let l = 0; l < 4; ++l) {
+              const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
+              const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
+              const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
+              const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
+              const tint = (tx << 10) | ty;
 
-        for (let l = 0; l < 4; ++l) {
-          const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
-          const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
-          const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
-          const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
-          const tint = (tx << 10) | ty;
-
-          data.push(
-            c[l][0] + block.x,
-            c[l][1] + block.y,
-            c[l][2] + block.z,
-            tangU,
-            tangV,
-            tex1,
-            tex2,
-            tint,
-          );
-        }
+              data.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, tangU, tangV, tex1, tex2, tint);
+            }
+          });
+        });
       });
     });
-  };
 
-  private processData(data: number[]): Float32Array {
     const asFloat32 = new Float32Array(data);
     const asInt32 = new Int32Array(asFloat32.buffer);
     for (let i = 0; i < asFloat32.length; i += 8) {

@@ -80,7 +80,7 @@ abstract class Block {
    * 取得此方塊的充能強度
    */
   get power() {
-    return this.states.power;
+    return this.internal.power;
   }
 
   /**

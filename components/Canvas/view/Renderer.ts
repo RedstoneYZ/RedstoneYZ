@@ -1,9 +1,9 @@
 import type Controller from "../controller/Controller";
 import type { Block } from "../model";
 import type Engine from "../model/Engine";
-import type { Vector3, Vector6 } from "../model/types";
+import type { BlockInternal, BlockState, Vector3, Vector6 } from "../model/types";
 import { BlockType } from "../model/types";
-import { Maps } from "../model/utils";
+import { Maps, strictEqual } from "../model/utils";
 import ModelHandler from "./ModelManager";
 import TextureManager from "./TextureManager";
 import type { BlockModelFace } from "./types";
@@ -27,6 +27,8 @@ export default class Renderer {
   public mspf: number;
   public maxMspf: number;
 
+  public pg: RenderBlock[][][];
+
   constructor(controller: Controller, canvas: HTMLCanvasElement, dimensions: Vector3) {
     this.controller = controller;
     this.dimensions = dimensions;
@@ -43,6 +45,8 @@ export default class Renderer {
 
     this.mspf = 0;
     this.maxMspf = 0;
+
+    this.pg = this.generatePlayground();
   }
 
   private lastFrameTime: number = window.performance.now();
@@ -69,6 +73,62 @@ export default class Renderer {
     };
 
     requestAnimationFrame(draw);
+  }
+
+  updatePlayground() {
+    const needUpdate: boolean[][][] = [];
+    for (let x = 0; x < this.engine.xLen; x++) {
+      needUpdate.push([]);
+      for (let y = 0; y < this.engine.yLen; y++) {
+        needUpdate[x].push(Array(this.engine.zLen).fill(false));
+        for (let z = 0; z < this.engine.zLen; z++) {
+          const block = this.engine.block(x, y, z)!;
+          const { type, internal, states } = this.pg[x][y][z];
+
+          const updated =
+            type === block.type &&
+            strictEqual(internal, block.internal) &&
+            strictEqual(states, block.states);
+
+          needUpdate[x][y][z] ||= updated;
+          if (!updated) continue;
+
+          if (needUpdate[x + 1]?.[y]?.[z] !== undefined) needUpdate[x + 1][y][z] = true;
+          if (needUpdate[x - 1]?.[y]?.[z] !== undefined) needUpdate[x - 1][y][z] = true;
+          if (needUpdate[x]?.[y + 1]?.[z] !== undefined) needUpdate[x][y + 1][z] = true;
+          if (needUpdate[x]?.[y - 1]?.[z] !== undefined) needUpdate[x][y - 1][z] = true;
+          if (needUpdate[x]?.[y]?.[z + 1] !== undefined) needUpdate[x][y][z + 1] = true;
+          if (needUpdate[x]?.[y]?.[z - 1] !== undefined) needUpdate[x][y][z - 1] = true;
+        }
+      }
+    }
+
+    for (let x = 0; x < this.engine.xLen; x++) {
+      for (let y = 0; y < this.engine.yLen; y++) {
+        for (let z = 0; z < this.engine.zLen; z++) {
+          if (!needUpdate[x][y][z]) continue;
+
+          const block = this.engine.block(x, y, z)!;
+          this.pg[x][y][z] = {
+            type: block.type,
+            internal: structuredClone(block.internal),
+            states: structuredClone(block.states),
+            exposedFaces: [],
+          };
+
+          if (block.type === BlockType.AirBlock) continue;
+          const models = this.models.get(block.type, block.states);
+
+          models.forEach((model) => {
+            model.faces.forEach((face) => {
+              if (this.isExposed(block, face)) {
+                this.pg[x][y][z].exposedFaces.push(face);
+              }
+            });
+          });
+        }
+      }
+    }
   }
 
   getTarget(): Vector6 | null {
@@ -161,7 +221,16 @@ export default class Renderer {
     return [...target.block, ...target.normal] as Vector6;
   }
 
-  public shouldRender(block: Block, face: BlockModelFace) {
+  private get needRender() {
+    return this.controller.needRender || this.engine.needRender;
+  }
+
+  private resetNeedRender() {
+    this.controller.needRender = false;
+    this.engine.needRender = false;
+  }
+
+  private isExposed(block: Block, face: BlockModelFace) {
     if (!face.cullface) return true;
 
     const [x, y, z] = Maps.P6DMap[face.cullface];
@@ -203,12 +272,49 @@ export default class Renderer {
     return true;
   }
 
-  private get needRender() {
-    return this.controller.needRender || this.engine.needRender;
-  }
+  private generatePlayground(): RenderBlock[][][] {
+    const pg: RenderBlock[][][] = [];
+    for (let x = 0; x < this.engine.xLen; x++) {
+      pg.push([]);
+      for (let y = 0; y < this.engine.yLen; y++) {
+        pg[x].push([]);
+        for (let z = 0; z < this.engine.zLen; z++) {
+          const block = this.engine.block(x, y, z);
+          if (!block || block.type === BlockType.AirBlock) {
+            pg[x][y][z] = {
+              type: BlockType.AirBlock,
+              internal: { power: 0, source: false },
+              states: {},
+              exposedFaces: [],
+            };
+            continue;
+          }
 
-  private resetNeedRender() {
-    this.controller.needRender = false;
-    this.engine.needRender = false;
+          pg[x][y][z] = {
+            type: block.type,
+            internal: structuredClone(block.internal),
+            states: structuredClone(block.states),
+            exposedFaces: [],
+          };
+
+          const models = this.models.get(block.type, block.states);
+          models.forEach((model) => {
+            model.faces.forEach((face) => {
+              if (this.isExposed(block, face)) {
+                pg[x][y][z].exposedFaces.push(face);
+              }
+            });
+          });
+        }
+      }
+    }
+    return pg;
   }
+}
+
+interface RenderBlock {
+  type: BlockType;
+  internal: BlockInternal;
+  states: BlockState;
+  exposedFaces: BlockModelFace[];
 }

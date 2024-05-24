@@ -10,24 +10,24 @@ abstract class FullBlock extends Block {
   override PPUpdate() {
     super.PPUpdate();
 
-    const oldPower = this.states.power;
-    const oldSource = this.states.source;
+    const oldPower = this.internal.power;
+    const oldSource = this.internal.source;
 
-    let power = 0,
-      source = false;
+    let newPower = 0;
+    let newSource = false;
     Maps.P6DArray.forEach(([dir, [x, y, z]]) => {
       const block = this.engine.block(this.x + x, this.y + y, this.z + z);
       const powerStatus = block?.powerTowardsBlock(Maps.ReverseDir[dir]);
       if (powerStatus) {
-        power = Math.max(power, powerStatus.power);
-        source ||= powerStatus.strong;
+        newPower = Math.max(newPower, powerStatus.power);
+        newSource ||= powerStatus.strong;
       }
     });
 
-    this.states.power = power;
-    this.states.source = source;
+    this.internal.power = newPower;
+    this.internal.source = newSource;
 
-    if (oldPower !== this.states.power || oldSource !== this.states.source) {
+    if (oldPower !== this.internal.power || oldSource !== this.internal.source) {
       this.sendPPUpdate();
     }
   }

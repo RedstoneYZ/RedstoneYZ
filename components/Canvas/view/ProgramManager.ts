@@ -1,12 +1,11 @@
 import type Controller from "../controller/Controller";
 import type Engine from "../model/Engine";
-import type { Blocks } from "../model/types";
-import { BlockType } from "../model/types";
 import EnvironmentProgram from "./Programs/EnvironmentProgram";
+import HotBarProgram from "./Programs/HotBarProgram";
 import LightProgram from "./Programs/LightProgram";
 import LineProgram from "./Programs/LineProgram";
 import MainProgram from "./Programs/MainProgram";
-import HotBarProgram from "./Programs/HotBarProgram";
+// import TestProgram from "./Programs/TestProgram";
 import type Program from "./Programs/Program";
 import type Renderer from "./Renderer";
 import Matrix4 from "./utils/Matrix4";
@@ -121,20 +120,6 @@ export default class ProgramManager {
     return [texture0, texture1];
   }
 
-  public getData<T>(func: DataProcessor<T>): T[] {
-    const data: T[] = [];
-    for (let x = 0; x < this.engine.xLen; x++) {
-      for (let y = 0; y < this.engine.yLen; y++) {
-        for (let z = 0; z < this.engine.zLen; z++) {
-          const block = this.engine.block(x, y, z);
-          if (!block || block.type === BlockType.AirBlock) continue;
-          func(this.controller, this.engine, this.renderer, block, data);
-        }
-      }
-    }
-    return data;
-  }
-
   public get sunAngle(): number {
     // return Math.PI / 3.5;
     const tick = this.engine.tick % 24000;
@@ -195,5 +180,3 @@ export default class ProgramManager {
     );
   }
 }
-
-export type DataProcessor<T> = (c: Controller, e: Engine, r: Renderer, b: Blocks, d: T[]) => void;

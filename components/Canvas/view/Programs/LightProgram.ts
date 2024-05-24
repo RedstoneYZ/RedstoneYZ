@@ -1,5 +1,4 @@
 import type ProgramManager from "../ProgramManager";
-import type { DataProcessor } from "../ProgramManager";
 import Program from "./Program";
 import { glUnpackif } from "./glImports";
 
@@ -44,8 +43,7 @@ export default class LightProgram extends Program {
 
     gl.clear(gl.DEPTH_BUFFER_BIT);
 
-    const rawData = this.parent.getData(this.processRaw);
-    const data = this.processData(rawData);
+    const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     gl.drawElements(gl.TRIANGLE_FAN, (data.length / 16) * 5, gl.UNSIGNED_SHORT, 0);
 
@@ -69,25 +67,27 @@ export default class LightProgram extends Program {
     return uniform;
   }
 
-  private processRaw: DataProcessor<number> = function (_c, _e, renderer, block, data) {
-    const models = renderer.models.get(block.type, block.states);
-    models.forEach((model) => {
-      model.faces.forEach((face) => {
-        if (!renderer.shouldRender(block, face)) return;
+  private getData(): Float32Array {
+    const textures = this.parent.renderer.textures;
+    const engine = this.parent.engine;
+    const data: number[] = [];
+    this.parent.renderer.pg.forEach((layer, x) => {
+      layer.forEach((column, y) => {
+        column.forEach(({ exposedFaces }, z) => {
+          exposedFaces.forEach((face) => {
+            const { corners: c, texCoord: t, texture: tex } = face;
+            const offset = textures.sampleBlock(tex, engine.tick);
+            const [ox1, oy1] = offset;
 
-        const { corners: c, texCoord: t, texture: tex } = face;
-        const offset = renderer.textures.sampleBlock(tex, renderer.engine.tick);
-        const [ox1, oy1] = offset;
-
-        for (let l = 0; l < 4; ++l) {
-          const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10);
-          data.push(c[l][0] + block.x, c[l][1] + block.y, c[l][2] + block.z, tex1);
-        }
+            for (let l = 0; l < 4; ++l) {
+              const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10);
+              data.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, tex1);
+            }
+          });
+        });
       });
     });
-  };
 
-  private processData(data: number[]): Float32Array {
     const asFloat32 = new Float32Array(data);
     const asInt32 = new Int32Array(asFloat32.buffer);
     for (let i = 0; i < asFloat32.length; i += 4) {
