@@ -13,7 +13,7 @@ const ATLAS_HEIGHT = 256;
   const json = {};
   await blitBlock(ctx, json);
   await blitItem(ctx, json);
-  await blitGui(ctx);
+  await blitGui(ctx, json);
   await blitEnvironment(ctx, json);
   await blitTint(ctx, json);
 
@@ -123,19 +123,40 @@ async function blitItem(ctx, json) {
  * @param {CanvasRenderingContext2D} ctx
  * @param {object} json
  */
-async function blitGui(ctx) {
+async function blitGui(ctx, json) {
+  const DATA = GUI_DATA;
+
   const root = TEXTURE_ROOT + "/gui";
-  const offset_y = 128;
-  const HotBar = await loadImage(root + "/hotbar.png");
-  if (HotBar.width !== 180 || HotBar.height !== 20) {
+  let x, y;
+
+  const hotbar = await loadImage(root + "/hotbar.png");
+  if (hotbar.width !== 182 || hotbar.height !== 22) {
     throw new Error("Unexpected aspect: hotbar.png");
   }
-  ctx.drawImage(HotBar, 0, offset_y, 180, 20);
-  const HotBarSelection = await loadImage(root + "/hotbar_selection.png");
-  if (HotBarSelection.width !== 22 || HotBarSelection.height !== 22) {
+  ({
+    offset: [x, y],
+  } = DATA.hotbar);
+  ctx.drawImage(hotbar, x, y, 182, 22);
+
+  const hotbarSelection = await loadImage(root + "/hotbar_selection.png");
+  if (hotbarSelection.width !== 24 || hotbarSelection.height !== 23) {
     throw new Error("Unexpected aspect: hotbar_selection.png");
   }
-  ctx.drawImage(HotBarSelection, 180, offset_y, 22, 22);
+  ({
+    offset: [x, y],
+  } = DATA.hotbar_selection);
+  ctx.drawImage(hotbarSelection, x, y, 24, 23);
+
+  const crosshair = await loadImage(root + "/crosshair.png");
+  if (crosshair.width !== 15 || crosshair.height !== 15) {
+    throw new Error("Unexpected aspect: crosshair.png");
+  }
+  ({
+    offset: [x, y],
+  } = DATA.crosshair);
+  ctx.drawImage(crosshair, x, y, 15, 15);
+
+  json.gui = DATA;
 }
 
 /**
@@ -207,6 +228,20 @@ function partition(arr, condition) {
   }
   return [passed, other];
 }
+
+const GUI_LEFT = 0;
+const GUI_TOP = ATLAS_HEIGHT - 96;
+const GUI_DATA = {
+  hotbar: {
+    offset: [GUI_LEFT, GUI_TOP],
+  },
+  hotbar_selection: {
+    offset: [GUI_LEFT + 182, GUI_TOP],
+  },
+  crosshair: {
+    offset: [GUI_LEFT + 206, GUI_TOP],
+  },
+};
 
 const ENVIRONMENT_LEFT = 0;
 const ENVIRONMENT_TOP = ATLAS_HEIGHT - 64;

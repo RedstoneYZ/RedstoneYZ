@@ -37,6 +37,15 @@ export default class TextureManager {
     return [x, y];
   }
 
+  sampleGui(path: string): Vector2 {
+    if (!(path in Textures.gui)) {
+      throw new Error(`Texture ${path} does not exist in texture atlas.`);
+    }
+
+    const [x, y] = Textures.gui[path as keyof typeof Textures.gui].offset;
+    return [x, y];
+  }
+
   sampleEnvironment(path: string): Vector2 {
     if (!(path in Textures.environment)) {
       throw new Error(`Texture ${path} does not exist in texture atlas.`);

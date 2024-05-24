@@ -1,3 +1,4 @@
+import type { Vector2 } from "../../model/types";
 import type ProgramManager from "../ProgramManager";
 import Program from "./Program";
 
@@ -11,7 +12,10 @@ export default class HotBarProgram extends Program {
 
   private abo: WebGLBuffer;
   private vao: WebGLVertexArrayObject;
-  private attiArraylen: number;
+
+  private readonly slotSize: number;
+  private readonly pixelSize: number;
+  private readonly hotbarOffset: Vector2;
 
   constructor(parent: ProgramManager, gl: WebGL2RenderingContext) {
     super(parent, gl);
@@ -20,6 +24,15 @@ export default class HotBarProgram extends Program {
     this.setupUniform(["screensize", "sampler"]);
     this.abo = this.createAbo();
     this.vao = this.createVao();
+
+    const width = this.parent.renderer.canvasW;
+    const height = this.parent.renderer.canvasH;
+    this.slotSize = Math.min(width / 18, height / 10);
+    this.pixelSize = this.slotSize / 20;
+    this.hotbarOffset = [
+      width / 2 - (this.slotSize * 4.5 + this.pixelSize),
+      height - (this.slotSize + 10),
+    ];
 
     this.ready = true;
   }
@@ -32,8 +45,9 @@ export default class HotBarProgram extends Program {
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
+    const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, this.getData(), gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, this.attiArraylen, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, data.length, gl.UNSIGNED_SHORT, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
     gl.useProgram(null);
@@ -42,74 +56,21 @@ export default class HotBarProgram extends Program {
   }
 
   private getData(): Float32Array {
-    const hotbarTexture = [0, 128],
-      hotbarSelTexture = [180, 128];
-    const canvasWidth = this.parent.renderer.canvasW,
-      canvasHeight = this.parent.renderer.canvasH;
-    const edge = 0.06 * canvasWidth,
-      x_offset = 0.23 * canvasWidth,
-      y_offset = canvasHeight - 10;
+    const slot = this.slotSize;
+    let [xOffset, yOffset] = this.hotbarOffset;
+    xOffset += this.pixelSize;
+    yOffset += this.pixelSize;
 
-    const hotbarIndex = this.parent.controller.hotbarIndex;
-    const gui_pos = new Float32Array([x_offset, x_offset + 9 * edge, y_offset - edge, y_offset]); // x1, x2, y1, y2
-    const sel_pos = new Float32Array([
-      x_offset + (hotbarIndex - 0.05) * edge,
-      x_offset + hotbarIndex * edge + 1.05 * edge,
-      y_offset - 1.05 * edge,
-      y_offset + 0.05 * edge,
-    ]); // x1, x2, y1, y2
+    const attiArray = this.fixedData;
 
-    const attiArray = [
-      gui_pos[0],
-      gui_pos[2],
-      0,
-      hotbarTexture[0] / 256,
-      hotbarTexture[1] / 256,
-      gui_pos[0],
-      gui_pos[3],
-      0,
-      hotbarTexture[0] / 256,
-      (hotbarTexture[1] + 20) / 256,
-      gui_pos[1],
-      gui_pos[3],
-      0,
-      (hotbarTexture[0] + 180) / 256,
-      (hotbarTexture[1] + 20) / 256,
-      gui_pos[1],
-      gui_pos[2],
-      0,
-      (hotbarTexture[0] + 180) / 256,
-      hotbarTexture[1] / 256,
-      sel_pos[0],
-      sel_pos[2],
-      1,
-      hotbarSelTexture[0] / 256,
-      hotbarSelTexture[1] / 256,
-      sel_pos[0],
-      sel_pos[3],
-      1,
-      hotbarSelTexture[0] / 256,
-      (hotbarSelTexture[1] + 22) / 256,
-      sel_pos[1],
-      sel_pos[3],
-      1,
-      (hotbarSelTexture[0] + 22) / 256,
-      (hotbarSelTexture[1] + 22) / 256,
-      sel_pos[1],
-      sel_pos[2],
-      1,
-      (hotbarSelTexture[0] + 22) / 256,
-      hotbarSelTexture[1] / 256,
-    ];
-
-    for (const item of this.parent.controller.hotbar) {
+    this.parent.controller.hotbar.forEach((item, i) => {
       let [tx, ty] = this.parent.renderer.textures.sampleItem(item);
       if (tx === -1) {
         // need to sample block
         const blockdata = this.parent.renderer.textures.sampleBlock(item, 0);
         tx = blockdata[0] / 256;
         ty = blockdata[1] / 256;
-        /*          (0, 0)
+        /**          (0, 0)
          *                     0(0.5 edge, 0.1 edge)
          *                     /                    \
          *        1(0.14 edge, 0.28 edge)  2(0.86 edge, 0.28 edge)
@@ -121,74 +82,38 @@ export default class HotBarProgram extends Program {
          *                     6(0.5 edge, 0.9 edge)
          */
 
-        const index = this.parent.controller.hotbar.indexOf(item);
-        attiArray.push(x_offset + (index + 0.86) * edge, y_offset - 0.72 * edge, 2, tx, ty);
-        attiArray.push(x_offset + (index + 0.5) * edge, y_offset - 0.9 * edge, 2, tx + 0.0625, ty);
+        /* eslint-disable */
         attiArray.push(
-          x_offset + (index + 0.14) * edge,
-          y_offset - 0.72 * edge,
-          2,
-          tx + 0.0625,
-          ty + 0.0625,
-        );
-        attiArray.push(x_offset + (index + 0.5) * edge, y_offset - 0.54 * edge, 2, tx, ty + 0.0625);
+          xOffset + (i + 0.50) * slot, yOffset + 0.10 * slot, -0.999, tx         , ty         ,
+          xOffset + (i + 0.14) * slot, yOffset + 0.28 * slot, -0.999, tx         , ty + 0.0625,
+          xOffset + (i + 0.50) * slot, yOffset + 0.46 * slot, -0.999, tx + 0.0625, ty + 0.0625,
+          xOffset + (i + 0.86) * slot, yOffset + 0.28 * slot, -0.999, tx + 0.0625, ty         ,
 
-        attiArray.push(x_offset + (index + 0.14) * edge, y_offset - 0.72 * edge, 2, tx, ty);
-        attiArray.push(
-          x_offset + (index + 0.14) * edge,
-          y_offset - 0.28 * edge,
-          2,
-          tx + 0.0625,
-          ty,
-        );
-        attiArray.push(
-          x_offset + (index + 0.5) * edge,
-          y_offset - 0.1 * edge,
-          2,
-          tx + 0.0625,
-          ty + 0.0625,
-        );
-        attiArray.push(x_offset + (index + 0.5) * edge, y_offset - 0.54 * edge, 2, tx, ty + 0.0625);
+          xOffset + (i + 0.14) * slot, yOffset + 0.28 * slot, -0.999, tx         , ty         ,
+          xOffset + (i + 0.14) * slot, yOffset + 0.72 * slot, -0.999, tx         , ty + 0.0625,
+          xOffset + (i + 0.50) * slot, yOffset + 0.90 * slot, -0.999, tx + 0.0625, ty + 0.0625,
+          xOffset + (i + 0.50) * slot, yOffset + 0.46 * slot, -0.999, tx + 0.0625, ty         ,
 
-        attiArray.push(x_offset + (index + 0.86) * edge, y_offset - 0.72 * edge, 2, tx, ty);
-        attiArray.push(x_offset + (index + 0.5) * edge, y_offset - 0.54 * edge, 2, tx + 0.0625, ty);
-        attiArray.push(
-          x_offset + (index + 0.5) * edge,
-          y_offset - 0.1 * edge,
-          2,
-          tx + 0.0625,
-          ty + 0.0625,
-        );
-        attiArray.push(
-          x_offset + (index + 0.86) * edge,
-          y_offset - 0.28 * edge,
-          2,
-          tx,
-          ty + 0.0625,
-        );
+          xOffset + (i + 0.50) * slot, yOffset + 0.46 * slot, -0.999, tx         , ty         ,
+          xOffset + (i + 0.50) * slot, yOffset + 0.90 * slot, -0.999, tx         , ty + 0.0625,
+          xOffset + (i + 0.86) * slot, yOffset + 0.72 * slot, -0.999, tx + 0.0625, ty + 0.0625,
+          xOffset + (i + 0.86) * slot, yOffset + 0.28 * slot, -0.999, tx + 0.0625, ty         ,
+        )
+        /* eslint-enable */
       } else {
         tx /= 256;
         ty /= 256;
-        const index = this.parent.controller.hotbar.indexOf(item);
-        attiArray.push(x_offset + (index + 1 - 0.1) * edge, y_offset - 0.9 * edge, 2, tx, ty);
-        attiArray.push(x_offset + (index + 0.1) * edge, y_offset - 0.9 * edge, 2, tx + 0.0625, ty);
+
+        /* eslint-disable */
         attiArray.push(
-          x_offset + (index + 0.1) * edge,
-          y_offset - 0.1 * edge,
-          2,
-          tx + 0.0625,
-          ty + 0.0625,
+          xOffset + (i + 0.1) * slot, yOffset + 0.1 * slot, -0.999, tx         , ty         ,
+          xOffset + (i + 0.1) * slot, yOffset + 0.9 * slot, -0.999, tx         , ty + 0.0625,
+          xOffset + (i + 0.9) * slot, yOffset + 0.9 * slot, -0.999, tx + 0.0625, ty + 0.0625,
+          xOffset + (i + 0.9) * slot, yOffset + 0.1 * slot, -0.999, tx + 0.0625, ty         ,
         );
-        attiArray.push(
-          x_offset + (index + 1 - 0.1) * edge,
-          y_offset - 0.1 * edge,
-          2,
-          tx,
-          ty + 0.0625,
-        );
+        /* eslint-enable */
       }
-    }
-    this.attiArraylen = Math.round(attiArray.length / 20 + attiArray.length / 5 - 1);
+    });
     return new Float32Array(attiArray);
   }
 
@@ -224,13 +149,11 @@ export default class HotBarProgram extends Program {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 20, 0);
-    gl.vertexAttribPointer(1, 1, gl.FLOAT, false, 20, 8);
-    gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 20, 12);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 20, 0);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 20, 12);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
-    gl.enableVertexAttribArray(2);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.parent.indices), gl.STATIC_DRAW);
@@ -241,25 +164,17 @@ export default class HotBarProgram extends Program {
   }
 
   protected vsSrc = `#version 300 es
-    layout(location = 0) in vec2 a_position;
-    layout(location = 1) in float gui_id;
-    layout(location = 2) in vec2 a_texcoord;
+    layout(location = 0) in vec3 a_position;
+    layout(location = 1) in vec2 a_texcoord;
 
     uniform ivec2 screensize;
 
     out mediump vec2 v_texcoord;
-    out float v_gui_id;
 
     void main() {
-
-      vec2 clipSpace = (a_position / vec2(screensize)) * 2. - 1.;
-      
-      if(gui_id == 0.) gl_Position = vec4(clipSpace * vec2(1., -1.), -0.999, 1);
-      else if(gui_id == 1.) gl_Position = vec4(clipSpace * vec2(1., -1.), -0.9991, 1);
-      else gl_Position = vec4(clipSpace * vec2(1., -1.), -0.9992, 1);
-      
+      vec2 clipSpace = (a_position.xy / vec2(screensize)) * 2. - 1.;
+      gl_Position = vec4(clipSpace * vec2(1., -1.), a_position.z, 1);
       v_texcoord = a_texcoord;
-      v_gui_id = gui_id;
     }
   `;
 
@@ -267,17 +182,61 @@ export default class HotBarProgram extends Program {
     precision mediump float;
 
     in mediump vec2 v_texcoord;
-    in float v_gui_id;
 
     uniform sampler2D sampler;
 
     out vec4 fragColor;
 
     void main() {
-      vec4 texel;
-      texel = texture(sampler, v_texcoord);
-      if(texel.r == 0.) discard;
-      fragColor = vec4(texel.rgb, 1.0);
+      fragColor = texture(sampler, v_texcoord);
     }
   `;
+
+  private get fixedData() {
+    const data: number[] = [];
+    let x1, y1, x2, y2, tx, ty;
+
+    const width = this.parent.renderer.canvasW;
+    const height = this.parent.renderer.canvasH;
+    const slot = this.slotSize;
+    const pixel = this.pixelSize;
+
+    /* eslint-disable */
+    [x1, y1] = [width / 2 - (slot * 4.5 + pixel), height - (slot + 10)];
+    [x2, y2] = [x1 + slot * 9 + 2 * pixel, y1 + slot + 2 * pixel];
+    [tx, ty] = this.parent.renderer.textures.sampleGui('hotbar');
+    [tx, ty] = [tx / 256, ty / 256];
+    data.push(
+      x1, y1, -0.997, tx            , ty           , 
+      x1, y2, -0.997, tx            , ty + 22 / 256, 
+      x2, y2, -0.997, tx + 182 / 256, ty + 22 / 256, 
+      x2, y1, -0.997, tx + 182 / 256, ty           , 
+    );
+    
+    const index = this.parent.controller.hotbarIndex;
+    [x1, y1] = [x1 - pixel + index * slot, y1 - pixel];
+    [x2, y2] = [x1 + slot + 4 * pixel, y1 + slot + 3 * pixel];
+    [tx, ty] = this.parent.renderer.textures.sampleGui('hotbar_selection');
+    [tx, ty] = [tx / 256, ty / 256];
+    data.push(
+      x1, y1, -0.998, tx           , ty           , 
+      x1, y2, -0.998, tx           , ty + 23 / 256, 
+      x2, y2, -0.998, tx + 24 / 256, ty + 23 / 256, 
+      x2, y1, -0.998, tx + 24 / 256, ty           , 
+    );
+
+    [x1, y1] = [width / 2 - 7.5 * pixel, height / 2 - 7.5 * pixel];
+    [x2, y2] = [x1 + 15 * pixel, y1 + 15 * pixel];
+    [tx, ty] = this.parent.renderer.textures.sampleGui('crosshair');
+    [tx, ty] = [tx / 256, ty / 256];
+    data.push(
+      x1, y1, -0.999, tx           , ty           , 
+      x1, y2, -0.999, tx           , ty + 15 / 256, 
+      x2, y2, -0.999, tx + 15 / 256, ty + 15 / 256, 
+      x2, y1, -0.999, tx + 15 / 256, ty           , 
+    );
+
+    return data;
+    /* eslint-enable */
+  }
 }
