@@ -143,9 +143,9 @@ export default class MainProgram extends Program {
             const tanV = (vv[0] << 20) | (vv[1] << 10) | vv[2];
             const [ox1, oy1, ox2, oy2, oa, ob] = offset;
             const minS = Math.min(...t.map(([a]) => a));
-            const minT = Math.min(...t.map(([,a]) => a));
+            const minT = Math.min(...t.map(([, a]) => a));
             const w = Math.max(...t.map(([a]) => a)) - minS;
-            const h = Math.max(...t.map(([,a]) => a)) - minT;
+            const h = Math.max(...t.map(([, a]) => a)) - minT;
             const tex3 = ((minS + ox1) << 20) | ((minT + oy1) << 10) | (w << 5) | h;
 
             for (let l = 0; l < 4; ++l) {
@@ -319,7 +319,7 @@ export default class MainProgram extends Program {
         currentDepth += layerDepth;
       }
 
-      vec3 normal = -v_tangentu;
+      vec3 normal = v_tangentn;
       if (newDepth < oldDepth) {
         vec2 texcoord = curTexCoords + result;
         vec2 center = round_half(texcoord, vec2(256., 256.));

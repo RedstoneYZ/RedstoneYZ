@@ -121,7 +121,7 @@ export default class ProgramManager {
   }
 
   public get sunAngle(): number {
-    // return Math.PI * 2.5 / 4;
+    // return Math.PI / 3.5;
     const tick = this.engine.tick % 24000;
     return (tick * Math.PI) / 12000;
   }

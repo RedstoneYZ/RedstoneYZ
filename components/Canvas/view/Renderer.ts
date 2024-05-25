@@ -76,19 +76,22 @@ export default class Renderer {
   }
 
   updatePlayground() {
-    const needUpdate: boolean[][][] = [];
+    const needUpdate: boolean[][][] = Array.from({ length: this.engine.xLen }, () =>
+      Array.from({ length: this.engine.yLen }, () =>
+        Array.from({ length: this.engine.zLen }, () => false),
+      ),
+    );
+
     for (let x = 0; x < this.engine.xLen; x++) {
-      needUpdate.push([]);
       for (let y = 0; y < this.engine.yLen; y++) {
-        needUpdate[x].push(Array(this.engine.zLen).fill(false));
         for (let z = 0; z < this.engine.zLen; z++) {
           const block = this.engine.block(x, y, z)!;
           const { type, internal, states } = this.pg[x][y][z];
 
           const updated =
-            type === block.type &&
-            strictEqual(internal, block.internal) &&
-            strictEqual(states, block.states);
+            type !== block.type ||
+            !strictEqual(internal, block.internal) ||
+            !strictEqual(states, block.states);
 
           needUpdate[x][y][z] ||= updated;
           if (!updated) continue;
