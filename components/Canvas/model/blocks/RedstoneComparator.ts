@@ -26,20 +26,17 @@ class RedstoneComparator extends Block {
   }
 
   override powerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
-    return this.states.powered && direction === this.states.facing
+    return this.states.powered && Maps.ReverseDir[direction] === this.states.facing
       ? { strong: true, power: this.internal.power }
       : { strong: false, power: 0 };
   }
 
   override powerTowardsWire(direction: SixSides): { strong: boolean; power: number } {
-    return this.states.powered && direction === this.states.facing
+    return this.states.powered && Maps.ReverseDir[direction] === this.states.facing
       ? { strong: true, power: this.internal.power }
       : { strong: false, power: 0 };
   }
 
-  /**
-   * 與此紅石中繼器互動一次
-   */
   interact() {
     this.states.mode = this.states.mode === "compare" ? "subtract" : "compare";
     this.sendPPUpdate();
@@ -55,10 +52,6 @@ class RedstoneComparator extends Block {
     }
   }
 
-  /**
-   * 更新此紅石中繼器的激發狀態
-   * @param power
-   */
   comparatorUpdate(power: number) {
     if (this.currentPower === this.internal.power) {
       return;
@@ -93,7 +86,7 @@ class RedstoneComparator extends Block {
     ];
 
     let x: number, y: number, z: number;
-    [x, y, z] = Maps.P4DMap[Maps.ReverseDir[facingDir]];
+    [x, y, z] = Maps.P4DMap[facingDir];
     this._backCoords = [this.x + x, this.y + y, this.z + z];
 
     [x, y, z] = Maps.P4DMap[this._left];
@@ -112,7 +105,7 @@ class RedstoneComparator extends Block {
     const [rx, ry, rz] = this._rightCoords;
 
     let block = this.engine.block(bx, by, bz);
-    const backPower = block?.powerTowardsWire(this.states.facing).power ?? 0;
+    const backPower = block?.powerTowardsWire(Maps.ReverseDir[this.states.facing]).power ?? 0;
 
     let sidePower = 0;
     block = this.engine.block(lx, ly, lz);

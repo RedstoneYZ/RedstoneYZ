@@ -24,28 +24,25 @@ class RedstoneRepeater extends Block {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
 
-  overridepowerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
-    return this.states.powered && direction === this.states.facing
+  override powerTowardsBlock(direction: SixSides): { strong: boolean; power: number } {
+    return this.states.powered && Maps.ReverseDir[direction] === this.states.facing
       ? { strong: true, power: 15 }
       : { strong: false, power: 0 };
   }
 
-  overridepowerTowardsWire(direction: SixSides): { strong: boolean; power: number } {
-    return this.states.powered && direction === this.states.facing
+  override powerTowardsWire(direction: SixSides): { strong: boolean; power: number } {
+    return this.states.powered && Maps.ReverseDir[direction] === this.states.facing
       ? { strong: true, power: 15 }
       : { strong: false, power: 0 };
   }
 
-  /**
-   * 與此紅石中繼器互動一次
-   */
   interact() {
     this.states.delay = this.states.delay === 4 ? 1 : this.states.delay + 1;
     this.sendPPUpdate();
   }
 
   // temprarily take PP and NC update as the same
-  overridePPUpdate() {
+  override PPUpdate() {
     super.PPUpdate();
 
     const powered = this.currentPowered;
@@ -64,9 +61,6 @@ class RedstoneRepeater extends Block {
     }
   }
 
-  /**
-   * 更新此紅石中繼器的激發狀態
-   */
   repeaterUpdate(powered: boolean) {
     if (!powered && this.currentPowered) {
       return;
@@ -100,7 +94,7 @@ class RedstoneRepeater extends Block {
     ];
 
     let x: number, y: number, z: number;
-    [x, y, z] = Maps.P4DMap[Maps.ReverseDir[facingDir]];
+    [x, y, z] = Maps.P4DMap[facingDir];
     this._backCoords = [this.x + x, this.y + y, this.z + z];
 
     [x, y, z] = Maps.P4DMap[this._left];
@@ -114,7 +108,7 @@ class RedstoneRepeater extends Block {
     const [bx, by, bz] = this._backCoords;
 
     const block = this.engine.block(bx, by, bz);
-    return !!block?.powerTowardsWire(this.states.facing).power;
+    return !!block?.powerTowardsWire(Maps.ReverseDir[this.states.facing]).power;
   }
 
   private get currentLocked() {

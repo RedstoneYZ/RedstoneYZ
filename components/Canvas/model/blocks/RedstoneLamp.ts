@@ -17,7 +17,7 @@ class RedstoneLamp extends FullBlock {
   override PPUpdate() {
     super.PPUpdate();
 
-    if (this._shouldLit()) {
+    if (this.shouldLit()) {
       this.states.lit = true;
     } else {
       this.engine.addTask(["lampUnlit", [this.x, this.y, this.z], 4]);
@@ -25,20 +25,19 @@ class RedstoneLamp extends FullBlock {
   }
 
   lampUnlit() {
-    if (this._shouldLit()) return;
-
+    if (this.shouldLit()) return;
     this.states.lit = false;
   }
 
   /**
    * 判斷此紅石燈是否應該要被點亮
    */
-  private _shouldLit() {
+  private shouldLit() {
     if (this.power) return true;
 
     const litByPower = Maps.P6DArray.some(([, [x, y, z]]) => {
       const block = this.engine.block(this.x + x, this.y + y, this.z + z);
-      return block?.internal.power;
+      return block?.power;
     });
     return litByPower;
   }
