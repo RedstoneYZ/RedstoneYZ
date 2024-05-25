@@ -328,7 +328,7 @@ class Engine {
           : "north";
     const newBlock = NewBlock(type, { x, y, z, engine: this, normDir: face, facingDir: facing });
 
-    if (newBlock.needBottomSupport && !this.block(x, y - 1, z)?.topSolid) return;
+    if (newBlock.attachedFace && !newBlock.supportingBlock?.support(newBlock.attachedFace)) return;
 
     this._pg[x][y][z] = newBlock;
     this._pg[x][y][z].sendPPUpdate();

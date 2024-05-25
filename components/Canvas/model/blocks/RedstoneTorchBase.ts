@@ -6,7 +6,7 @@ abstract class RedstoneTorchBase extends Block {
   public states: RedstoneTorchBaseState;
 
   constructor(options: BlockOptions) {
-    super({ needSupport: true, transparent: true, redirectRedstone: "full", ...options });
+    super(options);
 
     this.states = { lit: true };
     this.internal = { power: 0, source: true };

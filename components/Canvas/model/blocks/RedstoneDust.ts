@@ -11,10 +11,11 @@ class RedstoneDust extends Block {
   public crossMode: boolean;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redirectRedstone: "full", ...options });
+    super({ transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneDust;
     this.states = { east: "side", south: "side", west: "side", north: "side" };
+    this.attachedFace = "up";
     this.crossMode = true;
   }
 

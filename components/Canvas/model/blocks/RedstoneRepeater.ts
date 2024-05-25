@@ -8,10 +8,11 @@ class RedstoneRepeater extends Block {
   public states: RedstoneRepeaterState;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redirectRedstone: "line", ...options });
+    super({ transparent: true, redirectRedstone: "line", ...options });
 
     this.type = BlockType.RedstoneRepeater;
     this.states = { delay: 1, facing: "north", locked: false, powered: false };
+    this.attachedFace = "up";
     this.setFacing(options.normDir, options.facingDir);
   }
 

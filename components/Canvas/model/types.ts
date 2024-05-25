@@ -135,8 +135,6 @@ export interface BlockOptions {
   topSolid?: boolean;
   bottomSolid?: boolean;
   sideSolid?: boolean;
-  needSupport?: boolean;
-  needBottomSupport?: boolean;
 
   redirectRedstone?: "full" | "line" | "none";
 }

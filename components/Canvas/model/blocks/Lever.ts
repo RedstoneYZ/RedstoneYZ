@@ -8,7 +8,7 @@ class Lever extends Block {
   public states: LeverState;
 
   constructor(options: BlockOptions) {
-    super({ transparent: true, needSupport: true, redirectRedstone: "full", ...options });
+    super({ transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.Lever;
     this.states = { face: "wall", facing: "north", powered: false };
@@ -57,14 +57,17 @@ class Lever extends Block {
     if (normDir === "up") {
       this.states.face = "floor";
       this.states.facing = Maps.ReverseDir[facingDir];
+      this.attachedFace = "up";
       this.supportingBlockCoords = [this.x, this.y - 1, this.z];
     } else if (normDir === "down") {
       this.states.face = "ceiling";
       this.states.facing = Maps.ReverseDir[facingDir];
+      this.attachedFace = "down";
       this.supportingBlockCoords = [this.x, this.y + 1, this.z];
     } else {
       this.states.face = "wall";
       this.states.facing = normDir;
+      this.attachedFace = normDir;
       const [x, y, z] = Maps.P6DMap[normDir];
       this.supportingBlockCoords = [this.x - x, this.y - y, this.z - z];
     }

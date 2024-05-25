@@ -24,8 +24,7 @@ abstract class Block {
   public topSolid: boolean;
   public sideSolid: boolean;
   public bottomSolid: boolean;
-  public needSupport: boolean;
-  public needBottomSupport: boolean;
+  public attachedFace: SixSides | null;
 
   public breakable: boolean;
   public transparent: boolean;
@@ -44,8 +43,7 @@ abstract class Block {
     this.topSolid = options.solid || options.topSolid || false;
     this.sideSolid = options.solid || options.sideSolid || false;
     this.bottomSolid = options.solid || options.bottomSolid || false;
-    this.needSupport = options.needSupport || false;
-    this.needBottomSupport = options.needBottomSupport || false;
+    this.attachedFace = null;
 
     this.breakable = options.breakable || true;
     this.transparent = options.transparent || false;
@@ -76,18 +74,18 @@ abstract class Block {
     };
   }
 
-  /**
-   * 取得此方塊的充能強度
-   */
   get power() {
     return this.internal.power;
   }
 
-  /**
-   * 取得此方塊的附著方塊，`undefined` 代表此方塊不需要附著方塊
-   */
-  get supportingBlock(): Blocks | null | undefined {
-    return undefined;
+  get supportingBlock(): Blocks | null {
+    return null;
+  }
+
+  support(face: SixSides): boolean {
+    if (face === "up") return this.topSolid;
+    if (face === "down") return this.bottomSolid;
+    return this.sideSolid;
   }
 
   /**
@@ -120,7 +118,7 @@ abstract class Block {
    * 根據 Post Placement Update 的來源方向更新自身狀態
    */
   PPUpdate() {
-    if (this.supportingBlock === null || this.supportingBlock?.type === BlockType.AirBlock) {
+    if (this.attachedFace && !this.supportingBlock?.support(this.attachedFace)) {
       this.engine._leftClick(this.x, this.y, this.z);
       return;
     }

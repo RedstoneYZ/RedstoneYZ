@@ -7,7 +7,7 @@ class RedstoneWallTorch extends RedstoneTorchBase {
   public override states: RedstoneWallTorchState;
 
   constructor(options: BlockOptions) {
-    super({ needSupport: true, transparent: true, redirectRedstone: "full", ...options });
+    super({ transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneWallTorch;
     this.states = { lit: true, facing: "north" };
@@ -31,6 +31,7 @@ class RedstoneWallTorch extends RedstoneTorchBase {
     if (normDir === "down" || normDir === "up") return;
 
     this.states.facing = normDir;
+    this.attachedFace = normDir;
     const [x, y, z] = Maps.P6DMap[normDir];
     this.supportingBlockCoords = [this.x - x, this.y - y, this.z - z];
   }

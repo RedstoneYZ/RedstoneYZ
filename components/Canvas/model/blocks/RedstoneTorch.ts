@@ -6,10 +6,11 @@ class RedstoneTorch extends RedstoneTorchBase {
   public override states: RedstoneTorchState;
 
   constructor(options: BlockOptions) {
-    super({ needSupport: true, transparent: true, redirectRedstone: "full", ...options });
+    super(options);
 
     this.type = BlockType.RedstoneTorch;
     this.states = { lit: true };
+    this.attachedFace = "up";
   }
 
   override get supportingBlock() {

@@ -8,11 +8,12 @@ class RedstoneComparator extends Block {
   public states: RedstoneComparatorState;
 
   constructor(options: BlockOptions) {
-    super({ needBottomSupport: true, transparent: true, redirectRedstone: "full", ...options });
+    super({ transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneComparator;
     this.states = { facing: "north", mode: "compare", powered: false };
 
+    this.attachedFace = "up";
     this.setFacing(options.normDir, options.facingDir);
   }
 
