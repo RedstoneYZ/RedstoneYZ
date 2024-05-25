@@ -341,7 +341,8 @@ class Engine {
    */
   private _torchUpdate(x: number, y: number, z: number, lit: boolean): void {
     const block = this.block(x, y, z);
-    if (block?.type !== BlockType.RedstoneTorch) return;
+    if (block?.type !== BlockType.RedstoneTorch && block?.type !== BlockType.RedstoneWallTorch)
+      return;
 
     block.torchUpdate(lit);
   }

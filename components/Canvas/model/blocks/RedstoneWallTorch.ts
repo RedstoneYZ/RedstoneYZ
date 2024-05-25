@@ -7,7 +7,7 @@ class RedstoneWallTorch extends RedstoneTorchBase {
   public override states: RedstoneWallTorchState;
 
   constructor(options: BlockOptions) {
-    super({ transparent: true, redirectRedstone: "full", ...options });
+    super({ transparent: true, ...options });
 
     this.type = BlockType.RedstoneWallTorch;
     this.states = { lit: true, facing: "north" };

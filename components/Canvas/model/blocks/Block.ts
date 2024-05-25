@@ -9,7 +9,7 @@ import type {
   PowerTransmission,
   SixSides,
 } from "../types";
-import { BlockType } from "../types";
+import type { BlockType } from "../types";
 import type Engine from "../Engine";
 
 /**

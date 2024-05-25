@@ -19,10 +19,6 @@ class RedstoneDust extends Block {
     this.crossMode = true;
   }
 
-  override get power() {
-    return this.internal.power;
-  }
-
   override get supportingBlock() {
     return this.engine.block(this.x, this.y - 1, this.z);
   }
