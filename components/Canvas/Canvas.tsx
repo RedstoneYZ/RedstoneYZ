@@ -43,6 +43,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       e.preventDefault();
     }
     controller?.addActiveKey(e.key.toLowerCase());
+    controller?.jumpHotbar(e.key.toLowerCase());
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {

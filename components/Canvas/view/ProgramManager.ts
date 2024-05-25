@@ -122,14 +122,14 @@ export default class ProgramManager {
 
   public get sunAngle(): number {
     return Math.PI / 3.5;
-    const tick = this.engine.tick % 24000;
-    return (tick * Math.PI) / 12000;
+    // const tick = this.engine.tick % 24000;
+    // return (tick * Math.PI) / 12000;
   }
 
   public get seasonAngle(): number {
     return 0;
-    const tick = this.engine.tick % (24000 * 96);
-    return (tick * Math.PI) / (24000 * 48);
+    // const tick = this.engine.tick % (24000 * 96);
+    // return (tick * Math.PI) / (24000 * 48);
   }
 
   public get mvp(): Float32Array {
@@ -153,11 +153,12 @@ export default class ProgramManager {
     const y = this.renderer.scaleY;
 
     return Matrix4.Multiply(
+      Matrix4.Translate(-this.engine.xLen / 2, -this.engine.yLen / 2, -this.engine.zLen / 2),
       Matrix4.RotateY(-Math.PI / 2),
       Matrix4.RotateZ((-25.04 * Math.PI) / 180),
       Matrix4.RotateX(theta),
       Matrix4.RotateY((-23.4 * Math.sin(phi) * Math.PI) / 180),
-      Matrix4.Orthographic(-7 * x, 7 * x, -7 * y, 7 * y, -10, 10),
+      Matrix4.Orthographic(-10 * x, 10 * x, -10 * y, 10 * y, -10, 10),
     );
   }
 
