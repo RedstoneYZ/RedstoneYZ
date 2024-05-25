@@ -27,9 +27,9 @@ class Controller {
 
     this.activeKeys = new Set();
     this.hotbar = preLoadData?.availableBlocks ?? [
-      BlockType.CommandBlock,
       BlockType.IronBlock,
       BlockType.Glass,
+      BlockType.Target,
       BlockType.RedstoneDust,
       BlockType.RedstoneTorch,
       BlockType.RedstoneRepeater,

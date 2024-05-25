@@ -207,10 +207,10 @@ export default class HotBarProgram extends Program {
     [tx, ty] = this.parent.renderer.textures.sampleGui('hotbar');
     [tx, ty] = [tx / 256, ty / 256];
     data.push(
-      x1, y1, -0.997, tx            , ty           , 
-      x1, y2, -0.997, tx            , ty + 22 / 256, 
-      x2, y2, -0.997, tx + 182 / 256, ty + 22 / 256, 
-      x2, y1, -0.997, tx + 182 / 256, ty           , 
+      x1 + 0.0005, y1 + 0.0005, -0.997, tx            , ty           , 
+      x1 + 0.0005, y2 - 0.0005, -0.997, tx            , ty + 22 / 256, 
+      x2 - 0.0005, y2 - 0.0005, -0.997, tx + 182 / 256, ty + 22 / 256, 
+      x2 - 0.0005, y1 + 0.0005, -0.997, tx + 182 / 256, ty           , 
     );
     
     const index = this.parent.controller.hotbarIndex;
@@ -219,10 +219,10 @@ export default class HotBarProgram extends Program {
     [tx, ty] = this.parent.renderer.textures.sampleGui('hotbar_selection');
     [tx, ty] = [tx / 256, ty / 256];
     data.push(
-      x1, y1, -0.998, tx           , ty           , 
-      x1, y2, -0.998, tx           , ty + 23 / 256, 
-      x2, y2, -0.998, tx + 24 / 256, ty + 23 / 256, 
-      x2, y1, -0.998, tx + 24 / 256, ty           , 
+      x1 + 0.0005, y1 + 0.0005, -0.998, tx           , ty           , 
+      x1 + 0.0005, y2 - 0.0005, -0.998, tx           , ty + 23 / 256, 
+      x2 - 0.0005, y2 - 0.0005, -0.998, tx + 24 / 256, ty + 23 / 256, 
+      x2 - 0.0005, y1 + 0.0005, -0.998, tx + 24 / 256, ty           , 
     );
 
     [x1, y1] = [width / 2 - 7.5 * pixel, height / 2 - 7.5 * pixel];
@@ -230,10 +230,10 @@ export default class HotBarProgram extends Program {
     [tx, ty] = this.parent.renderer.textures.sampleGui('crosshair');
     [tx, ty] = [tx / 256, ty / 256];
     data.push(
-      x1, y1, -0.999, tx           , ty           , 
-      x1, y2, -0.999, tx           , ty + 15 / 256, 
-      x2, y2, -0.999, tx + 15 / 256, ty + 15 / 256, 
-      x2, y1, -0.999, tx + 15 / 256, ty           , 
+      x1 + 0.0005, y1 + 0.0005, -0.999, tx           , ty           , 
+      x1 + 0.0005, y2 - 0.0005, -0.999, tx           , ty + 15 / 256, 
+      x2 - 0.0005, y2 - 0.0005, -0.999, tx + 15 / 256, ty + 15 / 256, 
+      x2 - 0.0005, y1 + 0.0005, -0.999, tx + 15 / 256, ty           , 
     );
 
     return data;

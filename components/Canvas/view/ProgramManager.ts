@@ -1,7 +1,7 @@
 import type Controller from "../controller/Controller";
 import type Engine from "../model/Engine";
 import EnvironmentProgram from "./Programs/EnvironmentProgram";
-import HotBarProgram from "./Programs/HotBarProgram";
+import GuiProgram from "./Programs/GuiProgram";
 import LightProgram from "./Programs/LightProgram";
 import LineProgram from "./Programs/LineProgram";
 import MainProgram from "./Programs/MainProgram";
@@ -34,7 +34,7 @@ export default class ProgramManager {
         new MainProgram(this, this.gl),
         new EnvironmentProgram(this, this.gl),
         new LineProgram(this, this.gl),
-        new HotBarProgram(this, this.gl),
+        new GuiProgram(this, this.gl),
       ];
       this.ready = true;
     });
@@ -121,13 +121,13 @@ export default class ProgramManager {
   }
 
   public get sunAngle(): number {
-    // return Math.PI / 3.5;
+    return Math.PI / 3.5;
     const tick = this.engine.tick % 24000;
     return (tick * Math.PI) / 12000;
   }
 
   public get seasonAngle(): number {
-    // return 0;
+    return 0;
     const tick = this.engine.tick % (24000 * 96);
     return (tick * Math.PI) / (24000 * 48);
   }
