@@ -147,6 +147,7 @@ export interface BlockSpawnOptions {
   z: number;
   type: BlockType;
   states: BlockState;
+  internal: BlockInternal;
   engine: Engine;
   breakable?: boolean;
 }
@@ -155,6 +156,7 @@ export interface BlockData {
   type: BlockType;
   breakable: boolean;
   states: BlockState;
+  internal: BlockInternal;
 }
 
 export interface PowerTransmission {

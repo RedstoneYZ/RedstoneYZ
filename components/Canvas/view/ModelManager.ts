@@ -147,10 +147,10 @@ export default class ModelManager {
       result.ambientocclusion &&= parentData.ambientocclusion ?? true;
 
       if (parentData.textures) {
-        result.textures = deepCopy({ ...parentData.textures, ...result.textures });
+        result.textures = structuredClone({ ...parentData.textures, ...result.textures });
       }
       if (parentData.elements) {
-        result.elements = deepCopy(parentData.elements);
+        result.elements = structuredClone(parentData.elements);
       }
 
       parent = parentData.parent;
@@ -370,10 +370,6 @@ export default class ModelManager {
       [0, -1, 0],
     ],
   } as const;
-}
-
-function deepCopy<T>(data: T): T {
-  return JSON.parse(JSON.stringify(data));
 }
 
 type FullModel = Required<Omit<RawBlockModel, "parent" | "display">>;

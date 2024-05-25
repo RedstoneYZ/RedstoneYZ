@@ -11,11 +11,8 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   const [maxFps, setMaxFps] = useState(0);
 
   const { current: xLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.xLen);
-  const { current: yLen } = useRef("xLen" in props ? props.yLen : props.preLoadData.yLen);
-  const { current: zLen } = useRef("xLen" in props ? props.xLen : props.preLoadData.zLen);
-  const { current: mapName } = useRef(
-    "preLoadData" in props ? props.preLoadData.mapName : "New Map",
-  );
+  const { current: yLen } = useRef("yLen" in props ? props.yLen : props.preLoadData.yLen);
+  const { current: zLen } = useRef("zLen" in props ? props.zLen : props.preLoadData.zLen);
   const { current: preLoadData } = useRef("preLoadData" in props ? props.preLoadData : undefined);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,7 +28,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     });
 
     const canvas = canvasRef.current;
-    const controller = new Controller({ canvas, xLen, yLen, zLen, mapName, preLoadData });
+    const controller = new Controller({ canvas, xLen, yLen, zLen, mapName: "Map", preLoadData });
     controller.start(() => {
       setFps(Math.round(1000 / controller.renderer.mspf));
       setMaxFps(Math.round(1000 / controller.renderer.maxMspf));
@@ -39,7 +36,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
 
     setController(controller);
     return () => controller.destroy();
-  }, [xLen, yLen, zLen, mapName, preLoadData]);
+  }, [xLen, yLen, zLen, preLoadData]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLCanvasElement>) {
     if (e.key === " ") {
@@ -70,6 +67,10 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
 
       case 2:
         controller?.rightClick(e.shiftKey);
+        break;
+
+      case 3:
+        navigator.clipboard.writeText(JSON.stringify(controller?.extract()));
         break;
     }
   }

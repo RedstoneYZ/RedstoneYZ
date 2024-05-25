@@ -7,14 +7,12 @@ class RedstoneComparator extends Block {
   public type: BlockType.RedstoneComparator;
   public states: RedstoneComparatorState;
 
-  constructor(options: BlockOptions) {
+  constructor(options: BlockOptions, facing: FourFacings) {
     super({ transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.RedstoneComparator;
-    this.states = { facing: "north", mode: "compare", powered: false };
-
+    this.states = this.setStates(facing);
     this.attachedFace = "up";
-    this.setFacing(options.normDir, options.facingDir);
   }
 
   override get power() {
@@ -68,25 +66,12 @@ class RedstoneComparator extends Block {
   private _leftCoords: Vector3 = [this.x - 1, this.y, this.z];
   private _rightCoords: Vector3 = [this.x + 1, this.y, this.z];
 
-  /**
-   * 設定面向的方向
-   * @param normDir 指定面的法向量方向
-   * @param facingDir 與觀察視角最接近的軸向量方向
-   */
-  private setFacing(_normDir?: SixSides, facingDir?: FourFacings) {
-    if (!facingDir) return;
-
-    facingDir = Maps.ReverseDir[facingDir];
-    this.states.facing = facingDir ?? "north";
-    this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[
-      facingDir
-    ];
-    this._right = ({ north: "west", west: "south", south: "east", east: "north" } as const)[
-      facingDir
-    ];
+  private setStates(facing: FourFacings): RedstoneComparatorState {
+    this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[facing];
+    this._right = ({ north: "west", west: "south", south: "east", east: "north" } as const)[facing];
 
     let x: number, y: number, z: number;
-    [x, y, z] = Maps.P4DMap[facingDir];
+    [x, y, z] = Maps.P4DMap[facing];
     this._backCoords = [this.x + x, this.y + y, this.z + z];
 
     [x, y, z] = Maps.P4DMap[this._left];
@@ -94,6 +79,8 @@ class RedstoneComparator extends Block {
 
     [x, y, z] = Maps.P4DMap[this._right];
     this._rightCoords = [this.x + x, this.y + y, this.z + z];
+
+    return { facing, mode: "compare", powered: false };
   }
 
   /**

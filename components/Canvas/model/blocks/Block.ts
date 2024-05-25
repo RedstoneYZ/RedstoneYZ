@@ -54,10 +54,11 @@ abstract class Block {
   /**
    * 用給定的方塊資料生出方塊
    */
-  static spawn({ x, y, z, type, states, breakable, engine }: BlockSpawnOptions): Blocks {
+  static spawn({ x, y, z, type, states, internal, breakable, engine }: BlockSpawnOptions): Blocks {
     const block = NewBlock(type, { x, y, z, engine }, states);
     block.breakable = breakable || false;
     block.states = states as any;
+    block.internal = internal;
     return block;
   }
 
@@ -65,12 +66,11 @@ abstract class Block {
    * 把一個方塊轉換成可儲存的資料形式
    */
   static extract(block: Blocks): BlockData {
-    const states = JSON.parse(JSON.stringify(block.states));
-    delete states.__typename;
     return {
       type: block.type,
       breakable: block.breakable,
-      states: states,
+      states: structuredClone(block.states),
+      internal: structuredClone(block.internal),
     };
   }
 

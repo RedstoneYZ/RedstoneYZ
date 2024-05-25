@@ -1,4 +1,4 @@
-import type { BlockOptions, BlockState, Blocks, FourFacings, SixSides } from "../types";
+import type { BlockOptions, BlockState, Blocks, FourFacings, SixSides, ThreeFaces } from "../types";
 import { BlockType } from "../types";
 import {
   AirBlock,
@@ -14,6 +14,7 @@ import {
   Target,
   CommandBlock,
 } from "../blocks";
+import Maps from "./Maps";
 
 /**
  * 根據給定的方塊種類與狀態，回傳對應的 constructor
@@ -32,23 +33,6 @@ function NewBlock<T extends BlockState>(
   options: BlockOptions,
   states?: T,
 ): Blocks {
-  if (type === BlockType.RedstoneTorch || type === BlockType.RedstoneWallTorch) {
-    if (options.normDir && options.facingDir) {
-      return options.normDir === "up" || options.normDir === "down"
-        ? new RedstoneTorch(options)
-        : new RedstoneWallTorch(options);
-    } else if (states) {
-      if ("facing" in states) {
-        const block = new RedstoneWallTorch(options);
-        block.states.facing = states.facing as FourFacings;
-        return block;
-      }
-      return new RedstoneTorch(options);
-    } else {
-      throw new Error();
-    }
-  }
-
   switch (type) {
     case BlockType.AirBlock:
       return new AirBlock(options);
@@ -63,7 +47,29 @@ function NewBlock<T extends BlockState>(
       return new Glass(options);
 
     case BlockType.Lever:
-      return new Lever(options);
+      if (states) {
+        if (!("face" in states) || !("facing" in states)) {
+          throw new Error();
+        }
+        return new Lever(options, states.face as ThreeFaces, states.facing as FourFacings);
+      }
+
+      if (options.normDir === "up") {
+        return new Lever(options, "floor", Maps.ReverseDir[options.facingDir!]);
+      } else if (options.normDir === "down") {
+        return new Lever(options, "ceiling", Maps.ReverseDir[options.facingDir!]);
+      } else {
+        return new Lever(options, "wall", options.facingDir!);
+      }
+
+    case BlockType.RedstoneComparator:
+      if (states) {
+        if (!("facing" in states)) {
+          throw new Error();
+        }
+        return new RedstoneComparator(options, states.facing as FourFacings);
+      }
+      return new RedstoneComparator(options, Maps.ReverseDir[options.facingDir!]);
 
     case BlockType.RedstoneDust:
       return new RedstoneDust(options);
@@ -72,10 +78,26 @@ function NewBlock<T extends BlockState>(
       return new RedstoneLamp(options);
 
     case BlockType.RedstoneRepeater:
-      return new RedstoneRepeater(options);
+      if (states) {
+        if (!("facing" in states)) {
+          throw new Error();
+        }
+        return new RedstoneRepeater(options, states.facing as FourFacings);
+      }
+      return new RedstoneRepeater(options, Maps.ReverseDir[options.facingDir!]);
 
-    case BlockType.RedstoneComparator:
-      return new RedstoneComparator(options);
+    case BlockType.RedstoneTorch:
+    case BlockType.RedstoneWallTorch:
+      if (states) {
+        if (!("facing" in states)) {
+          return new RedstoneTorch(options);
+        }
+        return new RedstoneWallTorch(options, states.facing as FourFacings);
+      }
+      if (options.normDir === "up" || options.normDir === "down") {
+        return new RedstoneTorch(options);
+      }
+      return new RedstoneWallTorch(options, options.normDir!);
 
     case BlockType.Target:
       return new Target(options);

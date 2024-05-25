@@ -1,7 +1,7 @@
 import Engine from "../model/Engine";
 import Renderer from "../view";
 
-import type { FourFacings, ControllerOptions } from "../model/types";
+import type { FourFacings, ControllerOptions, MapData } from "../model/types";
 import { BlockType } from "../model/types";
 import blockNameTable from "../model/utils/blockNameTable";
 import Player from "./Player";
@@ -52,10 +52,6 @@ class Controller {
     return blockNameTable[this.hotbar[this.hotbarIndex]];
   }
 
-  /**
-   * 初始化
-   * @param canvas
-   */
   start(tickFunc: () => void): void {
     this.engine.startTicking(() => {
       tickFunc();
@@ -64,8 +60,11 @@ class Controller {
     this.renderer.startRendering(this.physics);
   }
 
-  private prevRefWheel = 0;
+  extract(): MapData {
+    return Engine.extract(this.engine);
+  }
 
+  private prevRefWheel = 0;
   adjustAngles(deltaX: number, deltaY: number): void {
     const facing = this.player.facing;
     facing.yaw = facing.yaw + deltaX * 0.00390625;

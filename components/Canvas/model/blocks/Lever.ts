@@ -7,12 +7,11 @@ class Lever extends Block {
   public type: BlockType.Lever;
   public states: LeverState;
 
-  constructor(options: BlockOptions) {
+  constructor(options: BlockOptions, face: ThreeFaces, facing: FourFacings) {
     super({ transparent: true, redirectRedstone: "full", ...options });
 
     this.type = BlockType.Lever;
-    this.states = { face: "wall", facing: "north", powered: false };
-    this.setFacing(options.normDir, options.facingDir);
+    this.states = this.setStates(face, facing);
   }
 
   override get power() {
@@ -51,26 +50,24 @@ class Lever extends Block {
    * @param normDir 指定面的法向量方向
    * @param facingDir 與觀察視角最接近的軸向量方向
    */
-  private setFacing(normDir?: SixSides, facingDir?: FourFacings) {
-    if (!normDir || !facingDir) return;
+  private setStates(face: ThreeFaces, facing: FourFacings): LeverState {
+    const states: LeverState = { face, facing, powered: false };
 
-    if (normDir === "up") {
-      this.states.face = "floor";
-      this.states.facing = Maps.ReverseDir[facingDir];
+    states.face = face!;
+    states.facing = facing!;
+
+    if (states.face === "floor") {
       this.attachedFace = "up";
       this.supportingBlockCoords = [this.x, this.y - 1, this.z];
-    } else if (normDir === "down") {
-      this.states.face = "ceiling";
-      this.states.facing = Maps.ReverseDir[facingDir];
+    } else if (states.face === "ceiling") {
       this.attachedFace = "down";
       this.supportingBlockCoords = [this.x, this.y + 1, this.z];
     } else {
-      this.states.face = "wall";
-      this.states.facing = normDir;
-      this.attachedFace = normDir;
-      const [x, y, z] = Maps.P6DMap[normDir];
+      this.attachedFace = states.facing;
+      const [x, y, z] = Maps.P6DMap[states.facing];
       this.supportingBlockCoords = [this.x - x, this.y - y, this.z - z];
     }
+    return states;
   }
 }
 

@@ -52,12 +52,12 @@ class Engine {
 
   static spawn({ xLen, yLen, zLen, mapName, blocks, validation }: MapData): Engine {
     const engine = new Engine({ xLen, yLen, zLen, mapName, validation });
-    blocks.forEach((layer, i) => {
-      layer.forEach((line, j) => {
-        line.forEach((block, k) => {
-          engine._pg[i][j][k] = block
-            ? Block.spawn({ ...block, x: i, y: j, z: k, engine })
-            : new AirBlock({ x: i, y: j, z: k, engine });
+    blocks.forEach((layer, x) => {
+      layer.forEach((line, y) => {
+        line.forEach((block, z) => {
+          engine._pg[x][y][z] = block
+            ? Block.spawn({ ...block, x, y, z, engine })
+            : new AirBlock({ x, y, z, engine });
         });
       });
     });

@@ -7,13 +7,12 @@ class RedstoneRepeater extends Block {
   public type: BlockType.RedstoneRepeater;
   public states: RedstoneRepeaterState;
 
-  constructor(options: BlockOptions) {
+  constructor(options: BlockOptions, facing: FourFacings) {
     super({ transparent: true, redirectRedstone: "line", ...options });
 
     this.type = BlockType.RedstoneRepeater;
-    this.states = { delay: 1, facing: "north", locked: false, powered: false };
+    this.states = this.setStates(facing);
     this.attachedFace = "up";
-    this.setFacing(options.normDir, options.facingDir);
   }
 
   override get power() {
@@ -76,25 +75,12 @@ class RedstoneRepeater extends Block {
   private _leftCoords: Vector3 = [this.x - 1, this.y, this.z];
   private _rightCoords: Vector3 = [this.x + 1, this.y, this.z];
 
-  /**
-   * 設定中繼器面向的方向
-   * @param normDir 指定面的法向量方向
-   * @param facingDir 與觀察視角最接近的軸向量方向
-   */
-  private setFacing(_normDir?: SixSides, facingDir?: FourFacings) {
-    if (!facingDir) return;
-
-    facingDir = Maps.ReverseDir[facingDir];
-    this.states.facing = facingDir ?? "north";
-    this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[
-      facingDir
-    ];
-    this._right = ({ north: "west", west: "south", south: "east", east: "north" } as const)[
-      facingDir
-    ];
+  private setStates(facing: FourFacings): RedstoneRepeaterState {
+    this._left = ({ north: "east", east: "south", south: "west", west: "north" } as const)[facing];
+    this._right = ({ north: "west", west: "south", south: "east", east: "north" } as const)[facing];
 
     let x: number, y: number, z: number;
-    [x, y, z] = Maps.P4DMap[facingDir];
+    [x, y, z] = Maps.P4DMap[facing];
     this._backCoords = [this.x + x, this.y + y, this.z + z];
 
     [x, y, z] = Maps.P4DMap[this._left];
@@ -102,6 +88,8 @@ class RedstoneRepeater extends Block {
 
     [x, y, z] = Maps.P4DMap[this._right];
     this._rightCoords = [this.x + x, this.y + y, this.z + z];
+
+    return { delay: 1, facing, locked: false, powered: false };
   }
 
   private get currentPowered() {
