@@ -52,10 +52,6 @@ class Lever extends Block {
    */
   private setStates(face: ThreeFaces, facing: FourFacings): LeverState {
     const states: LeverState = { face, facing, powered: false };
-
-    states.face = face!;
-    states.facing = facing!;
-
     if (states.face === "floor") {
       this.attachedFace = "up";
       this.supportingBlockCoords = [this.x, this.y - 1, this.z];
@@ -63,8 +59,8 @@ class Lever extends Block {
       this.attachedFace = "down";
       this.supportingBlockCoords = [this.x, this.y + 1, this.z];
     } else {
-      this.attachedFace = states.facing;
-      const [x, y, z] = Maps.P6DMap[states.facing];
+      this.attachedFace = facing;
+      const [x, y, z] = Maps.P6DMap[facing];
       this.supportingBlockCoords = [this.x - x, this.y - y, this.z - z];
     }
     return states;

@@ -16,9 +16,6 @@ import {
 } from "../blocks";
 import Maps from "./Maps";
 
-/**
- * 根據給定的方塊種類與狀態，回傳對應的 constructor
- */
 function NewBlock(
   type: BlockType,
   options: BlockOptions & { normDir: SixSides; facingDir: FourFacings },
@@ -59,7 +56,7 @@ function NewBlock<T extends BlockState>(
       } else if (options.normDir === "down") {
         return new Lever(options, "ceiling", Maps.ReverseDir[options.facingDir!]);
       } else {
-        return new Lever(options, "wall", options.facingDir!);
+        return new Lever(options, "wall", options.normDir!);
       }
 
     case BlockType.RedstoneComparator:

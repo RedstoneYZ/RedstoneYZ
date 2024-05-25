@@ -68,10 +68,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       case 2:
         controller?.rightClick(e.shiftKey);
         break;
-
-      case 3:
-        navigator.clipboard.writeText(JSON.stringify(controller?.extract()));
-        break;
     }
   }
 
