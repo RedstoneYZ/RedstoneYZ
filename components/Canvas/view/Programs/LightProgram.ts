@@ -116,8 +116,6 @@ export default class LightProgram extends Program {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
-    // TODO: maybe change normal and texcoords to half float
-    // COMMENT: wait for https://github.com/tc39/proposal-float16array
     gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 16, 0);
     gl.vertexAttribIPointer(1, 1, gl.INT, 16, 12);
 

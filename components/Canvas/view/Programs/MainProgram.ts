@@ -4,15 +4,11 @@ import { glUnpacki, glUnpackif } from "./glImports";
 
 interface Uniforms {
   u_mvp: WebGLUniformLocation;
-  u_mlp: WebGLUniformLocation;
   u_lightnorm: WebGLUniformLocation;
-  u_playerpos: WebGLUniformLocation;
   s_texture: WebGLUniformLocation;
-  s_shadow: WebGLUniformLocation;
-  screensize: WebGLUniformLocation;
 }
 
-export default class MainProgram extends Program {
+export default class FabulousProgram extends Program {
   protected program: WebGLProgram;
 
   private uniform: Uniforms;
@@ -23,15 +19,7 @@ export default class MainProgram extends Program {
     super(parent, gl);
 
     this.program = this.createProgram();
-    this.uniform = this.setupUniform([
-      "u_mvp",
-      "u_mlp",
-      "u_lightnorm",
-      "u_playerpos",
-      "s_texture",
-      "s_shadow",
-      "screensize",
-    ]);
+    this.uniform = this.setupUniform(["u_mvp", "u_lightnorm", "s_texture"]);
     this.abo = this.createAbo();
     this.vao = this.createVao();
 
@@ -47,13 +35,11 @@ export default class MainProgram extends Program {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
 
     gl.uniformMatrix4fv(this.uniform.u_mvp, false, this.parent.mvp);
-    gl.uniformMatrix4fv(this.uniform.u_mlp, false, this.parent.mlp);
     gl.uniform3fv(this.uniform.u_lightnorm, this.getLightNorm());
-    gl.uniform3fv(this.uniform.u_playerpos, this.parent.controller.player.xyzv);
 
     const data = this.getData();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 36) * 5, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLE_FAN, (data.length / 28) * 5, gl.UNSIGNED_SHORT, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindVertexArray(null);
@@ -72,8 +58,6 @@ export default class MainProgram extends Program {
     const gl = this.gl;
 
     gl.useProgram(this.program);
-    gl.uniform2fv(uniform.screensize, [this.parent.renderer.canvasW, this.parent.renderer.canvasH]);
-    gl.uniform1i(uniform.s_shadow, 0);
     gl.uniform1i(uniform.s_texture, 1);
     gl.useProgram(null);
 
@@ -100,12 +84,10 @@ export default class MainProgram extends Program {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.abo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0]), gl.STATIC_DRAW);
 
-    // TODO: maybe change normal and texcoords to half float
-    // COMMENT: wait for https://github.com/tc39/proposal-float16array
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 36, 0);
-    gl.vertexAttribIPointer(1, 2, gl.INT, 36, 12);
-    gl.vertexAttribIPointer(2, 3, gl.INT, 36, 20);
-    gl.vertexAttribIPointer(3, 1, gl.INT, 36, 32);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 28, 0);
+    gl.vertexAttribIPointer(1, 1, gl.INT, 28, 12);
+    gl.vertexAttribIPointer(2, 2, gl.INT, 28, 16);
+    gl.vertexAttribIPointer(3, 1, gl.INT, 28, 24);
 
     gl.enableVertexAttribArray(0);
     gl.enableVertexAttribArray(1);
@@ -134,28 +116,27 @@ export default class MainProgram extends Program {
               tangent: [u, v],
               texture: tex,
             } = face;
-            const offset = textures.sampleBlock(tex, engine.tick);
-            const [tx, ty] = textures.sampleTint(engine.block(x, y, z)!);
 
-            const uu = u.map((a) => (a + 1) * 511);
-            const vv = v.map((a) => (a + 1) * 511);
-            const tanU = (uu[0] << 20) | (uu[1] << 10) | uu[2];
-            const tanV = (vv[0] << 20) | (vv[1] << 10) | vv[2];
+            const offset = textures.sampleBlock(tex, engine.tick);
             const [ox1, oy1, ox2, oy2, oa, ob] = offset;
-            const minS = Math.min(...t.map(([a]) => a));
-            const minT = Math.min(...t.map(([, a]) => a));
-            const w = Math.max(...t.map(([a]) => a)) - minS;
-            const h = Math.max(...t.map(([, a]) => a)) - minT;
-            const tex3 = ((minS + ox1) << 20) | ((minT + oy1) << 10) | (w << 5) | h;
+
+            const [tx, ty] = textures.sampleTint(engine.block(x, y, z)!);
+            const tint = (tx << 10) | ty;
+
+            const normal = [
+              v[1] * u[2] - v[2] * u[1],
+              v[2] * u[0] - v[0] * u[2],
+              v[0] * u[1] - v[1] * u[0],
+            ].map((a) => (a + 1) * 511);
+            const norm = (normal[0] << 20) | (normal[1] << 10) | normal[2];
 
             for (let l = 0; l < 4; ++l) {
               const uOffset = t[l][0] > t[l ^ 2][0] ? 2 : 0;
               const vOffset = t[l][1] > t[l ^ 2][1] ? 1 : 0;
               const tex1 = ((t[l][0] + ox1) << 20) | ((t[l][1] + oy1) << 10) | (t[l][0] + ox2);
               const tex2 = ((t[l][1] + oy2) << 20) | (oa << 11) | (ob << 2) | uOffset | vOffset;
-              const tint = (tx << 10) | ty;
 
-              data.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, tanU, tanV, tex1, tex2, tex3, tint);
+              data.push(c[l][0] + x, c[l][1] + y, c[l][2] + z, norm, tex1, tex2, tint);
             }
           });
         });
@@ -164,13 +145,11 @@ export default class MainProgram extends Program {
 
     const asFloat32 = new Float32Array(data);
     const asInt32 = new Int32Array(asFloat32.buffer);
-    for (let i = 0; i < asFloat32.length; i += 9) {
+    for (let i = 0; i < asFloat32.length; i += 7) {
       asInt32[i + 3] = data[i + 3];
       asInt32[i + 4] = data[i + 4];
       asInt32[i + 5] = data[i + 5];
       asInt32[i + 6] = data[i + 6];
-      asInt32[i + 7] = data[i + 7];
-      asInt32[i + 8] = data[i + 8];
     }
     return asFloat32;
   }
@@ -180,26 +159,18 @@ export default class MainProgram extends Program {
     ${glUnpackif}
 
     layout(location = 0) in vec3 a_position;
-    layout(location = 1) in ivec2 a_tangent;
-    layout(location = 2) in ivec3 a_texture;
+    layout(location = 1) in int a_normal;
+    layout(location = 2) in ivec2 a_texture;
     layout(location = 3) in int a_tint;
 
     uniform mat4 u_mvp;
-    uniform mat4 u_mlp;
-    uniform vec3 u_playerpos;
+    uniform vec3 u_lightnorm;
     uniform sampler2D s_texture;
 
     out mediump vec2 v_texcoord1;
     out mediump vec2 v_texcoord2;
-    out mediump float v_texinter;
-    out mediump float v_suncosine;
-    flat out mediump vec3 v_tangentu;
-    flat out mediump vec3 v_tangentv;
-    flat out mediump vec3 v_tangentn;
-    flat out mediump vec4 v_texbound;
-    out mediump vec3 v_tanplayerpos;
-    out mediump vec3 v_tanfrgmntpos;
-    out mediump vec3 v_shadowcoord;
+    flat out mediump float v_texinter;
+    flat out mediump float v_suncosine;
     flat out mediump vec3 v_tint;
 
     const vec3 la = vec3(0.1, 0.1, 0.2);
@@ -220,26 +191,11 @@ export default class MainProgram extends Program {
       v_texcoord1.y += vOffset ? 0.0005 : -0.0005;
       v_texcoord2.y += vOffset ? 0.0005 : -0.0005;
 
-      v_texbound.x = unpackif(a_texture.z, 20, 10) / 256. + 0.0005;
-      v_texbound.y = unpackif(a_texture.z, 10, 10) / 256. + 0.0005;
-      v_texbound.z = v_texbound.x + unpackif(a_texture.z, 5, 5) / 256. - 0.001;
-      v_texbound.w = v_texbound.y + unpackif(a_texture.z, 0, 5) / 256. - 0.001;
-
-      v_tangentu.x = unpackif(a_tangent.s, 20, 10) / 511. - 1.;
-      v_tangentu.y = unpackif(a_tangent.s, 10, 10) / 511. - 1.;
-      v_tangentu.z = unpackif(a_tangent.s,  0, 10) / 511. - 1.;
-      v_tangentv.x = unpackif(a_tangent.t, 20, 10) / 511. - 1.;
-      v_tangentv.y = unpackif(a_tangent.t, 10, 10) / 511. - 1.;
-      v_tangentv.z = unpackif(a_tangent.t,  0, 10) / 511. - 1.;
-      v_tangentn = cross(v_tangentv, v_tangentu);
-
-      mat3 tangentSpace = transpose(mat3(v_tangentu, v_tangentv, v_tangentn));
-      v_tanplayerpos = tangentSpace * u_playerpos;
-      v_tanfrgmntpos = tangentSpace * a_position.xyz; 
-
-      vec4 lightcoord = u_mlp * vec4(a_position, 1.0);
-      v_shadowcoord = lightcoord.xyz / lightcoord.w;
-      v_shadowcoord = v_shadowcoord * 0.5 + 0.5;
+      vec3 tangent;
+      tangent.x = unpackif(a_normal, 20, 10) / 511. - 1.;
+      tangent.y = unpackif(a_normal, 10, 10) / 511. - 1.;
+      tangent.z = unpackif(a_normal,  0, 10) / 511. - 1.;
+      v_suncosine = max(dot(tangent, u_lightnorm), 0.0);
 
       vec2 tint;
       tint.x = (unpackif(a_tint, 10, 10) + 0.5) / 256.;
@@ -253,122 +209,25 @@ export default class MainProgram extends Program {
 
     in mediump vec2 v_texcoord1;
     in mediump vec2 v_texcoord2;
-    in mediump float v_texinter;
-    in mediump float v_suncosine;
-    flat in mediump vec3 v_tangentu;
-    flat in mediump vec3 v_tangentv;
-    flat in mediump vec3 v_tangentn;
-    flat in mediump vec4 v_texbound;
-    in mediump vec3 v_tanplayerpos;
-    in mediump vec3 v_tanfrgmntpos;
-    in mediump vec3 v_shadowcoord;
+    flat in mediump float v_texinter;
+    flat in mediump float v_suncosine;
     flat in mediump vec3 v_tint;
 
-    uniform vec2 screensize;
-    uniform vec3 u_lightnorm;
     uniform sampler2D s_texture;
-    uniform sampler2D s_shadow;
 
     out vec4 fragColor;
 
     const vec3 light_color = vec3(1.1, 1.1, 1.0);
     const vec3 ambient_color = vec3(0.8, 0.8, 1.0);
 
-    float brightness(vec4 v) {
-      return max(max(v.r, v.g), v.b);
-    }
-
-    vec2 round_half(vec2 v, vec2 size) {
-      vec2 vv = v * size;
-      vec2 halfV = vec2(0.5, 0.5);
-      return (round(vv + halfV) - halfV) / size;
-    }
-
-    float shadow(vec2 offset) {
-      vec2 size = 1. / screensize;
-      float shadow = 0.;
-      for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
-          vec2 xy = v_shadowcoord.xy + offset + (vec2(x, y)) * size;
-          float depth = texture(s_shadow, xy).r;
-          shadow += v_shadowcoord.z > depth ? 0.2 : 1.0;
-        }
-      }
-      return shadow * 0.11;
-    }
-
-    vec3 parallexOffset() {
-      const float layerCount = 15.;
-      float layerDepth = 1.0 / layerCount;
-
-      vec3 eyeDir = normalize(v_tanplayerpos - v_tanfrgmntpos);
-      vec2 delta = eyeDir.xy * 0.002 / layerCount;
-
-      vec2 curTexCoords = v_texcoord1;
-      vec4 color = texture(s_texture, curTexCoords);
-      float oldDepth = -1.;
-      float newDepth = 1. - brightness(color);
-
-      vec2 result;
-      float currentDepth = 0.;
-      while (currentDepth <= newDepth) {
-        result -= delta;
-        color = texture(s_texture, curTexCoords + result);
-        oldDepth = newDepth;
-        newDepth = 1. - brightness(color);
-        currentDepth += layerDepth;
-      }
-
-      vec3 normal = v_tangentn;
-      if (newDepth < oldDepth) {
-        vec2 texcoord = curTexCoords + result;
-        vec2 center = round_half(texcoord, vec2(256., 256.));
-        vec2 diff = texcoord - center;
-
-        if (abs(diff.x) > abs(diff.y)) {
-          normal = dot(eyeDir, v_tangentu) > 0. ? v_tangentu : -v_tangentu;
-        }
-        else {
-          normal = dot(eyeDir, v_tangentv) > 0. ? v_tangentv : -v_tangentv;
-        }
-      }
-
-      normal = normalize(normal + 3. * v_tangentn);
-      return vec3(result, max(dot(normal, u_lightnorm), 0.0));
-    }
-
-    vec4 boundedSample(vec2 texcoord) {
-      texcoord.x = min(max(v_texbound.x, texcoord.x), v_texbound.z);
-      texcoord.y = min(max(v_texbound.y, texcoord.y), v_texbound.w);
-      return texture(s_texture, texcoord);
-    }
-
     void main() {
-      vec3 parallex = parallexOffset();
-      vec4 texel1 = boundedSample(v_texcoord1 + parallex.xy);
-      vec4 texel2 = boundedSample(v_texcoord2 + parallex.xy);
+      vec4 texel1 = texture(s_texture, v_texcoord1);
+      vec4 texel2 = texture(s_texture, v_texcoord2);
       vec4 texel  = texel1 * v_texinter + texel2 * (1. - v_texinter);
       if (texel.a < 0.1) discard;
 
-      vec2 xy = round_half(v_shadowcoord.xy, screensize);
-      vec2 diff = (floor(v_shadowcoord.xy - xy) * 2. + 1.) / screensize;
-
-      float curShadow = shadow(vec2(0., 0.));
-      float horShadow = shadow(vec2(diff.x, 0.));
-      float verShadow = shadow(vec2(0., diff.y));
-      float diaShadow = shadow(diff);
-
-      float u = abs(v_shadowcoord.x - xy.x) * screensize.x;
-      float v = 1. - abs(v_shadowcoord.y - xy.y) * screensize.y;
-      
-      float uShadowTop = u * horShadow + (1. - u) * curShadow;
-      float uShadowBtm = u * diaShadow + (1. - u) * verShadow;
-      float shadow = v * uShadowTop + (1. - v) * uShadowBtm;
-
-      float suncosine = max(dot(v_tangentn, u_lightnorm), 0.0);
-
-      vec3 ambient = 0.25 * ambient_color;
-      vec3 light = parallex.z * shadow * light_color * (vec3(1, 1, 1) - ambient);
+      vec3 ambient = 0.5 * ambient_color;
+      vec3 light = v_suncosine * light_color * (vec3(1, 1, 1) - ambient);
       fragColor = vec4(texel.rgb * v_tint * (ambient + light), texel.a);
     }
   `;

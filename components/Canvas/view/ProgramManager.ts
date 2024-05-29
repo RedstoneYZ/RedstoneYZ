@@ -4,7 +4,8 @@ import EnvironmentProgram from "./Programs/EnvironmentProgram";
 import GuiProgram from "./Programs/GuiProgram";
 import LightProgram from "./Programs/LightProgram";
 import LineProgram from "./Programs/LineProgram";
-import MainProgram from "./Programs/MainProgram";
+import FabulousProgram from "./Programs/FabulousProgram";
+// import MainProgram from "./Programs/MainProgram";
 // import TestProgram from "./Programs/TestProgram";
 import type Program from "./Programs/Program";
 import type Renderer from "./Renderer";
@@ -30,11 +31,14 @@ export default class ProgramManager {
       this.textures = textures;
       this.programs = [
         new LightProgram(this, this.gl),
-        // new TestProgram(this, this.gl),
-        new MainProgram(this, this.gl),
+        new FabulousProgram(this, this.gl),
+        // new MainProgram(this, this.gl),
+
         new EnvironmentProgram(this, this.gl),
         new LineProgram(this, this.gl),
         new GuiProgram(this, this.gl),
+
+        // new TestProgram(this, this.gl),
       ];
       this.ready = true;
     });
