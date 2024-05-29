@@ -21,6 +21,7 @@ class Controller {
   public renderer: Renderer;
 
   public needRender: boolean;
+  public inGame: boolean;
   public alive: boolean;
 
   constructor({ canvas, xLen, yLen, zLen, mapName, preLoadData }: ControllerOptions) {
@@ -46,6 +47,7 @@ class Controller {
     this.renderer = new Renderer(this, canvas, [xLen, yLen, zLen]);
 
     this.needRender = true;
+    this.inGame = false;
     this.alive = true;
   }
 
@@ -67,6 +69,8 @@ class Controller {
 
   private prevRefWheel = 0;
   public adjustAngles(deltaX: number, deltaY: number): void {
+    if (!this.inGame) return;
+
     const facing = this.player.facing;
     facing.yaw = facing.yaw + deltaX * 0.00390625;
     facing.yaw += facing.yaw < -Math.PI ? Math.PI * 2 : 0;
@@ -79,6 +83,8 @@ class Controller {
   }
 
   public keyDown(key: string) {
+    if (!this.inGame) return;
+
     this.addActiveKey(key);
     this.jumpHotbar(key);
 
@@ -88,21 +94,23 @@ class Controller {
   }
 
   public keyUp(key: string) {
+    if (!this.inGame) return;
+
     this.removeActiveKey(key);
   }
 
-  public addActiveKey(key: string): boolean {
+  private addActiveKey(key: string): boolean {
     if (!Controller.IsMovementKey(key)) return false;
     this.activeKeys.add(key);
     return true;
   }
 
-  public removeActiveKey(key: string): boolean {
+  private removeActiveKey(key: string): boolean {
     if (!Controller.IsMovementKey(key)) return false;
     return this.activeKeys.delete(key);
   }
 
-  public jumpHotbar(key: string) {
+  private jumpHotbar(key: string) {
     if (!Controller.IsDigitKey(key)) return false;
     this.hotbarIndex = this.hotbarMap[key];
     this.prevRefWheel = this.hotbarIndex * 100;
@@ -110,6 +118,8 @@ class Controller {
   }
 
   public scrollHotbar(deltaY: number): void {
+    if (!this.inGame) return;
+
     this.prevRefWheel += deltaY;
     if (!this.hotbar.length) return;
 
@@ -119,6 +129,8 @@ class Controller {
   }
 
   public leftClick(): void {
+    if (!this.inGame) return;
+
     const target = this.renderer.getTarget();
     if (!target) return;
 
@@ -129,6 +141,8 @@ class Controller {
   }
 
   public middleClick(): void {
+    if (!this.inGame) return;
+
     const target = this.renderer.getTarget();
     if (!target) return;
 
@@ -150,6 +164,8 @@ class Controller {
   }
 
   public rightClick(shift: boolean): void {
+    if (!this.inGame) return;
+
     const target = this.renderer.getTarget();
     if (!target) return;
 

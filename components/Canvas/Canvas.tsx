@@ -25,6 +25,10 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       if (document.pointerLockElement !== canvasRef.current) {
         window.removeEventListener("wheel", preventDefault, false);
       }
+
+      if (controller) {
+        controller.inGame = Boolean(document.pointerLockElement);
+      }
     });
 
     const canvas = canvasRef.current;
@@ -39,7 +43,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   }, [xLen, yLen, zLen, preLoadData]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    if (e.key === " ") {
+    if (e.code === "Space") {
       e.preventDefault();
     }
     controller?.keyDown(e.code);
@@ -50,23 +54,26 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   }
 
   function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
+    if (!controller) return;
+
     switch (e.button) {
       case 0:
+
         if (canvasRef.current && document.pointerLockElement !== canvasRef.current) {
           window.addEventListener("wheel", preventDefault, { passive: false });
           canvasRef.current.requestPointerLock();
         } else {
-          controller?.leftClick();
+          controller.leftClick();
         }
         break;
 
       case 1:
         e.preventDefault();
-        controller?.middleClick();
+        controller.middleClick();
         break;
 
       case 2:
-        controller?.rightClick(e.shiftKey);
+        controller.rightClick(e.shiftKey);
         break;
     }
   }
