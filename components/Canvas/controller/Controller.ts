@@ -5,7 +5,8 @@ import type { FourFacings, MapData } from "../model/types";
 import { BlockType } from "../model/types";
 import blockNameTable from "../model/utils/blockNameTable";
 import Player from "./Player";
-import { ControllerOptions, DigitKey, KeyBoard, MovementKey } from "./types";
+import type { ControllerOptions, DigitKey, MovementKey } from "./types";
+import { KeyBoard } from "./types";
 
 /**
  * The interface of the engine
@@ -240,15 +241,15 @@ class Controller {
   }
 
   private readonly hotbarMap = {
-    [KeyBoard.D1]: 0, 
-    [KeyBoard.D2]: 1, 
-    [KeyBoard.D3]: 2, 
-    [KeyBoard.D4]: 3, 
-    [KeyBoard.D5]: 4, 
-    [KeyBoard.D6]: 5, 
-    [KeyBoard.D7]: 6, 
-    [KeyBoard.D8]: 7, 
-    [KeyBoard.D9]: 8, 
+    [KeyBoard.D1]: 0,
+    [KeyBoard.D2]: 1,
+    [KeyBoard.D3]: 2,
+    [KeyBoard.D4]: 3,
+    [KeyBoard.D5]: 4,
+    [KeyBoard.D6]: 5,
+    [KeyBoard.D7]: 6,
+    [KeyBoard.D8]: 7,
+    [KeyBoard.D9]: 8,
   };
 }
 

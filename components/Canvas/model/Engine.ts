@@ -44,7 +44,7 @@ class Engine {
     this.time = 4000;
 
     this.gamerule = {
-      doDaylightCycle: true
+      doDaylightCycle: true,
     };
 
     this.taskQueue = [];

@@ -58,7 +58,6 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
 
     switch (e.button) {
       case 0:
-
         if (canvasRef.current && document.pointerLockElement !== canvasRef.current) {
           window.addEventListener("wheel", preventDefault, { passive: false });
           canvasRef.current.requestPointerLock();
