@@ -83,26 +83,60 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
   }
 
   return (
-    <div className="canvas-wrapper">
-      <div className="canvas-wrapper-upper">
-        <canvas
-          className="canvas"
-          ref={canvasRef}
-          width={canvasWidth}
-          height={canvasHeight}
-          tabIndex={0}
-          onKeyDown={handleKeyDown}
-          onKeyUp={handleKeyUp}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onWheelCapture={handleScroll}
-        />
-        <div className="canvas-wrapper-f3">
-          {fps} fps / {maxFps} max fps
+    <>
+      <h2>控制鍵</h2>
+      <h3>遊戲</h3>
+      <ul>
+        <li>滑鼠左鍵：進入遊戲</li>
+        <li>Esc：退出遊戲</li>
+      </ul>
+
+      <h3>移動</h3>
+      <ul>
+        <li>W：向前移動</li>
+        <li>A：向前移動</li>
+        <li>S：向前移動</li>
+        <li>D：向前移動</li>
+        <li>左 Shift：向前移動</li>
+        <li>空白鍵：向前移動</li>
+      </ul>
+
+      <h3>快捷欄</h3>
+      <ul>
+        <li>滑鼠滾輪：滾動快捷欄</li>
+        <li>數字 1-9：快捷欄 1-9</li>
+      </ul>
+
+      <h3>滑鼠</h3>
+      <ul>
+        <li>滑鼠左鍵：破壞方塊</li>
+        <li>滑鼠右鍵：放置方塊／與方塊互動</li>
+        <li>滑鼠中鍵：選取方塊</li>
+      </ul>
+
+      <br />
+
+      <div className="canvas-wrapper">
+        <div className="canvas-wrapper-upper">
+          <canvas
+            className="canvas"
+            ref={canvasRef}
+            width={canvasWidth}
+            height={canvasHeight}
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onWheelCapture={handleScroll}
+          />
+          <div className="canvas-wrapper-f3">
+            {fps} fps / {maxFps} max fps
+          </div>
+          <span ref={spanRef} style={{ display: "none" }} />
         </div>
-        <span ref={spanRef} style={{ display: "none" }} />
       </div>
-    </div>
+    </>
   );
 };
 

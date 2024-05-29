@@ -1,3 +1,17 @@
+h2 {
+  font-size: 2em;
+  margin: 0.5em 0;
+}
+
+h3 {
+  font-size: 1.5em;
+  margin: 0.2em 0;
+}
+
+li {
+  margin-left: 1.5em;
+}
+
 .canvas-wrapper {
   border: 3px rgb(186, 186, 186) solid;
   border-radius: 0.3em;
