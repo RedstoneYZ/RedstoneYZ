@@ -1,3 +1,14 @@
+import { MapData } from "../model/types";
+
+export interface ControllerOptions {
+  canvas: HTMLCanvasElement;
+  xLen: number;
+  yLen: number;
+  zLen: number;
+  mapName: string;
+  preLoadData?: MapData;
+}
+
 export interface PlayerXYZ {
   x: number;
   y: number;
@@ -14,6 +25,7 @@ export enum KeyBoard {
   A = "KeyA", 
   S = "KeyS", 
   D = "KeyD", 
+  R = "KeyR", 
   LeftShift = "ShiftLeft", 
   Space = "Space", 
   D1 = "Digit1", 

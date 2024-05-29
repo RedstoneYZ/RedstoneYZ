@@ -121,15 +121,13 @@ export default class ProgramManager {
   }
 
   public get sunAngle(): number {
-    return Math.PI / 3.5;
-    // const tick = this.engine.tick % 24000;
-    // return (tick * Math.PI) / 12000;
+    const time = this.engine.time % 24000;
+    return (time * Math.PI) / 12000;
   }
 
   public get seasonAngle(): number {
-    return 0;
-    // const tick = this.engine.tick % (24000 * 96);
-    // return (tick * Math.PI) / (24000 * 48);
+    const time = this.engine.time % (24000 * 96);
+    return (time * Math.PI) / (24000 * 48);
   }
 
   public get mvp(): Float32Array {

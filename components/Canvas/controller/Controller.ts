@@ -1,11 +1,11 @@
 import Engine from "../model/Engine";
 import Renderer from "../view";
 
-import type { FourFacings, ControllerOptions, MapData } from "../model/types";
+import type { FourFacings, MapData } from "../model/types";
 import { BlockType } from "../model/types";
 import blockNameTable from "../model/utils/blockNameTable";
 import Player from "./Player";
-import { DigitKey, KeyBoard, MovementKey } from "./types";
+import { ControllerOptions, DigitKey, KeyBoard, MovementKey } from "./types";
 
 /**
  * The interface of the engine
@@ -53,7 +53,7 @@ class Controller {
     return blockNameTable[this.hotbar[this.hotbarIndex]];
   }
 
-  start(tickFunc: () => void): void {
+  public start(tickFunc: () => void): void {
     this.engine.startTicking(() => {
       tickFunc();
       this.renderer.updatePlayground();
@@ -61,12 +61,12 @@ class Controller {
     this.renderer.startRendering(this.physics);
   }
 
-  extract(): MapData {
+  public extract(): MapData {
     return Engine.extract(this.engine);
   }
 
   private prevRefWheel = 0;
-  adjustAngles(deltaX: number, deltaY: number): void {
+  public adjustAngles(deltaX: number, deltaY: number): void {
     const facing = this.player.facing;
     facing.yaw = facing.yaw + deltaX * 0.00390625;
     facing.yaw += facing.yaw < -Math.PI ? Math.PI * 2 : 0;
@@ -76,6 +76,19 @@ class Controller {
     facing.pitch = Math.max(Math.min(facing.pitch, Math.PI / 2), -(Math.PI / 2));
 
     this.needRender = true;
+  }
+
+  public keyDown(key: string) {
+    this.addActiveKey(key);
+    this.jumpHotbar(key);
+
+    if (key === KeyBoard.R) {
+      this.engine.gamerule.doDaylightCycle = !this.engine.gamerule.doDaylightCycle;
+    }
+  }
+
+  public keyUp(key: string) {
+    this.removeActiveKey(key);
   }
 
   public addActiveKey(key: string): boolean {
@@ -96,7 +109,7 @@ class Controller {
     return true;
   }
 
-  scrollHotbar(deltaY: number): void {
+  public scrollHotbar(deltaY: number): void {
     this.prevRefWheel += deltaY;
     if (!this.hotbar.length) return;
 
@@ -105,7 +118,7 @@ class Controller {
       this.hotbar.length;
   }
 
-  leftClick(): void {
+  public leftClick(): void {
     const target = this.renderer.getTarget();
     if (!target) return;
 
@@ -115,7 +128,7 @@ class Controller {
     this.needRender = true;
   }
 
-  middleClick(): void {
+  public middleClick(): void {
     const target = this.renderer.getTarget();
     if (!target) return;
 
@@ -123,9 +136,11 @@ class Controller {
     const block = this.engine.block(x, y, z);
     if (!block) return;
 
-    const index = this.hotbar.findIndex((e) => e === block.type);
+    const type = block.type === BlockType.RedstoneWallTorch ? BlockType.RedstoneTorch : block.type;
+
+    const index = this.hotbar.findIndex((e) => e === type);
     if (index < 0) {
-      this.hotbar[this.hotbarIndex] = block.type;
+      this.hotbar[this.hotbarIndex] = type;
     } else {
       this.hotbarIndex = index;
       this.prevRefWheel = index * 100;
@@ -134,7 +149,7 @@ class Controller {
     this.needRender = true;
   }
 
-  rightClick(shift: boolean): void {
+  public rightClick(shift: boolean): void {
     const target = this.renderer.getTarget();
     if (!target) return;
 
@@ -151,7 +166,7 @@ class Controller {
     this.needRender = true;
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.alive = false;
     this.engine.destroy();
   }

@@ -7,6 +7,7 @@ import type {
   EngineOptions,
   EngineTask,
   FourFacings,
+  Gamerule,
   MapData,
   ValidationData,
   Vector3,
@@ -22,6 +23,10 @@ class Engine {
 
   public tick: number;
   public day: number;
+  public time: number;
+
+  public gamerule: Gamerule;
+
   public taskQueue: EngineTask[];
   public needRender: boolean;
 
@@ -36,6 +41,12 @@ class Engine {
 
     this.tick = 0;
     this.day = 1;
+    this.time = 4000;
+
+    this.gamerule = {
+      doDaylightCycle: true
+    };
+
     this.taskQueue = [];
     this.needRender = true;
 
@@ -260,9 +271,14 @@ class Engine {
 
       this.needRender = true;
 
-      this.tick += 100;
-      if (this.tick % 24000 === 0) {
-        this.day++;
+      this.tick += 1;
+
+      if (this.gamerule.doDaylightCycle) {
+        this.time += 1;
+        while (this.time >= 24000) {
+          this.day++;
+          this.time -= 24000;
+        }
       }
 
       tickFunc();

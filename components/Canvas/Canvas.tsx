@@ -42,12 +42,11 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     if (e.key === " ") {
       e.preventDefault();
     }
-    controller?.addActiveKey(e.code);
-    controller?.jumpHotbar(e.code);
+    controller?.keyDown(e.code);
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    controller?.removeActiveKey(e.code);
+    controller?.keyUp(e.code);
   }
 
   function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
@@ -89,6 +88,7 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       <ul>
         <li>滑鼠左鍵：進入遊戲</li>
         <li>Esc：退出遊戲</li>
+        <li>R：切換太陽是否移動</li>
       </ul>
 
       <h3>移動</h3>

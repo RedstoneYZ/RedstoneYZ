@@ -30,21 +30,16 @@ export type CanvasProps = {
     }
 );
 
-export interface ControllerOptions {
-  canvas: HTMLCanvasElement;
-  xLen: number;
-  yLen: number;
-  zLen: number;
-  mapName: string;
-  preLoadData?: MapData;
-}
-
 export interface EngineOptions {
   xLen: number;
   yLen: number;
   zLen: number;
   mapName: string;
   validation?: ValidationData | undefined;
+}
+
+export interface Gamerule {
+  doDaylightCycle: boolean;
 }
 
 export type EngineTaskParams = {
