@@ -42,12 +42,12 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
     if (e.key === " ") {
       e.preventDefault();
     }
-    controller?.addActiveKey(e.key.toLowerCase());
-    controller?.jumpHotbar(e.key.toLowerCase());
+    controller?.addActiveKey(e.code);
+    controller?.jumpHotbar(e.code);
   }
 
   function handleKeyUp(e: React.KeyboardEvent<HTMLCanvasElement>) {
-    controller?.removeActiveKey(e.key.toLowerCase());
+    controller?.removeActiveKey(e.code);
   }
 
   function handleMouseDown(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {

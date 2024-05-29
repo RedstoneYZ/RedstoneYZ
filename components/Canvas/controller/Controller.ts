@@ -5,6 +5,7 @@ import type { FourFacings, ControllerOptions, MapData } from "../model/types";
 import { BlockType } from "../model/types";
 import blockNameTable from "../model/utils/blockNameTable";
 import Player from "./Player";
+import { DigitKey, KeyBoard, MovementKey } from "./types";
 
 /**
  * The interface of the engine
@@ -12,7 +13,7 @@ import Player from "./Player";
 class Controller {
   public player: Player;
 
-  public activeKeys: Set<string>;
+  public activeKeys: Set<KeyBoard>;
   public hotbar: BlockType[];
   public hotbarIndex: number;
 
@@ -77,19 +78,20 @@ class Controller {
     this.needRender = true;
   }
 
-  public addActiveKey(key: string) {
-    if (!this.validInputs.has(key)) return false;
+  public addActiveKey(key: string): boolean {
+    if (!Controller.IsMovementKey(key)) return false;
     this.activeKeys.add(key);
     return true;
   }
 
-  removeActiveKey(key: string) {
-    this.activeKeys.delete(key);
+  public removeActiveKey(key: string): boolean {
+    if (!Controller.IsMovementKey(key)) return false;
+    return this.activeKeys.delete(key);
   }
 
   public jumpHotbar(key: string) {
-    if (!(key in this.hotbarMap)) return false;
-    this.hotbarIndex = this.hotbarMap[key as keyof typeof this.hotbarMap];
+    if (!Controller.IsDigitKey(key)) return false;
+    this.hotbarIndex = this.hotbarMap[key];
     this.prevRefWheel = this.hotbarIndex * 100;
     return true;
   }
@@ -155,22 +157,22 @@ class Controller {
   }
 
   private physics = () => {
-    if (this.activeKeys.has("w")) {
+    if (this.activeKeys.has(KeyBoard.W)) {
       this.player.moveForward();
     }
-    if (this.activeKeys.has("s")) {
+    if (this.activeKeys.has(KeyBoard.S)) {
       this.player.moveBackward();
     }
-    if (this.activeKeys.has("a")) {
+    if (this.activeKeys.has(KeyBoard.A)) {
       this.player.moveLeft();
     }
-    if (this.activeKeys.has("d")) {
+    if (this.activeKeys.has(KeyBoard.D)) {
       this.player.moveRight();
     }
-    if (this.activeKeys.has(" ")) {
+    if (this.activeKeys.has(KeyBoard.Space)) {
       this.player.moveUp();
     }
-    if (this.activeKeys.has("shift")) {
+    if (this.activeKeys.has(KeyBoard.LeftShift)) {
       this.player.moveDown();
     }
 
@@ -181,52 +183,41 @@ class Controller {
     this.player.advance();
   };
 
-  private readonly validInputs = new Set([
-    "w",
-    "a",
-    "s",
-    "d",
-    " ",
-    "shift",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "!",
-    "@",
-    "#",
-    "$",
-    "%",
-    "^",
-    "&",
-    "*",
-    "(",
-  ]);
+  private static IsMovementKey(key: string): key is MovementKey {
+    return (
+      key === KeyBoard.W ||
+      key === KeyBoard.A ||
+      key === KeyBoard.S ||
+      key === KeyBoard.D ||
+      key === KeyBoard.LeftShift ||
+      key === KeyBoard.Space
+    );
+  }
+
+  private static IsDigitKey(key: string): key is DigitKey {
+    return (
+      key === KeyBoard.D1 ||
+      key === KeyBoard.D2 ||
+      key === KeyBoard.D3 ||
+      key === KeyBoard.D4 ||
+      key === KeyBoard.D5 ||
+      key === KeyBoard.D6 ||
+      key === KeyBoard.D7 ||
+      key === KeyBoard.D8 ||
+      key === KeyBoard.D9
+    );
+  }
 
   private readonly hotbarMap = {
-    "1": 0,
-    "2": 1,
-    "3": 2,
-    "4": 3,
-    "5": 4,
-    "6": 5,
-    "7": 6,
-    "8": 7,
-    "9": 8,
-    "!": 0,
-    "@": 1,
-    "#": 2,
-    $: 3,
-    "%": 4,
-    "^": 5,
-    "&": 6,
-    "*": 7,
-    "(": 8,
+    [KeyBoard.D1]: 0, 
+    [KeyBoard.D2]: 1, 
+    [KeyBoard.D3]: 2, 
+    [KeyBoard.D4]: 3, 
+    [KeyBoard.D5]: 4, 
+    [KeyBoard.D6]: 5, 
+    [KeyBoard.D7]: 6, 
+    [KeyBoard.D8]: 7, 
+    [KeyBoard.D9]: 8, 
   };
 }
 
