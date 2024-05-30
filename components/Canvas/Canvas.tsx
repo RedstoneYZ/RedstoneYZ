@@ -100,11 +100,11 @@ const Canvas = ({ canvasHeight, canvasWidth, ...props }: CanvasProps) => {
       <h3>移動</h3>
       <ul>
         <li>W：向前移動</li>
-        <li>A：向前移動</li>
-        <li>S：向前移動</li>
-        <li>D：向前移動</li>
-        <li>左 Shift：向前移動</li>
-        <li>空白鍵：向前移動</li>
+        <li>A：向左移動</li>
+        <li>S：向後移動</li>
+        <li>D：向右移動</li>
+        <li>左 Shift：向下移動</li>
+        <li>空白鍵：向上移動</li>
       </ul>
 
       <h3>快捷欄</h3>
