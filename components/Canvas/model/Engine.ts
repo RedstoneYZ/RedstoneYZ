@@ -2,6 +2,8 @@ import { sleep, strictEqual } from "./utils";
 import type { Lever, RedstoneLamp } from ".";
 import { AirBlock, Block, IronBlock, NewBlock } from ".";
 import blockNameTable from "./utils/blockNameTable";
+import SoundEffectTable from "./utils/soundEffectTable";
+// import media from '@/public/sounds/dig/glass1.ogg';
 import type {
   Blocks,
   EngineOptions,
@@ -292,6 +294,9 @@ class Engine {
     const block = this.block(x, y, z);
     if (!block?.breakable) return null;
 
+    
+    this._playSoundEffect('dig', block.type)
+
     this._pg[x][y][z] = new AirBlock({ x, y, z, engine: this });
     block.sendPPUpdate();
     return block;
@@ -396,6 +401,19 @@ class Engine {
 
     block.lampUnlit();
   }
+
+  
+  private _playSoundEffect(type: String, blockType: BlockType): void {
+    let url : string[];
+    if(type === 'dig') url = SoundEffectTable[blockType].dig;
+    else url = SoundEffectTable[blockType].place;
+    
+    const randomUrl ="@/public/sounds/dig/" + url[Math.floor(Math.random() * url.length)];
+    //const alarm = require(randomUrl);
+    //let audio = new Audio(media);
+    //audio.play();
+  }
 }
+
 
 export default Engine;
