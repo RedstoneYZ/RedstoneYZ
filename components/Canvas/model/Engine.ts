@@ -4,6 +4,7 @@ import { AirBlock, Block, IronBlock, NewBlock } from ".";
 import blockNameTable from "./utils/blockNameTable";
 import SoundEffectTable from "./utils/soundEffectTable";
 // import media from '@/public/sounds/dig/glass1.ogg';
+import { Particle } from "./Particle";
 import type {
   Blocks,
   EngineOptions,
@@ -33,6 +34,7 @@ class Engine {
   public needRender: boolean;
 
   private _pg: Blocks[][][];
+  public particle: Particle[];
 
   constructor({ xLen, yLen, zLen, mapName, validation }: EngineOptions) {
     this.xLen = xLen;
@@ -40,6 +42,7 @@ class Engine {
     this.zLen = zLen;
     this.mapName = mapName;
     this.validation = validation;
+    this.particle = [];
 
     this.tick = 0;
     this.day = 1;
@@ -283,6 +286,8 @@ class Engine {
         }
       }
 
+      this._updateParticle();
+
       tickFunc();
     }, 50);
   }
@@ -293,9 +298,9 @@ class Engine {
   public _leftClick(x: number, y: number, z: number): Blocks | null {
     const block = this.block(x, y, z);
     if (!block?.breakable) return null;
-
     
-    this._playSoundEffect('dig', block.type)
+    this._playSoundEffect('dig', block.type);
+    this._genParticle(x, y, z, block.type);
 
     this._pg[x][y][z] = new AirBlock({ x, y, z, engine: this });
     block.sendPPUpdate();
@@ -402,6 +407,37 @@ class Engine {
     block.lampUnlit();
   }
 
+  private _genParticle(x: number, y: number, z: number, type: BlockType): void {
+    for(let i = 0; i < 40; i++) {
+      const randomX = Math.random() + x;
+      const randomY = Math.random() + y;
+      const randomZ = Math.random() + z;
+      const vx = Math.random();
+      const vy = Math.random();
+      const vz = Math.random();
+      const textureX1 = Math.random() * 0.75;
+      const textureY1 = Math.random() * 0.75;
+      const textureX2 = textureX1 + 0.25;
+      const textureY2 = textureX2 + 0.25;
+      const liveTime = Math.floor(Math.random() * 10) + 5;
+
+      this.particle.push(new Particle({engine: this, x: randomX, y: randomY, z: randomZ, vx, vy, vz, type, textureX1, textureY1, textureX2, textureY2, liveTime}));
+    }
+  }
+
+  private _updateParticle(): void {
+    let particleIdx = 0;
+    while(this.particle.length !== particleIdx) {
+      if(this.particle[particleIdx].update()) {
+        particleIdx ++;
+      }
+      else {
+        this.particle.splice(particleIdx, 1);
+      }
+    }
+    if(this.particle.length !== 0) console.log(this.particle[0]);
+  }
+
   
   private _playSoundEffect(type: String, blockType: BlockType): void {
     let url : string[];
@@ -409,6 +445,7 @@ class Engine {
     else url = SoundEffectTable[blockType].place;
     
     const randomUrl ="@/public/sounds/dig/" + url[Math.floor(Math.random() * url.length)];
+    console.log(`play SoundEffect, file: ${randomUrl}`);
     //const alarm = require(randomUrl);
     //let audio = new Audio(media);
     //audio.play();
