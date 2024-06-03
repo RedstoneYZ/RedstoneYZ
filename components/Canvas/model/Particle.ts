@@ -28,21 +28,21 @@ export class Particle {
 
   constructor(options: ParticleOption) {
     this.engine = options.engine;
-    this.x = options.x;
-    this.y = options.y;
-    this.z = options.z;
-    this.textureX1 = options.textureX1;
-    this.textureY1 = options.textureY1;
-    this.textureX2 = options.textureX2;
-    this.textureY2 = options.textureY2;
+    this.x = options.x + Math.random();
+    this.y = options.y + Math.random();
+    this.z = options.z + Math.random();
+    this.textureX1 = Math.random() * 12;
+    this.textureY1 = Math.random() * 12;
+    this.textureX2 = this.textureX1 + 4;
+    this.textureY2 = this.textureY1 + 4;
 
-    this.vx = options.vx;
-    this.vy = options.vy;
-    this.vz = options.vz;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = Math.random() * 0.2;
+    this.vz = (Math.random() - 0.5) * 0.4;
 
-    this.liveTime = options.liveTime;
+    this.liveTime = Math.floor(Math.random() * 10) + 5;
     this.type = options.type;
-    this.randomSize = options.randomSize;
+    this.randomSize = (Math.random() - 0.5) * 0.2;
   }
 
   public update(): boolean {

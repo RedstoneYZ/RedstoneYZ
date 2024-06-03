@@ -111,7 +111,7 @@ export default class ParticleProgram extends Program {
       const texY1 = (textureY1 + blockdata[1]) / 256;
       const texY2 = (textureY2 + blockdata[1]) / 256;
       const {xyz: {x:cx, y:cy, z:cz}} = this.parent.renderer.controller.player;
-      const size = Math.min(1 * Math.pow((x - cx)**2 + (y - cy)**2 + (z - cz)**2 + randomSize, -2), 0.1);
+      const size = Math.min(1 * Math.pow((x - cx)**2 + (y - cy)**2 + (z - cz)**2 + randomSize, -1), 0.1);
       data.push(x, y, z, -size,  -size, texX1, texY1);
       data.push(x, y, z, size,  -size, texX1, texY2);
       data.push(x, y, z,  size,  size, texX2, texY2);

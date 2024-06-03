@@ -409,19 +409,7 @@ class Engine {
 
   private _genParticle(x: number, y: number, z: number, type: BlockType): void {
     for(let i = 0; i < 40; i++) {
-      const randomX = Math.random() + x;
-      const randomY = Math.random() + y;
-      const randomZ = Math.random() + z;
-      const vx = (Math.random() - 0.5) * 0.4;
-      const vy = Math.random() * 0.2;
-      const vz = (Math.random() - 0.5) * 0.4;
-      const textureX1 = Math.random() * 12;
-      const textureY1 = Math.random() * 12;
-      const textureX2 = textureX1 + 4;
-      const textureY2 = textureY1 + 4;
-      const liveTime = Math.floor(Math.random() * 10) + 5;
-      const randomSize = (Math.random() - 0.5) * 0.1;
-      this.particle.push(new Particle({engine: this, x: randomX, y: randomY, z: randomZ, vx, vy, vz, type, textureX1, textureY1, textureX2, textureY2, liveTime, randomSize}));
+      this.particle.push(new Particle({engine: this, x, y, z, type}));
     }
   }
 
