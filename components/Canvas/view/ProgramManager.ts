@@ -5,6 +5,7 @@ import GuiProgram from "./Programs/GuiProgram";
 import LightProgram from "./Programs/LightProgram";
 import LineProgram from "./Programs/LineProgram";
 import FabulousProgram from "./Programs/FabulousProgram";
+import ParticleProgram from "./Programs/ParticleProgram";
 // import MainProgram from "./Programs/MainProgram";
 // import TestProgram from "./Programs/TestProgram";
 import type Program from "./Programs/Program";
@@ -32,8 +33,9 @@ export default class ProgramManager {
       this.programs = [
         new LightProgram(this, this.gl),
         new FabulousProgram(this, this.gl),
-        // new MainProgram(this, this.gl),
-
+        //new MainProgram(this, this.gl),
+        new ParticleProgram(this, this.gl),
+        
         new EnvironmentProgram(this, this.gl),
         new LineProgram(this, this.gl),
         new GuiProgram(this, this.gl),

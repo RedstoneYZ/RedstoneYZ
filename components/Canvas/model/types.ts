@@ -181,6 +181,21 @@ export interface ParticleOption {
 
   liveTime: number;
   type: BlockType;
+  randomSize: number;
+}
+
+export interface ParticleData {
+  x: number;
+  y: number;
+  z: number;
+
+  textureX1: number;
+  textureY1: number;
+  textureX2: number;
+  textureY2: number;
+
+  type: BlockType;
+  randomSize: number;
 }
 
 export type Vector2 = [number, number];

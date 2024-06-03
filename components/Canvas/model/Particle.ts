@@ -1,4 +1,4 @@
-import type { BlockType, ParticleOption } from "./types";
+import type { BlockType, ParticleOption, ParticleData } from "./types";
 import type Engine from "./Engine";
 
 
@@ -6,24 +6,25 @@ import type Engine from "./Engine";
  * 代表一個粒子
  */
 export class Particle {
-  public engine: Engine;
-  public x: number;
-  public y: number;
-  public z: number;
+  private engine: Engine;
+  private x: number;
+  private y: number;
+  private z: number;
 
-  public textureX1: number;
-  public textureY1: number;
-  public textureX2: number;
-  public textureY2: number;
+  private textureX1: number;
+  private textureY1: number;
+  private textureX2: number;
+  private textureY2: number;
 
-  public vx: number;
-  public vy: number;
-  public vz: number;
+  private vx: number;
+  private vy: number;
+  private vz: number;
 
-  public gravity = 0.01;
+  private gravity = 0.05;
 
-  public liveTime: number;
-  public type: BlockType;
+  private liveTime: number;
+  private type: BlockType;
+  private randomSize: number;
 
   constructor(options: ParticleOption) {
     this.engine = options.engine;
@@ -41,16 +42,36 @@ export class Particle {
 
     this.liveTime = options.liveTime;
     this.type = options.type;
+    this.randomSize = options.randomSize;
   }
 
   public update(): boolean {
     this.liveTime -= 1;
     if(this.liveTime === 0) return false;
-    this.vy -= this.gravity;
-    this.x += this.vx;
-    this.y += this.vy;
-    this.z += this.vz;
+    const xint = Math.floor(this.x), yint = Math.floor(this.y), zint = Math.floor(this.z);
+    
+    const block = this.engine.block(xint, yint, zint);
+    if(block === null || block.type === 'air') {
+      this.vy -= this.gravity;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.z += this.vz;
+    }
     return true;
+  }
+
+  public getData(): ParticleData {
+    const x = this.x;
+    const y = this.y;
+    const z = this.z;
+    const textureX1 = this.textureX1;
+    const textureY1 = this.textureY1;
+    const textureX2 = this.textureX2;
+    const textureY2 = this.textureY2;
+    const type = this.type;
+    const randomSize = this.randomSize
+
+    return {x, y, z, textureX1, textureY1, textureX2, textureY2, type, randomSize};
   }
 }
 

@@ -412,16 +412,16 @@ class Engine {
       const randomX = Math.random() + x;
       const randomY = Math.random() + y;
       const randomZ = Math.random() + z;
-      const vx = Math.random();
-      const vy = Math.random();
-      const vz = Math.random();
-      const textureX1 = Math.random() * 0.75;
-      const textureY1 = Math.random() * 0.75;
-      const textureX2 = textureX1 + 0.25;
-      const textureY2 = textureX2 + 0.25;
+      const vx = (Math.random() - 0.5) * 0.4;
+      const vy = Math.random() * 0.2;
+      const vz = (Math.random() - 0.5) * 0.4;
+      const textureX1 = Math.random() * 12;
+      const textureY1 = Math.random() * 12;
+      const textureX2 = textureX1 + 4;
+      const textureY2 = textureY1 + 4;
       const liveTime = Math.floor(Math.random() * 10) + 5;
-
-      this.particle.push(new Particle({engine: this, x: randomX, y: randomY, z: randomZ, vx, vy, vz, type, textureX1, textureY1, textureX2, textureY2, liveTime}));
+      const randomSize = (Math.random() - 0.5) * 0.1;
+      this.particle.push(new Particle({engine: this, x: randomX, y: randomY, z: randomZ, vx, vy, vz, type, textureX1, textureY1, textureX2, textureY2, liveTime, randomSize}));
     }
   }
 
@@ -435,7 +435,7 @@ class Engine {
         this.particle.splice(particleIdx, 1);
       }
     }
-    if(this.particle.length !== 0) console.log(this.particle[0]);
+    // if(this.particle.length !== 0) console.log(this.particle[0]);
   }
 
   
