@@ -2,7 +2,7 @@ import { sleep, strictEqual } from "./utils";
 import type { Lever, RedstoneLamp } from ".";
 import { AirBlock, Block, IronBlock, NewBlock } from ".";
 import blockNameTable from "./utils/blockNameTable";
-import SoundEffectTable from "./utils/soundEffectTable";
+// import SoundEffectTable from "./utils/soundEffectTable";
 // import media from '@/public/sounds/dig/glass1.ogg';
 import { Particle } from "./Particle";
 import type {
@@ -300,7 +300,7 @@ class Engine {
     if (!block || block.type === BlockType.AirBlock) return null;
     if (!block.breakable) return null;
 
-    this._playSoundEffect("dig", block.type);
+    // this._playSoundEffect("dig", block.type);
     this._genParticle(x, y, z, block.type);
 
     this._pg[x][y][z] = new AirBlock({ x, y, z, engine: this });
@@ -425,9 +425,8 @@ class Engine {
         this.particle.splice(particleIdx, 1);
       }
     }
-    // if(this.particle.length !== 0) console.log(this.particle[0]);
   }
-
+  /*
   private _playSoundEffect(type: string, blockType: BlockType): void {
     let url: string[];
     if (type === "dig") url = SoundEffectTable[blockType].dig;
@@ -439,6 +438,7 @@ class Engine {
     //let audio = new Audio(media);
     //audio.play();
   }
+  */
 }
 
 export default Engine;
