@@ -35,7 +35,7 @@ export default class ProgramManager {
         new FabulousProgram(this, this.gl),
         //new MainProgram(this, this.gl),
         new ParticleProgram(this, this.gl),
-        
+
         new EnvironmentProgram(this, this.gl),
         new LineProgram(this, this.gl),
         new GuiProgram(this, this.gl),

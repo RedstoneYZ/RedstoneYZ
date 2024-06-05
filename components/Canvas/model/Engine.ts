@@ -297,9 +297,10 @@ class Engine {
    */
   public _leftClick(x: number, y: number, z: number): Blocks | null {
     const block = this.block(x, y, z);
-    if (!block?.breakable) return null;
-    
-    this._playSoundEffect('dig', block.type);
+    if (!block || block.type === BlockType.AirBlock) return null;
+    if (!block.breakable) return null;
+
+    this._playSoundEffect("dig", block.type);
     this._genParticle(x, y, z, block.type);
 
     this._pg[x][y][z] = new AirBlock({ x, y, z, engine: this });
@@ -408,37 +409,36 @@ class Engine {
   }
 
   private _genParticle(x: number, y: number, z: number, type: BlockType): void {
-    for(let i = 0; i < 40; i++) {
-      this.particle.push(new Particle({engine: this, x, y, z, type}));
+    for (let i = 0; i < 40; i++) {
+      if (type === BlockType.RedstoneDust) continue;
+      if (type === BlockType.RedstoneWallTorch) type = BlockType.RedstoneTorch;
+      this.particle.push(new Particle({ engine: this, x, y, z, type }));
     }
   }
 
   private _updateParticle(): void {
     let particleIdx = 0;
-    while(this.particle.length !== particleIdx) {
-      if(this.particle[particleIdx].update()) {
-        particleIdx ++;
-      }
-      else {
+    while (this.particle.length !== particleIdx) {
+      if (this.particle[particleIdx].update()) {
+        particleIdx++;
+      } else {
         this.particle.splice(particleIdx, 1);
       }
     }
     // if(this.particle.length !== 0) console.log(this.particle[0]);
   }
 
-  
-  private _playSoundEffect(type: String, blockType: BlockType): void {
-    let url : string[];
-    if(type === 'dig') url = SoundEffectTable[blockType].dig;
+  private _playSoundEffect(type: string, blockType: BlockType): void {
+    let url: string[];
+    if (type === "dig") url = SoundEffectTable[blockType].dig;
     else url = SoundEffectTable[blockType].place;
-    
-    const randomUrl ="@/public/sounds/dig/" + url[Math.floor(Math.random() * url.length)];
+
+    const randomUrl = "@/public/sounds/dig/" + url[Math.floor(Math.random() * url.length)];
     console.log(`play SoundEffect, file: ${randomUrl}`);
     //const alarm = require(randomUrl);
     //let audio = new Audio(media);
     //audio.play();
   }
 }
-
 
 export default Engine;

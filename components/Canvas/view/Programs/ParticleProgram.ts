@@ -46,11 +46,11 @@ export default class ParticleProgram extends Program {
 
     return true;
   }
-  
+  /*
   private getLightNorm(): Float32Array {
     const theta = this.parent.sunAngle;
     return new Float32Array([Math.cos(theta), Math.sin(theta), 0]);
-  }
+  }*/
 
   protected override setupUniform<T extends string>(uniforms: T[]): Uniforms {
     const uniform = super.setupUniform(uniforms) as Uniforms;
@@ -104,22 +104,37 @@ export default class ParticleProgram extends Program {
     const engine = this.parent.engine;
     const data: number[] = [];
     engine.particle.forEach((particle) => {
-      const {x:x, y:y, z:z, type:type, textureX1:textureX1, textureX2:textureX2, textureY1:textureY1, textureY2:textureY2, randomSize: randomSize} = particle.getData()
+      const {
+        x: x,
+        y: y,
+        z: z,
+        type: type,
+        textureX1: textureX1,
+        textureX2: textureX2,
+        textureY1: textureY1,
+        textureY2: textureY2,
+        randomSize: randomSize,
+      } = particle.getData();
       const blockdata = textures.sampleBlock(type, 0);
       const texX1 = (textureX1 + blockdata[0]) / 256;
       const texX2 = (textureX2 + blockdata[0]) / 256;
       const texY1 = (textureY1 + blockdata[1]) / 256;
       const texY2 = (textureY2 + blockdata[1]) / 256;
-      const {xyz: {x:cx, y:cy, z:cz}} = this.parent.renderer.controller.player;
-      const size = Math.min(1 * Math.pow((x - cx)**2 + (y - cy)**2 + (z - cz)**2 + randomSize, -1), 0.1);
-      data.push(x, y, z, -size,  -size, texX1, texY1);
-      data.push(x, y, z, size,  -size, texX1, texY2);
-      data.push(x, y, z,  size,  size, texX2, texY2);
-      data.push(x, y, z,  -size, size, texX2, texY1);
+      const {
+        xyz: { x: cx, y: cy, z: cz },
+      } = this.parent.renderer.controller.player;
+      const size = Math.min(
+        1 * Math.pow((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2 + randomSize, -1),
+        0.05,
+      );
+      data.push(x, y, z, -size, -size, texX1, texY1);
+      data.push(x, y, z, size, -size, texX1, texY2);
+      data.push(x, y, z, size, size, texX2, texY2);
+      data.push(x, y, z, -size, size, texX2, texY1);
     });
-    
+
     const asFloat32 = new Float32Array(data);
-    
+
     return asFloat32;
   }
 
@@ -137,7 +152,7 @@ export default class ParticleProgram extends Program {
     out mediump vec2 v_texcoord;
 
     void main() {
-      gl_Position = u_mvp * vec4(a_position, 1.0) + vec4(a_posOffset, 0., 1.0);
+      gl_Position = u_mvp * vec4(a_position, 1.0) + vec4(a_posOffset, 0., 0.);
 
       v_texcoord = a_texture;
     }
@@ -157,5 +172,3 @@ export default class ParticleProgram extends Program {
     }
   `;
 }
-
-

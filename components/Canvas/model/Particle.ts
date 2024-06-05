@@ -1,7 +1,6 @@
 import type { BlockType, ParticleOption, ParticleData } from "./types";
 import type Engine from "./Engine";
 
-
 /**
  * 代表一個粒子
  */
@@ -47,11 +46,13 @@ export class Particle {
 
   public update(): boolean {
     this.liveTime -= 1;
-    if(this.liveTime === 0) return false;
-    const xint = Math.floor(this.x), yint = Math.floor(this.y), zint = Math.floor(this.z);
-    
+    if (this.liveTime === 0) return false;
+    const xint = Math.floor(this.x),
+      yint = Math.floor(this.y),
+      zint = Math.floor(this.z);
+
     const block = this.engine.block(xint, yint, zint);
-    if(block === null || block.type === 'air') {
+    if (block === null || block.type === "air") {
       this.vy -= this.gravity;
       this.x += this.vx;
       this.y += this.vy;
@@ -69,10 +70,8 @@ export class Particle {
     const textureX2 = this.textureX2;
     const textureY2 = this.textureY2;
     const type = this.type;
-    const randomSize = this.randomSize
+    const randomSize = this.randomSize;
 
-    return {x, y, z, textureX1, textureY1, textureX2, textureY2, type, randomSize};
+    return { x, y, z, textureX1, textureY1, textureX2, textureY2, type, randomSize };
   }
 }
-
-
