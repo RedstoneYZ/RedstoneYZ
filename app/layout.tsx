@@ -1,11 +1,7 @@
 import "styles/tailwind.css";
-import "pliny/search/algolia.css";
 
 import { Space_Grotesk } from "next/font/google";
-import type { AnalyticsConfig } from "pliny/analytics";
-import { Analytics } from "pliny/analytics";
-import type { SearchConfig } from "pliny/search";
-import { SearchProvider } from "pliny/search";
+import { KBarProvider } from "@/utils/lib";
 import Header from "@/components/Header";
 import SectionContainer from "@/components/SectionContainer";
 import Footer from "@/components/Footer";
@@ -77,13 +73,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
         <ThemeProviders>
-          <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
           <SectionContainer>
             <div className="flex h-screen flex-col justify-between font-sans">
-              <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+              <KBarProvider actions={[/* TODO */]}>
                 <Header />
                 <main className="mb-auto">{children}</main>
-              </SearchProvider>
+              </KBarProvider>
               <Footer />
             </div>
           </SectionContainer>

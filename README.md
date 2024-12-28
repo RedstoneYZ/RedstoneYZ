@@ -12,14 +12,11 @@
   - `@tailwindcss/forms`：讓輸入標籤的客製化變得比較容易。
   - `@tailwindcss/typography`：新增許多可以自動排版的 HTML 類別。
   - `autoprefixer`：根據 [Can I use](https://caniuse.com/) 調整 CSS 檔案以支援不同的瀏覽器。
-  - `contentlayer`：目前使用的框架，但因為處在 Beta 版而且已經快一年沒更新了，可能在未來會考慮撤換到 `contentlayer2`。
   - `esbuild`。
   - `gray-matter`：輸入特定格式的字串（通常是一篇文章）後，可以得到一個容易處理的物件。
   - `image-size`：用來取得各種圖檔的長寬。
   - `next`。
-  - `next-contentlayer`。
   - `next-themes`：支援深色模式。
-  - `pliny`：似乎是 SEO 相關的套件。
   - `postcss`。
   - `react`。
   - `react-dom`。
@@ -30,6 +27,10 @@
   - `remark-math`：Latex 相關。
   - `tailwindcss`。
   - `unist-util-visit`。
+
+# 開發日誌
+- 搜尋欄待修：使用 kbar。
+- `npm audit fix`。
 
 # 歷史
 

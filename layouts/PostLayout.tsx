@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import type { CoreContent } from "pliny/utils/contentlayer";
-import type { Article, Authors } from "contentlayer/generated";
+import type { Article, Authors, CoreContent } from "@/types";
 import Link from "@/components/Link";
 import PageTitle from "@/components/PageTitle";
 import SectionContainer from "@/components/SectionContainer";

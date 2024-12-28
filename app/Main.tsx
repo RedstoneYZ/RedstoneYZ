@@ -1,17 +1,12 @@
 import Link from "@/components/Link";
 import Tag from "@/components/Tag";
 import siteMetadata from "@/data/siteMetadata";
-import { formatDate } from "pliny/utils/formatDate";
-import { MDXLayoutRenderer } from "pliny/mdx-components";
-import type { Article, Singlepage } from "contentlayer/generated";
-import { allSinglepages } from "contentlayer/generated";
-import { components } from "@/components/MDXComponents";
-import type { CoreContent } from "pliny/utils/contentlayer";
+import formatDate from "@/utils/formatDate";
+import type { Article, CoreContent } from "@/types";
 
 const MAX_DISPLAY = 3;
 
 export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
-  const homepage = allSinglepages.find((p) => p.slug === "homepage") as Singlepage;
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -22,7 +17,6 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             {siteMetadata.description}
           </p>
-          <MDXLayoutRenderer code={homepage.body.code} components={components} toc={homepage.toc} />
         </div>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!posts.length && "No posts found."}

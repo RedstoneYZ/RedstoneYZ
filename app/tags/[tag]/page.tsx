@@ -1,7 +1,6 @@
-import { allCoreContent, sortPosts } from "pliny/utils/contentlayer";
 import siteMetadata from "@/data/siteMetadata";
 import ListLayout from "@/layouts/ListLayoutWithTreeStructure";
-import { allArticles } from "contentlayer/generated";
+import { allArticles } from "@/data/Article";
 import tagData from "app/tag-data.json";
 import { genPageMetadata } from "app/seo";
 import type { Metadata } from "next";
@@ -33,8 +32,6 @@ export default function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag);
   // Capitalize first letter and convert space to dash
   const title = tag[0].toUpperCase() + tag.split(" ").join("-").slice(1);
-  const filteredPosts = allCoreContent(
-    sortPosts(allArticles.filter((post) => post.tags && post.tags.includes(tag))),
-  );
+  const filteredPosts = allArticles.filter((post) => post.tags && post.tags.includes(tag));
   return <ListLayout posts={filteredPosts} title={title} />;
 }

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { allArticles } from "contentlayer/generated";
+import { allArticles } from "@/data/Article";
 import siteMetadata from "@/data/siteMetadata";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -9,7 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((post) => !post.draft)
     .map((post) => ({
       url: `${siteUrl}/${post.path}`,
-      lastModified: post.lastmod || post.date,
+      lastModified: post.date,
     }));
 
   const routes = ["", "article", "tags"].map((route) => ({

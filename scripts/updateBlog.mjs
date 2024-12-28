@@ -1,9 +1,7 @@
 import fs from "fs";
 
-fs.writeFileSync(
-  "./app/articleHierarchy.json",
-  JSON.stringify(readData("./data/article/", "article"), null, 2),
-);
+// TODO
+console.log("The articles have to be updated.");
 
 /**
  * @param {string} path

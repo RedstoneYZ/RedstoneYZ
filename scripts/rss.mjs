@@ -1,10 +1,8 @@
 import { writeFileSync, mkdirSync } from "fs";
 import path from "path";
-import { escape } from "pliny/utils/htmlEscaper.js";
 import siteMetadata from "../data/siteMetadata.js";
 import tagData from "../app/tag-data.json" assert { type: "json" };
-import { allArticles } from "../.contentlayer/generated/index.mjs";
-import { sortPosts } from "pliny/utils/contentlayer.js";
+import { allArticles } from "@/data/Article";
 
 const generateRssItem = (config, post) => `
   <item>
@@ -40,7 +38,7 @@ async function generateRSS(config, allArticles, page = "feed.xml") {
   const publishPosts = allArticles.filter((post) => post.draft !== true);
   // RSS for article
   if (publishPosts.length > 0) {
-    const rss = generateRss(config, sortPosts(publishPosts));
+    const rss = generateRss(config, publishPosts);
     writeFileSync(`./public/${page}`, rss);
   }
 
@@ -62,3 +60,8 @@ const rss = () => {
   console.log("RSS feed generated...");
 };
 export default rss;
+
+
+function escape(string) {
+  return string.replace(/[&<>'"]/g, (m) => escapeMap[m]);
+}

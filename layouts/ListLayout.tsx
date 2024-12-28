@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { formatDate } from "pliny/utils/formatDate";
-import type { CoreContent } from "pliny/utils/contentlayer";
-import type { Article } from "contentlayer/generated";
+import formatDate from "@/utils/formatDate";
+import type { Article, CoreContent } from "@/types";
 import Link from "@/components/Link";
 import Tag from "@/components/Tag";
 import siteMetadata from "@/data/siteMetadata";

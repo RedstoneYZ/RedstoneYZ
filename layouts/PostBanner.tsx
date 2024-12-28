@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 import Image from "@/components/Image";
-import Bleed from "pliny/ui/Bleed";
-import type { CoreContent } from "pliny/utils/contentlayer";
-import type { Article } from "contentlayer/generated";
+import type { Article, CoreContent } from "@/types";
 import Link from "@/components/Link";
 import PageTitle from "@/components/PageTitle";
 import SectionContainer from "@/components/SectionContainer";
@@ -27,11 +25,11 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
         <div>
           <div className="space-y-1 pb-10 text-center dark:border-gray-700">
             <div className="w-full">
-              <Bleed>
+              <div>
                 <div className="relative aspect-[2/1] w-full">
                   <Image src={displayImage} alt={title} fill className="object-cover" />
                 </div>
-              </Bleed>
+              </div>
             </div>
             <div className="relative pt-10">
               <PageTitle>{title}</PageTitle>
