@@ -1,8 +1,6 @@
 import { writeFileSync, mkdirSync } from "fs";
 import path from "path";
 import siteMetadata from "../data/siteMetadata.js";
-import tagData from "../app/tag-data.json" assert { type: "json" };
-import { allArticles } from "@/data/Article";
 
 const generateRssItem = (config, post) => `
   <item>
@@ -35,28 +33,30 @@ const generateRss = (config, posts, page = "feed.xml") => {
 };
 
 async function generateRSS(config, allArticles, page = "feed.xml") {
-  const publishPosts = allArticles.filter((post) => post.draft !== true);
-  // RSS for article
-  if (publishPosts.length > 0) {
-    const rss = generateRss(config, publishPosts);
-    writeFileSync(`./public/${page}`, rss);
-  }
+  // TODO: articles
+  // const publishPosts = allArticles.filter((post) => post.draft !== true);
+  // // RSS for article
+  // if (publishPosts.length > 0) {
+  //   const rss = generateRss(config, publishPosts);
+  //   writeFileSync(`./public/${page}`, rss);
+  // }
 
-  if (publishPosts.length > 0) {
-    for (const tag of Object.keys(tagData)) {
-      const filteredPosts = allArticles.filter((post) => post.tags.includes(tag));
-      if (filteredPosts.length > 0) {
-        const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`);
-        const rssPath = path.join("public", "tags", tag);
-        mkdirSync(rssPath, { recursive: true });
-        writeFileSync(path.join(rssPath, page), rss);
-      }
-    }
-  }
+  // TODO: categories
+  // if (publishPosts.length > 0) {
+  //   for (const tag of Object.keys(tagData)) {
+  //     const filteredPosts = allArticles.filter((post) => post.tags.includes(tag));
+  //     if (filteredPosts.length > 0) {
+  //       const rss = generateRss(config, filteredPosts, `tags/${tag}/${page}`);
+  //       const rssPath = path.join("public", "tags", tag);
+  //       mkdirSync(rssPath, { recursive: true });
+  //       writeFileSync(path.join(rssPath, page), rss);
+  //     }
+  //   }
+  // }
 }
 
 const rss = () => {
-  generateRSS(siteMetadata, allArticles);
+  // generateRSS(siteMetadata, allArticles);
   console.log("RSS feed generated...");
 };
 export default rss;

@@ -144,14 +144,14 @@ function RightPanel({
     <div>
       <ul>
         {displayPosts.map((post) => {
-          const { path, date, title, summary, tags } = post;
+          const { path, created, title, summary, categories } = post;
           return (
             <li key={path} className="py-5">
               <article className="flex flex-col space-y-2 xl:space-y-0">
                 <dl>
                   <dt className="sr-only">Published on</dt>
                   <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                    <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                    <time dateTime={created}>{formatDate(created, siteMetadata.locale)}</time>
                   </dd>
                 </dl>
                 <div className="space-y-3">
@@ -162,7 +162,7 @@ function RightPanel({
                       </Link>
                     </h2>
                     <div className="flex flex-wrap">
-                      {tags?.map((tag) => <Tag key={tag} text={tag} />)}
+                      {categories?.map((cat) => <Tag key={cat} text={cat} />)}
                     </div>
                   </div>
                   <div className="prose max-w-none text-gray-500 dark:text-gray-400">{summary}</div>

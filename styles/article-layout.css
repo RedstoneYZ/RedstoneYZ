@@ -1,0 +1,10 @@
+.left-infobox {
+  padding: 30px 0;
+  border-bottom: 1px solid #58595f;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-infobox > * {
+  margin: 5px 0;
+}

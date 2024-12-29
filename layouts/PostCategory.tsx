@@ -39,7 +39,7 @@ export default function PostCategory({
   prev,
   children,
 }: LayoutProps) {
-  const { filePath, path, date, title, tags } = content;
+  const { filePath, path, created, title, categories } = content;
   const basePath = path.split("/")[0];
   const pathSplit = path.split("/");
   let data = articleHierarchy;
@@ -63,8 +63,8 @@ export default function PostCategory({
                 <div>
                   <dt className="sr-only">Published on</dt>
                   <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                    <time dateTime={date}>
-                      {new Date(date).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
+                    <time dateTime={created}>
+                      {new Date(created).toLocaleDateString(siteMetadata.locale, postDateTemplate)}
                     </time>
                   </dd>
                 </div>
@@ -133,14 +133,14 @@ export default function PostCategory({
                 <ArticleTable data={data} parent={path + "/"} title={title}></ArticleTable>
               </div>
               <div className="divide-gray-200 text-sm font-medium leading-5 dark:divide-gray-700 xl:col-start-1 xl:row-start-2 xl:divide-y">
-                {tags && (
+                {categories && (
                   <div className="py-4 xl:py-8">
                     <h2 className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                       Tags
                     </h2>
                     <div className="flex flex-wrap">
-                      {tags.map((tag) => (
-                        <Tag key={tag} text={tag} />
+                      {categories.map((cat) => (
+                        <Tag key={cat} text={cat} />
                       ))}
                     </div>
                   </div>

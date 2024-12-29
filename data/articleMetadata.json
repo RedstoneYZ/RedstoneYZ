@@ -41,14 +41,20 @@
       "page": {
         "title": "在一切開始之前……",
         "created": "2024-03-23",
-        "author": "Zollo757347"
+        "author": "Zollo757347",
+        "categories": [
+          "general"
+        ]
       }
     },
     "nouns": {
       "page": {
         "title": "一些你需要的名詞",
         "created": "2024-03-23",
-        "author": "Zollo757347"
+        "author": "Zollo757347",
+        "categories": [
+          "general"
+        ]
       }
     }
   },
@@ -57,28 +63,40 @@
       "page": {
         "title": "強棒接力．紅石中繼器",
         "created": "2024-03-23",
-        "author": "Zollo757347"
+        "author": "Zollo757347",
+        "categories": [
+          "redstone"
+        ]
       }
     },
     "signal": {
       "page": {
         "title": "一切的開端．訊號",
         "created": "2024-03-23",
-        "author": "Zollo757347"
+        "author": "Zollo757347",
+        "categories": [
+          "redstone"
+        ]
       }
     },
     "torch": {
       "page": {
         "title": "顛倒是非．紅石火把",
         "created": "2024-03-23",
-        "author": "Zollo757347"
+        "author": "Zollo757347",
+        "categories": [
+          "redstone"
+        ]
       }
     },
     "transmit": {
       "page": {
         "title": "明與暗的旅程．訊號傳遞",
         "created": "2024-03-23",
-        "author": "Zollo757347"
+        "author": "Zollo757347",
+        "categories": [
+          "redstone"
+        ]
       }
     }
   }

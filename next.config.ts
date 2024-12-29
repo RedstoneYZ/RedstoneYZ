@@ -1,4 +1,3 @@
-import createMDX from '@next/mdx';
 import rehypeKatex from 'rehype-katex';
 import rehypePrismPlus from 'rehype-prism-plus';
  
@@ -7,11 +6,15 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 }
  
-const withMDX = createMDX({
+const withMDX = require('@next/mdx')({
   options: {
     rehypePlugins: [rehypeKatex, rehypePrismPlus]
   }
-})
+});
+
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: 'true' === 'true',
+});
  
 // Merge MDX config with Next.js config
-export default withMDX(nextConfig)
+export default withBundleAnalyzer(withMDX(nextConfig))

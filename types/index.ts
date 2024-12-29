@@ -25,7 +25,6 @@ export type Article = {
   title: string
   created: string
   author: string
-  tags: string[]
   categories: string[]
   lastmod?: string | undefined
   draft?: boolean | undefined
