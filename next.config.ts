@@ -1,14 +1,16 @@
-import createMDX from '@next/mdx'
+import createMDX from '@next/mdx';
+import rehypeKatex from 'rehype-katex';
+import rehypePrismPlus from 'rehype-prism-plus';
  
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configure `pageExtensions` to include markdown and MDX files
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  // Optionally, add any other Next.js config below
 }
  
 const withMDX = createMDX({
-  // Add markdown plugins here, as desired
+  options: {
+    rehypePlugins: [rehypeKatex, rehypePrismPlus]
+  }
 })
  
 // Merge MDX config with Next.js config

@@ -1,0 +1,69 @@
+{
+  "computer": {
+    "calculator": {
+      "adder": {
+        "page": {
+          "title": "計算機的第一步．加法器",
+          "date": "'2024-03-23'",
+          "tags": "['redstone', 'adder']"
+        }
+      },
+      "page": {
+        "title": "紅石電腦．啟動！",
+        "date": "'2024-03-29'",
+        "tags": "['computer']",
+        "summary": "紅石電腦"
+      }
+    }
+  },
+  "concepts": {
+    "notorand": {
+      "page": {
+        "title": "邏輯閘．非或與",
+        "date": "2024-03-23",
+        "tags": "['concept', 'gate', 'notorand']",
+        "summary": "邏輯閘非或與的介紹"
+      }
+    }
+  },
+  "general": {
+    "get_started": {
+      "page": {
+        "title": "在一切開始之前……",
+        "date": "'2024-03-23'"
+      }
+    },
+    "nouns": {
+      "page": {
+        "title": "一些你需要的名詞",
+        "date": "'2024-03-23'"
+      }
+    }
+  },
+  "redstone": {
+    "repeater": {
+      "page": {
+        "title": "強棒接力．紅石中繼器",
+        "date": "'2024-03-23'"
+      }
+    },
+    "signal": {
+      "page": {
+        "title": "一切的開端．訊號",
+        "date": "'2024-03-23'"
+      }
+    },
+    "torch": {
+      "page": {
+        "title": "顛倒是非．紅石火把",
+        "date": "'2024-03-23'"
+      }
+    },
+    "transmit": {
+      "page": {
+        "title": "明與暗的旅程．訊號傳遞",
+        "date": "'2024-03-23'"
+      }
+    }
+  }
+}
