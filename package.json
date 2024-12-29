@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "next start",
-    "dev": "node ./scripts/updateBlog.mjs && next dev",
-    "build": "node ./scripts/updateBlog.mjs && next build && node ./scripts/postbuild.mjs",
+    "dev": "node ./scripts/generateMetadata.mjs && next dev",
+    "build": "node ./scripts/generateMetadata.mjs && next build && node ./scripts/postbuild.mjs",
     "lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
     "atlas": "node ./scripts/generateAtlas.mjs"
   },
@@ -18,7 +18,6 @@
     "@tailwindcss/typography": "^0.5.9",
     "autoprefixer": "^10.4.13",
     "esbuild": "0.18.11",
-    "gray-matter": "^4.0.2",
     "image-size": "1.0.0",
     "kbar": "^0.1.0-beta.45",
     "next": "^15.1.3",
