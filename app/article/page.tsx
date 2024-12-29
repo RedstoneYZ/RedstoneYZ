@@ -1,8 +1,8 @@
 import Link from "@/components/Link";
-import articleMetaData from "@/data/articleMetadata.json";
 import formatDate from "@/utils/formatDate";
+import getArticles from "@/utils/getArticles";
 
-const articles = parseMetadata(articleMetaData);
+const articles = getArticles();
 
 export default function Article() {
   return (
@@ -39,30 +39,4 @@ export default function Article() {
       </div>
     </div>
   );
-}
-
-function parseMetadata(data: NestedArticle) {
-  const result: Article[] = [];
-
-  for (const key in data) {
-    const value = data[key as keyof typeof data];
-    if (key === "page") {
-      result.push(value as Article);
-    } else {
-      const subResult = parseMetadata(value as NestedArticle);
-      result.push(...subResult);
-    }
-  }
-
-  return result;
-}
-
-type NestedArticle = { [k: string]: Article | NestedArticle };
-
-interface Article {
-  title: string;
-  author: string;
-  created: string;
-  categories: string[];
-  link: string;
 }

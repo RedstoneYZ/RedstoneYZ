@@ -2,11 +2,12 @@ import Link from "@/components/Link";
 import Tag from "@/components/Tag";
 import siteMetadata from "@/data/siteMetadata";
 import formatDate from "@/utils/formatDate";
-import type { Article, CoreContent } from "@/types";
+import getArticles from "@/utils/getArticles";
 
 const MAX_DISPLAY = 3;
+const articles = getArticles();
 
-export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
+export default function Main() {
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -19,11 +20,11 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
           </p>
         </div>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {!posts.length && "No posts found."}
-          {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, created, title, summary, categories } = post;
+          {!articles.length && "No articles found."}
+          {articles.slice(0, MAX_DISPLAY).map((post, i) => {
+            const { created, title, categories, link } = post;
             return (
-              <li key={slug} className="py-12">
+              <li key={i} className="py-12">
                 <article>
                   <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
                     <dl>
@@ -36,10 +37,7 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
                       <div className="space-y-6">
                         <div>
                           <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link
-                              href={`/article/${slug}`}
-                              className="text-gray-900 dark:text-gray-100"
-                            >
+                            <Link href={link} className="text-gray-900 dark:text-gray-100">
                               {title}
                             </Link>
                           </h2>
@@ -49,13 +47,13 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
                             ))}
                           </div>
                         </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
+                        {/* TODO: <div className="prose max-w-none text-gray-500 dark:text-gray-400">
                           {summary}
-                        </div>
+                        </div> */}
                       </div>
                       <div className="text-base font-medium leading-6">
                         <Link
-                          href={`/article/${slug}`}
+                          href={link}
                           className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                           aria-label={`Read more: "${title}"`}
                         >
@@ -70,7 +68,7 @@ export default function Home({ posts }: { posts: CoreContent<Article>[] }) {
           })}
         </ul>
       </div>
-      {posts.length > MAX_DISPLAY && (
+      {articles.length > MAX_DISPLAY && (
         <div className="flex justify-end text-base font-medium leading-6">
           <Link
             href="/article"

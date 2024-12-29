@@ -19,7 +19,10 @@ function readData(fullPath, path) {
 
       if (child.endsWith(".mdx")) {
         const relativePath = fullPath + "/" + child;
-        content.link = relativePath.substring("./app".length, relativePath.length - "/page.mdx".length);
+        content.link = relativePath.substring(
+          "./app".length,
+          relativePath.length - "/page.mdx".length,
+        );
       }
       result[child === "page.mdx" ? "page" : child] = content;
     });
