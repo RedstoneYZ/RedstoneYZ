@@ -5,13 +5,20 @@
         "page": {
           "title": "計算機的第一步．加法器",
           "created": "2024-03-23",
-          "categories": "['redstone', 'adder']"
+          "author": "Zollo757347",
+          "categories": [
+            "redstone",
+            "adder"
+          ]
         }
       },
       "page": {
         "title": "紅石電腦．啟動！",
         "created": "2024-03-29",
-        "categories": "['computer']"
+        "author": "Zollo757347",
+        "categories": [
+          "computer"
+        ]
       }
     }
   },
@@ -20,7 +27,12 @@
       "page": {
         "title": "邏輯閘．非或與",
         "created": "2024-03-23",
-        "categories": "['concept', 'gate', 'notorand']"
+        "author": "Zollo757347",
+        "categories": [
+          "concept",
+          "gate",
+          "notorand"
+        ]
       }
     }
   },
@@ -28,13 +40,15 @@
     "get_started": {
       "page": {
         "title": "在一切開始之前……",
-        "created": "2024-03-23"
+        "created": "2024-03-23",
+        "author": "Zollo757347"
       }
     },
     "nouns": {
       "page": {
         "title": "一些你需要的名詞",
-        "created": "2024-03-23"
+        "created": "2024-03-23",
+        "author": "Zollo757347"
       }
     }
   },
@@ -42,25 +56,29 @@
     "repeater": {
       "page": {
         "title": "強棒接力．紅石中繼器",
-        "created": "2024-03-23"
+        "created": "2024-03-23",
+        "author": "Zollo757347"
       }
     },
     "signal": {
       "page": {
         "title": "一切的開端．訊號",
-        "created": "2024-03-23"
+        "created": "2024-03-23",
+        "author": "Zollo757347"
       }
     },
     "torch": {
       "page": {
         "title": "顛倒是非．紅石火把",
-        "created": "2024-03-23"
+        "created": "2024-03-23",
+        "author": "Zollo757347"
       }
     },
     "transmit": {
       "page": {
         "title": "明與暗的旅程．訊號傳遞",
-        "created": "2024-03-23"
+        "created": "2024-03-23",
+        "author": "Zollo757347"
       }
     }
   }

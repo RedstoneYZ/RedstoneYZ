@@ -23,8 +23,10 @@ export type Article = {
   _raw: RawDocumentData
   type: string
   title: string
-  date: string
+  created: string
+  author: string
   tags: string[]
+  categories: string[]
   lastmod?: string | undefined
   draft?: boolean | undefined
   summary?: string | undefined

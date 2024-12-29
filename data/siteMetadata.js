@@ -1,8 +1,8 @@
 const siteMetadata = {
   title: 'RedstoneYZ 紅石教學網站',
-  author: 'Redstone team',
+  author: 'RedstoneYZ',
   headerTitle: 'RedstoneYZ 紅石教學網站',
-  description: '一個中文導向的紅石教學網站，目標是成為像紅石口袋一樣的網站，目前仍位於開發階段。',
+  description: '一個中文導向的紅石教學網站，目前仍位於開發階段。',
   language: 'zh-TW',
   theme: 'system', // system, dark or light
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',

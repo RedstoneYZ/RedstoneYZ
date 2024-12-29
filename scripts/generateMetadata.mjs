@@ -33,6 +33,12 @@ function parseMetadata(content) {
     match[1]
       .trim()
       .split("\n")
-      .map((a) => a.split(/ *\: */)),
+      .map((a) => {
+        let [key, value] = a.split(/ *\: */);
+        const valueMatch = value.match(/\[(.+?)\]/);
+        if (!valueMatch) return [key, value];
+
+        return [key, valueMatch[1].split(/ *, */)];
+      }),
   );
 }

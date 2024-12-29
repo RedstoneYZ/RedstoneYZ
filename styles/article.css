@@ -1,0 +1,27 @@
+h1 {
+  margin: 30px 0;
+  font-size: 2em;
+  font-weight: bold;
+}
+
+h2 {
+  margin: 20px 0;
+  font-size: 1.6em;
+  font-weight: bold;
+}
+
+h3 {
+  margin: 10px 0;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+h4 {
+  margin: 5px 0;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+p {
+  margin: 20px 0;
+}
