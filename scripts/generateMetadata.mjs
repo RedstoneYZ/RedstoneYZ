@@ -16,6 +16,11 @@ function readData(fullPath, path) {
     children.forEach((child) => {
       const content = readData(fullPath + "/" + child, child);
       if (!content) return;
+
+      if (child.endsWith(".mdx")) {
+        const relativePath = fullPath + "/" + child;
+        content.link = relativePath.substring("./app".length, relativePath.length - "/page.mdx".length);
+      }
       result[child === "page.mdx" ? "page" : child] = content;
     });
     return result;

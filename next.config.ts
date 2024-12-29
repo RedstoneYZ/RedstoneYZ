@@ -12,9 +12,5 @@ const withMDX = require('@next/mdx')({
   }
 });
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: 'true' === 'true',
-});
- 
 // Merge MDX config with Next.js config
-export default withBundleAnalyzer(withMDX(nextConfig))
+export default withMDX(nextConfig);

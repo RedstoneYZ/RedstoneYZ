@@ -9,7 +9,8 @@
           "categories": [
             "redstone",
             "adder"
-          ]
+          ],
+          "link": "/article/computer/calculator/adder"
         }
       },
       "page": {
@@ -18,7 +19,8 @@
         "author": "Zollo757347",
         "categories": [
           "computer"
-        ]
+        ],
+        "link": "/article/computer/calculator"
       }
     }
   },
@@ -32,7 +34,8 @@
           "concept",
           "gate",
           "notorand"
-        ]
+        ],
+        "link": "/article/concepts/notorand"
       }
     }
   },
@@ -44,7 +47,8 @@
         "author": "Zollo757347",
         "categories": [
           "general"
-        ]
+        ],
+        "link": "/article/general/get_started"
       }
     },
     "nouns": {
@@ -54,7 +58,8 @@
         "author": "Zollo757347",
         "categories": [
           "general"
-        ]
+        ],
+        "link": "/article/general/nouns"
       }
     }
   },
@@ -66,7 +71,8 @@
         "author": "Zollo757347",
         "categories": [
           "redstone"
-        ]
+        ],
+        "link": "/article/redstone/repeater"
       }
     },
     "signal": {
@@ -76,7 +82,8 @@
         "author": "Zollo757347",
         "categories": [
           "redstone"
-        ]
+        ],
+        "link": "/article/redstone/signal"
       }
     },
     "torch": {
@@ -86,7 +93,8 @@
         "author": "Zollo757347",
         "categories": [
           "redstone"
-        ]
+        ],
+        "link": "/article/redstone/torch"
       }
     },
     "transmit": {
@@ -96,7 +104,8 @@
         "author": "Zollo757347",
         "categories": [
           "redstone"
-        ]
+        ],
+        "link": "/article/redstone/transmit"
       }
     }
   }

@@ -10,8 +10,13 @@ import Link from "@/components/Link";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { title, author, created, categories } = getMetadata(path);
 
+  // The layout does not apply to the root page.
+  if (path === "/article") {
+    return children;
+  }
+
+  const { title, author, created, categories } = getMetadata(path);
   return (
     <div>
       <div className="flex flex-col items-center justify-between border-b-2 border-solid border-slate-400 p-5">
