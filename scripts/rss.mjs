@@ -61,6 +61,13 @@ const rss = () => {
 };
 export default rss;
 
+const escapeMap = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#039;",
+};
 
 function escape(string) {
   return string.replace(/[&<>'"]/g, (m) => escapeMap[m]);

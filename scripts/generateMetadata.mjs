@@ -8,7 +8,6 @@ function readData(fullPath, path) {
   if (path.endsWith(".mdx")) {
     const content = fs.readFileSync(fullPath).toString();
     return parseMetadata(content);
-    throw new Error(`${fullPath} does not have a title`);
   }
 
   if (fs.statSync(fullPath).isDirectory()) {
@@ -34,7 +33,7 @@ function parseMetadata(content) {
       .trim()
       .split("\n")
       .map((a) => {
-        let [key, value] = a.split(/ *\: */);
+        let [key, value] = a.split(/ *: */);
         const valueMatch = value.match(/\[(.+?)\]/);
         if (!valueMatch) return [key, value];
 

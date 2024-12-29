@@ -75,7 +75,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProviders>
           <SectionContainer>
             <div className="flex h-screen flex-col justify-between font-sans">
-              <KBarProvider actions={[/* TODO */]}>
+              <KBarProvider
+                actions={
+                  [
+                    /* TODO */
+                  ]
+                }
+              >
                 <Header />
                 <main className="mb-auto">{children}</main>
               </KBarProvider>
