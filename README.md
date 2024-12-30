@@ -29,7 +29,6 @@ npm run build       # 編譯專案
 - `@tailwindcss/typography`：新增許多可以自動排版的 HTML 類別。
 - `autoprefixer`：根據 [Can I use](https://caniuse.com/) 調整 CSS 檔案以支援不同的瀏覽器。
 - `esbuild`。
-- `gray-matter`：輸入特定格式的字串（通常是一篇文章）後，可以得到一個容易處理的物件。
 - `image-size`：用來取得各種圖檔的長寬。
 - `next`。
 - `next-themes`：支援深色模式。
@@ -73,6 +72,7 @@ npm run build       # 編譯專案
 - 網站元素
   - [ ] 可放大的 Image
   - [ ] 引用系統
+  - [ ] 上一頁／下一頁
 - Canvas 
   - [ ] 方塊不可破壞
   - [ ] 移除光影（簡單）
