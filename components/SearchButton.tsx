@@ -1,13 +1,12 @@
-import siteMetadata from "@/data/siteMetadata";
+'use client';
+
+import { useKBar } from "kbar";
 
 const SearchButton = () => {
-  if (siteMetadata.search?.provider !== "algolia" && siteMetadata.search?.provider !== "kbar") {
-    return <></>;
-  }
+  const { query } = useKBar();
 
   return (
-    /* TODO: fix button */
-    <button aria-label="Search">
+    <button aria-label="Search" onClick={query.toggle}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
