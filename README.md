@@ -45,8 +45,41 @@ npm run build       # 編譯專案
 - `unist-util-visit`。
 
 # 開發日誌
-- 搜尋欄待修：使用 kbar。
-- `npm audit fix`。
+- 處理所有 `TODO`
+- 移除舊有套件與檔案
+  - [ ] `/app/articleHierarchy.json`
+  - [ ] `/data/Article`
+  - [ ] `/data/headerNavLinks.ts`
+  - [ ] `/data/siteMetadata.js`
+- 修復 SEO 相關檔案
+  - [ ] `/app/robots.tsx`
+  - [ ] `/scripts/rss.tsx`
+  - [ ] `/app/seo.tsx`
+  - [ ] `/app/sitemap.tsx`
+- 修復套件相依問題
+  - [ ] 更新所有套件
+  - [ ] `npm audit fix`
+- 動態更新文章的 metadata
+  - [ ] nodemon
+- 文章需求
+  - [ ] 更新 author 頁面
+  - [ ] 新增 category 頁面
+- 美術風格
+  - [ ] kbar 搜尋欄
+  - [ ] Logo
+  - [ ] 客製化或季節性網站配色
+  - [ ] 所有文章頁面設計
+  - [ ] 首頁設計（等文章充足）
+- 網站元素
+  - [ ] 可放大的 Image
+  - [ ] 引用系統
+- Canvas 
+  - [ ] 方塊不可破壞
+  - [ ] 移除光影（簡單）
+  - [ ] 新增光影選項（困難）
+- 維基化
+  - [ ] 帳號系統
+  - [ ] 文章上傳、編輯與審核機制
 
 # 歷史
 - 2024/12/28：重啟專案
