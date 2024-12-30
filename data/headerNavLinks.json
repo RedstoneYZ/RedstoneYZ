@@ -1,0 +1,7 @@
+[
+  { "href": "/", "title": "Home" },
+  { "href": "/article", "title": "Article" },
+  { "href": "/canvas", "title": "Canvas" },
+  { "href": "/category", "title": "Categories" },
+  { "href": "/about", "title": "About" }
+]

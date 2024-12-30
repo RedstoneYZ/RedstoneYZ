@@ -47,9 +47,9 @@ npm run build       # 編譯專案
 # 開發日誌
 - 處理所有 `TODO`
 - 移除舊有套件與檔案
-  - [ ] `/app/articleHierarchy.json`
-  - [ ] `/data/Article`
-  - [ ] `/data/headerNavLinks.ts`
+  - [x] `/app/articleHierarchy.json`
+  - [x] `/data/Article`
+  - [x] `/data/headerNavLinks.ts`
   - [ ] `/data/siteMetadata.js`
 - 修復 SEO 相關檔案
   - [ ] `/app/robots.tsx`
