@@ -12,10 +12,10 @@ import Image from "@/components/Image";
 
 ## 電源
 **紅石火把**（Redstone Torch）就如同火把一樣，可以被放置在地面上（方塊的頂部），也可以被放置在牆上（方塊的側面）。在一般情況下，紅石火把會是被點亮的，這個時候紅石火把本身與它正上方的方塊都會被強充能到等級 15，因此可以點亮相鄰的紅石燈。
-<Image src="/images/tutorials/torch/power.png" alt="紅石火把與上相鄰方塊都會被充能" width={500} priority />
+<Image src="/images/tutorial/torch/power.png" alt="紅石火把與上相鄰方塊都會被充能" width={500} priority />
 
 但是紅石火把有一點需要特別注意，雖然紅石火把本身是強充能方塊，但被紅石火把附著的方塊並不會被啟動，從下圖就可以看出，紅石火把所附著的紅石燈並沒有被點亮。
-<Image src="/images/tutorials/torch/not-powered.png" alt="紅石火把不會啟動附著方塊" width={500} />
+<Image src="/images/tutorial/torch/not-powered.png" alt="紅石火把不會啟動附著方塊" width={500} />
 
 這時候可能就會有人好奇了，明明紅石火把是電源，照理來說與電源相鄰的方塊應該要被啟動才對，為什麼只有附著的方塊沒有被啟動呢？其實，有這個特例的出現，是因為被附著的方塊承擔著比「被紅石火把啟動」還要重大的責任，那就是「信號反轉」。
 
@@ -23,15 +23,15 @@ import Image from "@/components/Image";
 訊號反轉指的是，當一根紅石火把的附著方塊被充能時，該紅石火把就會被熄滅，而熄滅的紅石火把本身不會發出任何訊號，也不會對正上方的方塊充能。當附著方塊的充能狀態改變時，紅石火把會延遲 2 個遊戲刻才會做出改變明暗的反應。
 
 從下圖可以看出，只要紅石火把附著在充能方塊上，無論那個方塊是強充能還是弱充能方塊，該紅石火把就會處於熄滅狀態。
-<Image src="/images/tutorials/torch/invert.png" alt="被充能方塊熄滅的紅石火把" width={500} />
+<Image src="/images/tutorial/torch/invert.png" alt="被充能方塊熄滅的紅石火把" width={500} />
 
 如果把附著方塊的充能狀態當成輸入，紅石火把的狀態當成輸出，就可以發現當輸入有訊號時，輸出就不會有訊號；但當輸入沒有訊號時，輸出就會有訊號。簡單來講，輸入輸出的訊號有無會是相反的，而這種特性正好對應到了最簡單的邏輯閘——「NOT Gate」。
 
 可能有人又會好奇，把訊號從有轉成無、把無轉成有的意義在哪裡？這邊就以一個活塞陷阱來當例子說明。
-<Image src="/images/tutorials/torch/trap-unactivated.png" alt="簡單的活塞陷阱" width={500} />
+<Image src="/images/tutorial/torch/trap-unactivated.png" alt="簡單的活塞陷阱" width={500} />
 
 在上圖的例子中，在壓力版沒有被啟動的情況下，黃色混凝土方塊不會被紅石粉充能，所以附著在混凝土上的紅石火把會被點亮，啟動相鄰的紅石粉，紅石粉再啟動活塞，因此活塞在機器閒置時會是展開的。
-<Image src="/images/tutorials/torch/trap-activated.png" alt="活塞陷阱被啟動時" width={500} />
+<Image src="/images/tutorial/torch/trap-activated.png" alt="活塞陷阱被啟動時" width={500} />
 
 當有生物踩在壓力板上時，黃色混凝土被紅石粉充能，因此紅石火把會被熄滅，與紅石火把相鄰的紅石粉也會跟著熄滅，因此活塞會縮回，讓經過的生物或玩家有機會掉進洞中。
 
