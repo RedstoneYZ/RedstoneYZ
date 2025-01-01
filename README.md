@@ -52,9 +52,9 @@ npm run build       # 編譯專案
   - [ ] `/data/siteMetadata.js`
 - 修復 SEO 相關檔案
   - [ ] `/app/robots.tsx`
-  - [ ] `/scripts/rss.tsx`
   - [ ] `/app/seo.tsx`
   - [ ] `/app/sitemap.tsx`
+  - [ ] `/scripts/rss.tsx`
 - 修復套件相依問題
   - [ ] 更新所有套件
   - [ ] `npm audit fix`
