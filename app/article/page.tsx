@@ -16,7 +16,7 @@ export default function Article() {
             className="border-b border-slate-400 px-2 py-5 hover:bg-gray-100 dark:hover:bg-gray-900"
             key={i}
           >
-            <div className="text-gray-400">{formatDate(atc.created, "zh-tw")}</div>
+            <div className="text-gray-400">{formatDate(atc.created)}</div>
             <div className="my-3">
               <Link href={atc.link} className="text-2xl font-bold">
                 {atc.title}
