@@ -58,8 +58,6 @@ npm run build       # 編譯專案
 - 修復套件相依問題
   - [ ] 更新所有套件
   - [ ] `npm audit fix`
-- 動態更新文章的 metadata
-  - [ ] nodemon
 - 文章需求
   - [ ] 更新 author 頁面
   - [ ] 新增 category 頁面

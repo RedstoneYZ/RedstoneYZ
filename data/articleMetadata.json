@@ -1,6 +1,15 @@
 {
   "computer": {
     "calculator": {
+      "page": {
+        "title": "紅石電腦．啟動！",
+        "created": "2024-03-29",
+        "author": "Zollo757347",
+        "categories": [
+          "computer"
+        ],
+        "link": "/article/computer/calculator"
+      },
       "adder": {
         "page": {
           "title": "計算機的第一步．加法器",
@@ -12,15 +21,6 @@
           ],
           "link": "/article/computer/calculator/adder"
         }
-      },
-      "page": {
-        "title": "紅石電腦．啟動！",
-        "created": "2024-03-29",
-        "author": "Zollo757347",
-        "categories": [
-          "computer"
-        ],
-        "link": "/article/computer/calculator"
       }
     }
   },
@@ -36,49 +36,6 @@
           "notorand"
         ],
         "link": "/article/concepts/notorand"
-      }
-    }
-  },
-  "general": {
-    "get_started": {
-      "page": {
-        "title": "在一切開始之前……",
-        "created": "2024-03-23",
-        "author": "Zollo757347",
-        "categories": [
-          "general"
-        ],
-        "link": "/article/general/get_started"
-      }
-    },
-    "nouns": {
-      "page": {
-        "title": "一些你需要的名詞",
-        "created": "2024-03-23",
-        "author": "Zollo757347",
-        "categories": [
-          "general"
-        ],
-        "link": "/article/general/nouns"
-      }
-    }
-  },
-  "machine": {
-    "item_sorter": {
-      "page": {
-        "title": "大型農場必備．物品分類器",
-        "version": [
-          "1.5",
-          "1.21.4"
-        ],
-        "created": "2025-01-01",
-        "author": "Zollo757347",
-        "categories": [
-          "machine",
-          "item"
-        ],
-        "summary": "不管是哪一種農場，只要擴大規模之後，蒐集掉落物的箱子就會充滿各種物品，變得雜亂不堪，每次要拿出特定的物品時都還要東翻西找，相當不方便。這時候你就需要這篇文章的主題：物品分類器。物品分類器可以幫你把任何可堆疊的物品分類成箱，讓你下次要拿東西時更加快速方便。",
-        "link": "/article/machine/item_sorter"
       }
     }
   },
@@ -125,6 +82,49 @@
           "redstone"
         ],
         "link": "/article/redstone/transmit"
+      }
+    }
+  },
+  "machine": {
+    "item_sorter": {
+      "page": {
+        "title": "大型農場必備．物品分類器",
+        "version": [
+          "1.5",
+          "1.21.4"
+        ],
+        "created": "2025-01-01",
+        "author": "Zollo757347",
+        "categories": [
+          "machine",
+          "item"
+        ],
+        "summary": "不管是哪一種農場，只要擴大規模之後，蒐集掉落物的箱子就會充滿各種物品，變得雜亂不堪，每次要拿出特定的物品時都還要東翻西找，相當不方便。這時候你就需要這篇文章的主題：物品分類器。物品分類器可以幫你把任何可堆疊的物品分類成箱，讓你下次要拿東西時更加快速方便。",
+        "link": "/article/machine/item_sorter"
+      }
+    }
+  },
+  "general": {
+    "get_started": {
+      "page": {
+        "title": "在一切開始之前……",
+        "created": "2024-03-23",
+        "author": "Zollo757347",
+        "categories": [
+          "general"
+        ],
+        "link": "/article/general/get_started"
+      }
+    },
+    "nouns": {
+      "page": {
+        "title": "一些你需要的名詞",
+        "created": "2024-03-23",
+        "author": "Zollo757347",
+        "categories": [
+          "general"
+        ],
+        "link": "/article/general/nouns"
       }
     }
   }
