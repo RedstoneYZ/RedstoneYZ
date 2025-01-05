@@ -1,12 +1,6 @@
 /.next
 /node_modules
 
-/build
-*.xml
-
-/public/feed.xml
-/public/search.json
-
 .DS_Store
 
 /data/articleMetadata.json
