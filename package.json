@@ -5,7 +5,7 @@
   "scripts": {
     "start": "next start",
     "dev": "next dev",
-    "build": "next build && node ./scripts/postbuild.mjs",
+    "build": "next build",
     "lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
     "atlas": "node ./scripts/generateAtlas.mjs"
   },

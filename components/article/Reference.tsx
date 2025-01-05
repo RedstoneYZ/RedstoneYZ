@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
 import { useEffect } from "react";
 import Link from "@/components/Link";
-import { Reference, useReferences } from "@/providers/ReferenceProvider";
+import type { Reference } from "@/providers/ReferenceProvider";
+import { useReferences } from "@/providers/ReferenceProvider";
 
 export function Citation(ref: Reference) {
   const { registerReference } = useReferences();
@@ -13,9 +14,7 @@ export function Citation(ref: Reference) {
 
   return (
     <sup id={`citation-${ref.id}`}>
-      <Link href={`#reference-${ref.id}`}>
-        [{ref.id}]
-      </Link>
+      <Link href={`#reference-${ref.id}`}>[{ref.id}]</Link>
     </sup>
   );
 }

@@ -18,11 +18,11 @@ const Image = ({ width: _width, height: _height, ...rest }: ImageProps) => {
   height = width && !height ? width / ratio : height;
 
   return (
-    <div className="my-3 w-full flex justify-center">
-      <div className="transition transform duration-150 ease-in-out hover:scale-[1.05] hover:cursor-pointer rounded-lg overflow-hidden">
+    <div className="my-3 flex w-full justify-center">
+      <div className="transform overflow-hidden rounded-lg transition duration-150 ease-in-out hover:scale-[1.05] hover:cursor-pointer">
         <NextImage
           {...rest}
-          className="transition transform duration-150 ease-in-out hover:scale-[1.05]"
+          className="transform transition duration-150 ease-in-out hover:scale-[1.05]"
           width={width}
           height={height}
           // @ts-ignore a type issue that should be a bug

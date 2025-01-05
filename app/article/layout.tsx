@@ -37,7 +37,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-col border-b border-solid border-slate-300 py-6 dark:border-slate-600">
             <div className="my-1 text-gray-400">作者：{author}</div>
             <div className="my-1 text-gray-400">發布日期：{formatDate(created)}</div>
-            {updated ? <div className="my-1 text-gray-400">更新日期：{formatDate(updated)}</div> : <></>}
+            {updated ? (
+              <div className="my-1 text-gray-400">更新日期：{formatDate(updated)}</div>
+            ) : (
+              <></>
+            )}
           </div>
           <div className="flex flex-col border-b border-solid border-slate-300 py-6 dark:border-slate-600">
             <div className="my-1 text-gray-400">標籤</div>
