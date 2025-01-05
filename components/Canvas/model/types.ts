@@ -164,6 +164,29 @@ export interface BlockInternal {
   source: boolean;
 }
 
+export interface ParticleOption {
+  engine: Engine;
+  x: number;
+  y: number;
+  z: number;
+
+  type: BlockType;
+}
+
+export interface ParticleData {
+  x: number;
+  y: number;
+  z: number;
+
+  textureX1: number;
+  textureY1: number;
+  textureX2: number;
+  textureY2: number;
+
+  type: BlockType;
+  randomSize: number;
+}
+
 export type Vector2 = [number, number];
 export type Vector3 = [number, number, number];
 export type Vector4 = [number, number, number, number];
