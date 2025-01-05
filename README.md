@@ -23,26 +23,6 @@ npm run build       # 編譯專案
 
 4. 如果要提交 PR，請提交至 dev 分支上，並且先在本地 lint 並 build 一次，確定沒有錯誤再提交。
 
-# 使用套件
-- `@next/mdx`：讓我們可以使用 MDX 來撰寫文章。
-- `@tailwindcss/forms`：讓輸入標籤的客製化變得比較容易。
-- `@tailwindcss/typography`：新增許多可以自動排版的 HTML 類別。
-- `autoprefixer`：根據 [Can I use](https://caniuse.com/) 調整 CSS 檔案以支援不同的瀏覽器。
-- `esbuild`。
-- `image-size`：用來取得各種圖檔的長寬。
-- `next`。
-- `next-themes`：支援深色模式。
-- `postcss`。
-- `react`。
-- `react-dom`。
-- `rehype-katex`：Latex 相關。
-- `rehype-prism-plus`：產生程式碼區塊的 HTML。
-- `remark`：處理 Markdown 檔的套件。
-- `remark-gfm`：支援 GFM 語法。
-- `remark-math`：Latex 相關。
-- `tailwindcss`。
-- `unist-util-visit`。
-
 # 開發日誌
 - 處理所有 `TODO`
 - 移除舊有套件與檔案
@@ -50,9 +30,6 @@ npm run build       # 編譯專案
   - [x] `/data/Article`
   - [x] `/data/headerNavLinks.ts`
   - [ ] `/data/siteMetadata.js`
-- 修復套件相依問題
-  - [ ] 更新所有套件
-  - [ ] `npm audit fix`
 - 文章需求
   - [ ] 更新 author 頁面
   - [ ] 新增 category 頁面
