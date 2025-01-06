@@ -37,7 +37,7 @@ export default function Main() {
                       <div className="space-y-6">
                         <div>
                           <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link href={link} className="text-gray-900 dark:text-gray-100">
+                            <Link href={link} className="!text-gray-900 dark:!text-gray-100">
                               {title}
                             </Link>
                           </h2>

@@ -34,7 +34,7 @@ npm run build       # 編譯專案
   - [ ] 更新 author 頁面
   - [ ] 新增 category 頁面
 - 美術風格
-  - [ ] kbar 搜尋欄
+  - [x] kbar 搜尋欄
   - [ ] Logo
   - [ ] 客製化或季節性網站配色
   - [ ] 所有文章頁面設計
