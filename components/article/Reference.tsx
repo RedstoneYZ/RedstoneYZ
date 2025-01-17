@@ -22,13 +22,20 @@ export function Citation(ref: Reference) {
 export function ReferenceList() {
   const { references } = useReferences();
 
+  if (!references.length) {
+    return <></>;
+  }
+
   return (
-    <ol>
-      {references.map((ref) => (
-        <li key={ref.id} id={`reference-${ref.id}`}>
-          <Link href={ref.href}>{ref.text ?? ref.href}</Link>
-        </li>
-      ))}
-    </ol>
+    <>
+      <h2>參考</h2>
+      <ol>
+        {references.map((ref) => (
+          <li key={ref.id} id={`reference-${ref.id}`}>
+            <Link href={ref.href}>{ref.text ?? ref.href}</Link>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }

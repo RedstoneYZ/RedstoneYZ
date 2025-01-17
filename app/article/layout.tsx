@@ -7,6 +7,9 @@ import formatDate from "@/utils/formatDate";
 import Link from "@/components/Link";
 import getMetadata from "@/utils/getMetadata";
 import ReferenceProvider from "@/providers/ReferenceProvider";
+import { ReferenceList } from "@/components/article/Reference";
+import GalleryProvider from "@/providers/GalleryProvider";
+import { Gallery } from "@/components/article/Gallery";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
@@ -31,7 +34,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
       <div className="grid grid-flow-row grid-cols-4 gap-8 px-2">
         <ReferenceProvider>
-          <div className="col-span-4 my-3 xl:col-span-3 xl:pb-0">{children}</div>
+          <GalleryProvider>
+            <div className="col-span-4 my-3 xl:col-span-3 xl:pb-0">
+              {children}
+              <ReferenceList />
+              <Gallery />
+            </div>
+          </GalleryProvider>
         </ReferenceProvider>
         <div className="col-span-4 flex flex-col xl:col-span-1 xl:pb-0">
           <div className="flex flex-col border-b border-solid border-slate-300 py-6 dark:border-slate-600">
