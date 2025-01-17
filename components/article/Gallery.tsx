@@ -52,8 +52,10 @@ export function Image({ width: _width, height: _height, ...rest }: ImageProps) {
   );
 }
 
-const arrowStyle = "flex h-full w-20 transform items-center justify-center bg-black/[0.1] transition duration-150 dark:bg-white/[0.1]";
-const arrowHoverStyle = "hover:scale-110 hover:cursor-pointer hover:bg-black/[0.15] hover:dark:bg-white/[0.15]";
+const arrowStyle =
+  "flex h-full w-20 transform items-center justify-center bg-black/[0.1] transition duration-150 dark:bg-white/[0.1]";
+const arrowHoverStyle =
+  "hover:scale-110 hover:cursor-pointer hover:bg-black/[0.15] hover:dark:bg-white/[0.15]";
 
 export function Gallery() {
   const { images, index, setIndex } = useGallery();
@@ -63,25 +65,44 @@ export function Gallery() {
 
   return (
     <div className="fixed left-0 top-0 z-10 flex h-full w-full justify-between backdrop-blur">
-      <div className="absolute h-full w-full" onClick={() => setIndex(-1)}></div>
+      <div
+        className="absolute h-full w-full"
+        onClick={() => setIndex(-1)}
+        onKeyDown={(e) => {
+          if (e.code === "Enter") setIndex(-1);
+        }}
+        role="button"
+        tabIndex={0}
+      ></div>
       <div
         className={index === 0 ? arrowStyle : `${arrowStyle} ${arrowHoverStyle}`}
         onClick={() => setIndex((i) => (i === 0 ? 0 : i - 1))}
+        onKeyDown={(e) => {
+          if (e.code === "Enter") setIndex((i) => (i === 0 ? 0 : i - 1));
+        }}
+        role="button"
+        tabIndex={0}
       >
         <span style={{ visibility: index === 0 ? "hidden" : "visible" }}>{"<"}</span>
       </div>
       <div className="m-10 flex w-[90%] items-center justify-center">
-        <img
-          className="h-full w-full object-scale-down"
+        <NextImage
+          className="h-auto w-full object-scale-down"
           src={image.href}
           alt={image.alt}
           width={0}
           height={0}
+          sizes="100vw"
         />
       </div>
       <div
         className={index === images.length - 1 ? arrowStyle : `${arrowStyle} ${arrowHoverStyle}`}
         onClick={() => setIndex((i) => (i === images.length - 1 ? i : i + 1))}
+        onKeyDown={(e) => {
+          if (e.code === "Enter") setIndex((i) => (i === images.length - 1 ? i : i + 1));
+        }}
+        role="button"
+        tabIndex={0}
       >
         <span style={{ visibility: index === images.length - 1 ? "hidden" : "visible" }}>
           {">"}
