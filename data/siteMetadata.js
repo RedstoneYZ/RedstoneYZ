@@ -13,6 +13,13 @@ const siteMetadata = {
   socialBanner: "/images/twitter-card.png",
   email: "redstoneYZ@gmail.com",
   github: "https://https://github.com/RedstoneYZ",
+  navLinks: [
+    { href: "/", title: "首頁" },
+    { href: "/article", title: "所有文章" },
+    { href: "/canvas", title: "測試地圖" },
+    { href: "/category", title: "所有分類" },
+    { href: "/about", title: "關於" },
+  ],
 };
 
 module.exports = siteMetadata;

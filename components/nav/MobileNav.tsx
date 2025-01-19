@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "./Link";
-import headerNavLinks from "@/data/headerNavLinks.json";
+import Link from "../Link";
+import { navLinks } from "@/data/siteMetadata";
 
 const MobileNav = () => {
   const [navShow, setNavShow] = useState(false);
@@ -57,7 +57,7 @@ const MobileNav = () => {
           </button>
         </div>
         <nav className="fixed mt-8 h-full">
-          {headerNavLinks.map((link) => (
+          {navLinks.map((link) => (
             <div key={link.title} className="px-12 py-4">
               <Link
                 href={link.href}

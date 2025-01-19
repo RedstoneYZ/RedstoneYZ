@@ -25,11 +25,6 @@ npm run build       # 編譯專案
 
 # 開發日誌
 - 處理所有 `TODO`
-- 移除舊有套件與檔案
-  - [x] `/app/articleHierarchy.json`
-  - [x] `/data/Article`
-  - [x] `/data/headerNavLinks.ts`
-  - [ ] `/data/siteMetadata.js`
 - 文章需求
   - [ ] 更新 author 頁面
   - [ ] 新增 category 頁面

@@ -1,9 +1,9 @@
 import siteMetadata from "@/data/siteMetadata";
-import headerNavLinks from "@/data/headerNavLinks.json";
+import { navLinks } from "@/data/siteMetadata";
 import Link from "./Link";
-import MobileNav from "./MobileNav";
-import ThemeSwitch from "./ThemeSwitch";
-import SearchButton from "./SearchButton";
+import MobileNav from "./nav/MobileNav";
+import ThemeSwitch from "./nav/ThemeSwitch";
+import SearchButton from "./nav/SearchButton";
 
 const Header = () => {
   return (
@@ -22,7 +22,7 @@ const Header = () => {
         </Link>
       </div>
       <div className="flex items-center space-x-4 leading-5 md:space-x-6">
-        {headerNavLinks
+        {navLinks
           .filter((link) => link.href !== "/")
           .map((link) => (
             <Link

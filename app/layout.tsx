@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SectionContainer from "@/components/SectionContainer";
 import siteMetadata from "@/data/siteMetadata";
 import KBarProvider from "@/providers/KbarProvider";
 import ThemeProvider from "@/providers/ThemeProvider";
@@ -72,17 +71,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-gray-200">
-        <ThemeProvider>
-          <KBarProvider>
-            <SectionContainer>
+        <section className="mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-5xl xl:px-0">
+          <ThemeProvider>
+            <KBarProvider>
               <div className="flex h-screen flex-col justify-between font-sans">
                 <Header />
                 <main className="mb-auto">{children}</main>
                 <Footer />
               </div>
-            </SectionContainer>
-          </KBarProvider>
-        </ThemeProvider>
+            </KBarProvider>
+          </ThemeProvider>
+        </section>
       </body>
     </html>
   );
