@@ -3,18 +3,19 @@ import type { LinkProps } from "next/link";
 import type { AnchorHTMLAttributes } from "react";
 
 const linkClass =
-  "text-primary-600 dark:text-primary-500 hover:text-primary-400 dark:hover:text-primary-300";
+  "!text-primary-600 dark:!text-primary-500 hover:!text-primary-400 dark:!hover:text-primary-300";
 
 const Link = ({
   className,
   href,
+  plain,
   children,
   ...rest
-}: LinkProps & AnchorHTMLAttributes<HTMLAnchorElement>) => {
+}: AnchorHTMLAttributes<HTMLAnchorElement> & LinkProps & ExtraLinkProps) => {
   const isInternalLink = href && href.startsWith("/");
   const isAnchorLink = href && href.startsWith("#");
 
-  className = linkClass + " " + className;
+  className = plain ? className : linkClass + " " + className;
 
   if (isInternalLink) {
     return (
@@ -38,5 +39,9 @@ const Link = ({
     </a>
   );
 };
+
+interface ExtraLinkProps {
+  plain?: boolean;
+}
 
 export default Link;

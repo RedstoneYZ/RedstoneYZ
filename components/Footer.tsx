@@ -10,21 +10,10 @@ export default function Footer() {
           <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} size={6} />
           <SocialIcon kind="github" href={siteMetadata.github} size={6} />
         </div>
-        <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <div>{siteMetadata.author}</div>
-          <div>{` • `}</div>
-          <div>{`© ${new Date().getFullYear()}`}</div>
-          <div>{` • `}</div>
-          <Link className="!text-gray-500 dark:!text-gray-400" href="/">
+        <div className="mb-16 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
+          <div>{`© 2024-${new Date().getFullYear()}`}</div>
+          <Link plain href="/">
             {siteMetadata.title}
-          </Link>
-        </div>
-        <div className="mb-8 text-sm">
-          <Link
-            className="!text-gray-500 dark:!text-gray-400"
-            href="https://github.com/timlrx/tailwind-nextjs-starter-blog"
-          >
-            Tailwind Nextjs Theme
           </Link>
         </div>
       </div>

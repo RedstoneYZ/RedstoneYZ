@@ -37,7 +37,7 @@ export default function Main() {
                       <div className="space-y-6">
                         <div>
                           <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link href={link} className="!text-gray-900 dark:!text-gray-100">
+                            <Link href={link} plain>
                               {title}
                             </Link>
                           </h2>
@@ -54,10 +54,9 @@ export default function Main() {
                       <div className="text-base font-medium leading-6">
                         <Link
                           href={link}
-                          className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
                           aria-label={`Read more: "${title}"`}
                         >
-                          Read more &rarr;
+                          繼續閱讀 &rarr;
                         </Link>
                       </div>
                     </div>
@@ -72,10 +71,9 @@ export default function Main() {
         <div className="flex justify-end text-base font-medium leading-6">
           <Link
             href="/article"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
             aria-label="All posts"
           >
-            All Posts &rarr;
+            所有文章 &rarr;
           </Link>
         </div>
       )}

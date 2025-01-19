@@ -18,14 +18,14 @@ export default function Article() {
           >
             <div className="text-gray-400">{formatDate(atc.created)}</div>
             <div className="my-3">
-              <Link href={atc.link} className="text-2xl font-bold !text-black dark:!text-white">
+              <Link plain href={atc.link} className="text-2xl font-bold">
                 {atc.title}
               </Link>
             </div>
             <div>
               {atc.categories.map((v, i) => (
                 <Link
-                  className="mr-3 text-sm font-medium uppercase text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                  className="mr-3 text-sm font-medium uppercase"
                   key={i}
                   href={`/category/${v}`}
                 >

@@ -36,9 +36,6 @@ export default function getMetadata(path: string): Article {
   if (!result.summary) {
     throw new Error(`[[Metadata Error]] Missing summary for ${path}`);
   }
-  if (!result.version) {
-    throw new Error(`[[Metadata Error]] Missing summary for ${path}`);
-  }
 
   return result;
 }

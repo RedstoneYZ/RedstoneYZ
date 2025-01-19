@@ -20,6 +20,7 @@ export default function NotFound() {
             2.0的愚人節版本，其中包含紅石蟲。這些蟲會在紅石線訊號強度快速變化的地方生成，就是在跟你提醒：你的線路出bug了！
           </p>
           <Link
+            plain
             href="/"
             className="focus:shadow-outline-blue inline rounded-lg border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium leading-5 text-white shadow transition-colors duration-150 hover:bg-blue-700 focus:outline-none dark:hover:bg-blue-500"
           >
