@@ -5,10 +5,8 @@ export interface Article {
   author: string;
   created: string;
   updated?: string;
-  // TODO: Version should be a required field
-  version?: string[];
-  // TODO: Summary should be a required field
-  summary?: string;
+  version?: string;
+  summary: string;
   categories: string[];
   link: string;
 }

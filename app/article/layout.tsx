@@ -24,13 +24,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div>
       <div className="flex flex-col items-center justify-between border-b-2 border-solid border-slate-400 p-5">
         <div className="my-3 text-4xl font-bold md:text-5xl">{title}</div>
-        {version ? (
-          <div className="text-gray-400">
-            Java Edition {version[0]} - {version[1]}
-          </div>
-        ) : (
-          <></>
-        )}
+        <div className="text-gray-400">{version}</div>
+
       </div>
       <div className="grid grid-flow-row grid-cols-4 gap-8 px-2">
         <ReferenceProvider>

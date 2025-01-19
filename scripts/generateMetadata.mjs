@@ -1,4 +1,5 @@
 import fs from "fs";
+import { latestVersion } from "@/data/siteMetadata";
 
 const PATH = "./app/article";
 
@@ -7,7 +8,8 @@ fs.writeFileSync("./data/articleMetadata.json", JSON.stringify(readData(PATH, ""
 function readData(fullPath, path) {
   if (path.endsWith(".mdx")) {
     const content = fs.readFileSync(fullPath).toString();
-    return parseMetadata(content);
+    const metadata = parseMetadata(content);
+    return format(metadata);
   }
 
   if (fs.statSync(fullPath).isDirectory()) {
@@ -48,4 +50,14 @@ function parseMetadata(content) {
         return [key, valueMatch[1].split(/ *, */)];
       }),
   );
+}
+
+function format(metadata) {
+  const { version } = metadata;
+  if (version.endsWith("+")) {
+    const ver = version.substring(0, version.length - 2)
+    metadata.version = `Java ${ver} - ${latestVersion}`
+  }
+  metadata.version = `Java ${version}`;
+  return metadata;
 }

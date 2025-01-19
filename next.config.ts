@@ -6,6 +6,7 @@ import rehypePrismPlus from 'rehype-prism-plus';
 import { Article, NestedArticle } from "./types";
 import strictEqual from "./utils/strictEqual";
 import path from "path";
+import { latestVersion } from "./data/siteMetadata";
 
 const nextConfig: NextConfig = {
   webpack: (config, { isServer }) => {
@@ -120,6 +121,16 @@ function parseMetadata(path: string): Article | void {
     "app".length,
     path.length - "/page.mdx".length,
   );
+
+  if (result.version) {
+    if (result.version.endsWith("+")) {
+      const ver = result.version.substring(0, result.version.length - 1);
+      result.version = `Java ${ver} - ${latestVersion}`;
+    }
+    else {
+      result.version = `Java ${result.version}`;
+    }
+  }
 
   return result
 }

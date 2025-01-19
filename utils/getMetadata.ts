@@ -6,20 +6,20 @@ export default function getMetadata(path: string): Article {
   route.shift(); // "" (empty string)
   route.shift(); // "article"
 
-  let map: Record<string, any> = articleMetadata;
+  let map: Record<string, unknown> = articleMetadata;
 
   route.forEach((filename) => {
     if (!(filename in map)) {
       throw new Error(`[[Error]] Metadata not found for ${path}`);
     }
-    map = map[filename as keyof typeof map];
+    map = map[filename as keyof typeof map] as Record<string, unknown>;
   });
 
   if (!("page" in map)) {
     throw new Error(`[[Error]] Metadata not found for ${path}`);
   }
 
-  const result = map.page;
+  const result = map.page as Article;
 
   if (!result.title) {
     throw new Error(`[[Metadata Error]] Missing title for ${path}`);
@@ -32,6 +32,12 @@ export default function getMetadata(path: string): Article {
   }
   if (!result.categories) {
     throw new Error(`[[Metadata Error]] Missing categories for ${path}`);
+  }
+  if (!result.summary) {
+    throw new Error(`[[Metadata Error]] Missing summary for ${path}`);
+  }
+  if (!result.version) {
+    throw new Error(`[[Metadata Error]] Missing summary for ${path}`);
   }
 
   return result;

@@ -22,7 +22,7 @@ export default function Main() {
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!articles.length && "No articles found."}
           {articles.slice(0, MAX_DISPLAY).map((post, i) => {
-            const { created, title, categories, link } = post;
+            const { created, title, categories, link, summary } = post;
             return (
               <li key={i} className="py-12">
                 <article>
@@ -47,9 +47,9 @@ export default function Main() {
                             ))}
                           </div>
                         </div>
-                        {/* TODO: <div className="prose max-w-none text-gray-500 dark:text-gray-400">
+                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
                           {summary}
-                        </div> */}
+                        </div>
                       </div>
                       <div className="text-base font-medium leading-6">
                         <Link

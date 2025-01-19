@@ -18,7 +18,7 @@ export default function Article() {
           >
             <div className="text-gray-400">{formatDate(atc.created)}</div>
             <div className="my-3">
-              <Link href={atc.link} className="text-2xl font-bold">
+              <Link href={atc.link} className="text-2xl font-bold !text-black dark:!text-white">
                 {atc.title}
               </Link>
             </div>
@@ -33,7 +33,7 @@ export default function Article() {
                 </Link>
               ))}
             </div>
-            {/* TODO: <div>{atc.summary}</div> */}
+            <div>{atc.summary}</div>
           </div>
         ))}
       </div>
