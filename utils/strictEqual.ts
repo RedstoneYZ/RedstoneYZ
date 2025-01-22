@@ -1,4 +1,4 @@
-export default function strictEqual(thing1: any, thing2: any) {
+export default function strictEqual<T>(thing1: T, thing2: T) {
   if (typeof thing1 === "number" && typeof thing2 === "number" && isNaN(thing1) && isNaN(thing2)) {
     return true;
   }

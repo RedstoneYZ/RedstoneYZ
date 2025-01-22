@@ -10,3 +10,11 @@ export interface Article {
   categories: string[];
   link: string;
 }
+
+export interface Author {
+  name: string;
+  avatar: string;
+  emain: string;
+  github: string;
+  link: string;
+}
