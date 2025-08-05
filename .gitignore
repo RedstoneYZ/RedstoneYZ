@@ -5,3 +5,6 @@
 
 /data/articleMetadata.json
 /data/authorMetadata.json
+
+/public/robots.txt
+/public/sitemap*.xml
