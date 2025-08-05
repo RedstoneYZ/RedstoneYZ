@@ -55,8 +55,8 @@ function parseMetadata(content) {
 function format(metadata) {
   const { version } = metadata;
   if (version.endsWith("+")) {
-    const ver = version.substring(0, version.length - 2)
-    metadata.version = `Java ${ver} - ${latestVersion}`
+    const ver = version.substring(0, version.length - 2);
+    metadata.version = `Java ${ver} - ${latestVersion}`;
   }
   metadata.version = `Java ${version}`;
   return metadata;

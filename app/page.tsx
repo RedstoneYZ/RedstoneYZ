@@ -52,10 +52,7 @@ export default function Main() {
                         </div>
                       </div>
                       <div className="text-base font-medium leading-6">
-                        <Link
-                          href={link}
-                          aria-label={`Read more: "${title}"`}
-                        >
+                        <Link href={link} aria-label={`Read more: "${title}"`}>
                           繼續閱讀 &rarr;
                         </Link>
                       </div>
@@ -69,10 +66,7 @@ export default function Main() {
       </div>
       {articles.length > MAX_DISPLAY && (
         <div className="flex justify-end text-base font-medium leading-6">
-          <Link
-            href="/article"
-            aria-label="All posts"
-          >
+          <Link href="/article" aria-label="All posts">
             所有文章 &rarr;
           </Link>
         </div>
