@@ -3,7 +3,7 @@ const siteMetadata = {
   author: "RedstoneYZ",
   headerTitle: "RedstoneYZ 紅石教學網站",
   description: "一個中文導向的紅石教學網站，目前仍位於開發階段。",
-  latestVersion: "1.20.4",
+  latestVersion: "1.20.8",
   language: "zh-TW",
   locale: "zh-TW",
   theme: "system",
