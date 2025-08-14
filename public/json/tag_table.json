@@ -1,0 +1,60 @@
+{
+  "building_block": {
+    "icon": "stone_bricks",
+    "chinese": "建築方塊", 
+    "members": [
+      "stone_bricks", 
+      "glass"
+    ]
+  },
+  "dirt": {
+    "icon": "dirt", 
+    "chinese": "泥土類方塊", 
+    "members": [
+      "dirt",
+      "grass_block",
+      "mycelium",
+      "podzol",
+      "rooted_dirt",
+      "coarse_dirt",
+      "mud",
+      "muddy_mangrove_roots",
+      "moss_block",
+      "pale_moss_block"
+    ]
+  }, 
+  "sugar_cane_placeable": {
+    "icon": "dirt",
+    "chinese": "可種植甘蔗的方塊", 
+    "members": [
+      "#dirt",
+      "#sand"
+    ]
+  }, 
+  "pistons": {
+    "icon": "piston",
+    "chinese": "活塞類方塊", 
+    "members": [
+      "piston",
+      "sticky_piston"
+    ]
+  },
+  "redstone_conductor": {
+    "icon": "smooth_stone", 
+    "chinese": "紅石導體", 
+    "members": [
+      "smooth_stone", 
+      "stone_bricks", 
+      "white_wool"
+    ]
+  },
+  "sand": {
+    "icon": "sand", 
+    "chinese": "沙子類方塊", 
+    "members": [
+      "sand",
+      "red_sand",
+      "suspisious_sand"
+    ]
+  }
+}

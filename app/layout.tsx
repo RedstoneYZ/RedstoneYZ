@@ -1,3 +1,4 @@
+import "styles/style.css";
 import "styles/tailwind.css";
 
 import type { Metadata } from "next";

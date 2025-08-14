@@ -8,6 +8,7 @@ summary: 缺紙了嗎？你需要自動甘蔗機！這篇文章介紹各種主�
 */}
 
 import { Image } from "@/components/article/Gallery";
+import Inventory from "@/components/article/Inventory";
 import Note from "@/components/article/Note";
 import Notice from "@/components/article/Notice";
 
@@ -15,9 +16,7 @@ import Notice from "@/components/article/Notice";
 
 ## 建造
 ### 單片可疊式
-- 需要方塊：
-    - 甘蔗 xN、可種植甘蔗的方塊 xN、實體方塊 xN、任意完整方塊 x7N
-    - 偵測器 xN、紅石粉 xN、活塞 xN
+<Inventory items={[{ id: "redstone", count: 1 }, { id: "observer", count: 1 },{ id: "#pistons", count: 1 },{ id: "#sugar_cane_placeable", count: 1 },{ id: "#redstone_conductor", count: 1 },{ id: "#building_block", count: 7 }]} />
 
 {/* <Image src="/images/tutorial/.png" alt="" width={500} priority /> */}
 
