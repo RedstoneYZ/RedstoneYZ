@@ -1,6 +1,6 @@
 {/*
 title: 農場系列．甘蔗
-version: 1.11+
+version: 1.13+
 created: 2025-08-09
 author: Zollo757347
 categories: [farm]
@@ -16,7 +16,7 @@ import Notice from "@/components/article/Notice";
 
 ## 建造
 ### 單片可疊式
-<Inventory items={[{ id: "redstone", count: 1 }, { id: "observer", count: 1 },{ id: "#pistons", count: 1 },{ id: "#sugar_cane_placeable", count: 1 },{ id: "#redstone_conductor", count: 1 },{ id: "#building_block", count: 7 }]} />
+<Inventory items={[{ id: "#building_block", count: 7 },{ id: "#redstone_conductor", count: 1 },{ id: "#sugar_cane_placeable", count: 1 },{ id: "sugar_cane", count: 1 },{ id: "redstone", count: 1 }, { id: "observer", count: 1 },{ id: "#pistons", count: 1 }]} />
 
 {/* <Image src="/images/tutorial/.png" alt="" width={500} priority /> */}
 
@@ -27,12 +27,51 @@ import Notice from "@/components/article/Notice";
 如果你覺得礦車運轉的聲音太吵，你可以考慮使用泥巴與漏斗的配置，因為泥巴上也能種植甘蔗，再加上泥巴的高度比全磚還低了八分之一，所以漏斗就可以吸到掉落在泥巴上的物品了，只需要把鐵軌換成一系列的漏斗，就不需要忍受礦車吵雜的聲音了。只不過要注意的是，過多的朝天漏斗會導致遊戲卡頓，所以如果希望遊戲順暢一點，還是選擇礦車的方案，再把甘蔗機蓋在遠離主要活動區的地方吧。
 
 ### 批量收割式
-- 需要方塊：
-    - 建築方塊 x???、實體方塊 x???、不動方塊 x???、樹葉 x???、樓梯 x???
-    - 紅石中繼器 x2、紅石粉 x???、偵測器 x???、黏性活塞 x4、史萊姆方塊 x10
-    - 漏斗礦車 x1、鐵軌 x174、動力鐵軌 x50
-- 需要物品：
-    - 水桶 x2、甘蔗 x???
+<Inventory items={[{ id: "#building_block", count: 64 },{ id: "#building_block", count: 64 },{ id: "#building_block", count: 64 },{ id: "#building_block", count: 64 },{ id: "#building_block", count: 19 },{ id: "glass", count: 64 },{ id: "glass", count: 64 },{ id: "glass", count: 64 },{ id: "glass", count: 20 },{ id: "#sugar_cane_placeable", count: 64 },{ id: "#sugar_cane_placeable", count: 64 },{ id: "#sugar_cane_placeable", count: 6 },{ id: "sugar_cane", count: 64 },{ id: "sugar_cane", count: 64 },{ id: "sugar_cane", count: 6 },{ id: "#full_waterlogable_block", count: 34 },{ id: "#redstone_conductor", count: 16 },{ id: "#stairs", count: 10 },{ id: "rail", count: 64 },{ id: "rail", count: 64 },{ id: "rail", count: 36 },{ id: "powered_rail", count: 30 },{ id: "hopper_minecart", count: 1 },{ id: "redstone", count: 13 },{ id: "redstone_torch", count: 1 },{ id: "repeater", count: 2 },{ id: "comparator", count: 1 },{ id: "redstone_block", count: 15 },{ id: "#piston_nonpushable", count: 15 },{ id: "observer", count: 6 },{ id: "slime_block", count: 12 },{ id: "sticky_piston", count: 2 },{ id: "chest", count: 2 },{ id: "hopper", count: 1 },{ id: "water_bucket", count: 1 },{ id: "water_bucket", count: 1 }]} />
+
+建築方塊	180
+紅石方塊	15
+鐵軌	164
+動力鐵軌	30
+
+紅石導體	4
+紅石火把	1
+比較器	1
+紅石粉	1
+儲物箱	2
+漏斗	1
+
+建築方塊	76
+草地	134
+階梯	10
+樹葉	34
+甘蔗	134
+
+建築方塊	16
+玻璃	212
+黑曜石	12
+
+紅石導體	5
+黑曜石	2
+建築方塊	2
+紅石粉	5
+中繼器	1
+偵測器	1
+
+紅石導體	7
+黑曜石	1
+紅石粉	7
+中繼器	1
+偵測器	2
+
+史萊姆	12
+黏性活塞	2
+偵測器	3
+建築方塊	1
+水桶 x2
+
+1.13 - 1.18 把樹葉換成半磚
+1.17 後可以把樹葉拿掉直接換成水源
 
 {/* <Image src="/images/tutorial/.png" alt="" width={500} priority /> */}
 

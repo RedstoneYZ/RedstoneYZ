@@ -11,10 +11,6 @@ type InventoryItem = {
 };
 
 export default function Inventory({ items }: { items: InventoryItem[] }) {
-  if (items.length > 27) {
-    throw new Error("The number of items exceed the capacity.");
-  }
-
   return (
     <div style={{
       width: "100%",
@@ -25,14 +21,14 @@ export default function Inventory({ items }: { items: InventoryItem[] }) {
     >
       <div style={{
         width: 352,
-        height: 136,
+        height: 136 + 108 * ~~(items.length / 27),
         padding: 14,
         display: "grid",
         gridTemplateColumns: "36px 36px 36px 36px 36px 36px 36px 36px 36px",
         gridTemplateRows: "36px 36px 36px",
         backgroundSize: "cover",
         imageRendering: "pixelated",
-        backgroundImage: "url(/images/inventory/inventory.png)"
+        backgroundImage: `url(/images/inventory/inventory_${~~(items.length / 27 + 1) * 3}.png)`
       }}>
         {items.map((item, i) => <Item key={i} item={item} />)}
       </div>
@@ -45,7 +41,7 @@ function Item({ item: { id, count = 1 } }: { item: InventoryItem }) {
 
   let icon: string = id;
   let members: string[] = [];
-  let chinese: string = translation[id as keyof typeof translation];
+  let chinese: string = translation[id as keyof typeof translation] ?? id;
 
   if (id.startsWith("#")) {
     const blocks = parseTags(id.substring(1));
@@ -54,7 +50,7 @@ function Item({ item: { id, count = 1 } }: { item: InventoryItem }) {
 
   const displayText = <span>
     {id.startsWith("#") ? "任何" : ""}{chinese}
-    {members.length ? <><br/><br/>{id.startsWith("#") ? "如" : ""}{members.map(m => translation[m as keyof typeof translation]).join("、")}</> : ""}
+    {members.length ? <><br/><br/>{id.startsWith("#") ? "如" : ""}{members.map(m => translation[m as keyof typeof translation] ?? m).join("、")}</> : ""}
   </span>
 
   return <>
@@ -93,7 +89,7 @@ function Item({ item: { id, count = 1 } }: { item: InventoryItem }) {
             position: "fixed",
             top: tooltip.y,
             left: tooltip.x,
-            maxWidth: 300, 
+            maxWidth: 352, 
             color: "white",
             padding: "6px 8px",
             border: "4px solid black", 
