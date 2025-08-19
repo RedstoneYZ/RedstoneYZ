@@ -29,6 +29,64 @@ import Notice from "@/components/article/Notice";
 ### 批量收割式
 <Inventory items={[{ id: "#building_block", count: 64 },{ id: "#building_block", count: 64 },{ id: "#building_block", count: 64 },{ id: "#building_block", count: 64 },{ id: "#building_block", count: 19 },{ id: "glass", count: 64 },{ id: "glass", count: 64 },{ id: "glass", count: 64 },{ id: "glass", count: 20 },{ id: "#sugar_cane_placeable", count: 64 },{ id: "#sugar_cane_placeable", count: 64 },{ id: "#sugar_cane_placeable", count: 6 },{ id: "sugar_cane", count: 64 },{ id: "sugar_cane", count: 64 },{ id: "sugar_cane", count: 6 },{ id: "#full_waterlogable_block", count: 34 },{ id: "#redstone_conductor", count: 16 },{ id: "#stairs", count: 10 },{ id: "rail", count: 64 },{ id: "rail", count: 64 },{ id: "rail", count: 36 },{ id: "powered_rail", count: 30 },{ id: "hopper_minecart", count: 1 },{ id: "redstone", count: 13 },{ id: "redstone_torch", count: 1 },{ id: "repeater", count: 2 },{ id: "comparator", count: 1 },{ id: "redstone_block", count: 15 },{ id: "#piston_nonpushable", count: 15 },{ id: "observer", count: 6 },{ id: "slime_block", count: 12 },{ id: "sticky_piston", count: 2 },{ id: "chest", count: 2 },{ id: "hopper", count: 1 },{ id: "water_bucket", count: 1 },{ id: "water_bucket", count: 1 }]} />
 
+單片可疊式甘蔗機雖然比較簡單好蓋，但它的缺點是每株甘蔗都需要額外兩格的面積來建造紅石機關，而且每格水源只和一株甘蔗相鄰，對於土地與水源的利用率都不是最好的。為了解決這些問題，這台利用飛行器批量收割的甘蔗機就這樣誕生了。
+
+這種甘蔗機的收割原理是透過飛行器飛過甘蔗田來收割甘蔗，掉落的甘蔗會被底下的漏斗礦車撿起並統一在儲存區卸貨。這台機器最大的優點是飛行器在閒置時會在側邊停放，所以就可以留下大片的空間來種植甘蔗，解決了土地與水源利用率不佳的問題。除此之外，中間的甘蔗田還可以根據需求沿著飛行器的飛行方向擴建，這裡提供剛好能放在一個區塊內的版本。
+
+首先，你需要先準備一個 16x16x7 大小的區域，如果你有強迫症，你可以把這台機器蓋在一個區塊內。第一步，你需要把中間 14x14 的區域鋪上建築方塊，並在建築方塊上依照下圖鋪上鐵軌、動力鐵軌與紅石方塊。當然，你也可以直接把鐵軌鋪在地板上，這樣就不用準備這些建築方塊了。注意下圖中 14x14 區域的左上角會需要空出三格，下一步要在那裡蓋甘蔗的卸貨區。
+
+<Image src="/images/tutorial/farm/sugar_cane/base.png" alt="批量收割式的底座" width={500} priority />
+
+這是上圖的右上角部分的特寫，你可以按下 F3 + G 來確認那個高一格的建築方塊恰好貼齊區塊邊界。
+
+<Image src="/images/tutorial/farm/sugar_cane/chunk_aligned.png" alt="確保機器位於完整的區塊內" width={500} priority />
+
+第二步，你會需要在第一步留下來的空格蓋一個甘蔗卸貨區，到時候漏斗礦車蒐集完掉落的甘蔗後，就會在這裡把甘蔗卸到儲物箱內。要注意的是，漏斗記得要朝向箱子，它才會把接收的甘蔗儲存到箱子內。如果你覺得一個大型儲物箱不夠，你也可以自行擴增儲物空間。
+
+<Image src="/images/tutorial/farm/sugar_cane/unloader.png" alt="批量收割式" width={500} priority />
+
+第三步，你會需要在剛剛鋪設好的鐵軌上方，直接照著下圖的樣式鋪上建築方塊、泥土、樹葉與階梯，完成後這層的高度會與卸貨區最高的方塊齊平，且佔地面積會剛好是 16x16。方塊鋪設完成後，你可以用兩個水桶先在旁邊準備好無限水源，接著再把樹葉與階梯都填滿水。
+
+<Image src="/images/tutorial/farm/sugar_cane/dirt_layer.png" alt="批量收割式的泥土層" width={500} priority />
+
+<Notice>
+1. 在 1.16 或更舊的版本，樹葉是不可以含水的，所以你需要把材料中的樹葉替換成下半磚或階梯。
+2. 在 1.17 或更新的版本，鐵軌不會被水沖走，所以你也可以直接把樹葉換成是單純的水源，但是美觀起見還是建議你放一下，反正樹葉也沒有多稀有。
+</Notice>
+
+第四步，你可以把甘蔗種到剛剛鋪好的泥土上。如果你覺得甘蔗遮擋你蓋農場的視線，等到農場的其他步驟完成後再回來種甘蔗也沒關係。
+
+<Image src="/images/tutorial/farm/sugar_cane/plant_sugar_cane.png" alt="種植甘蔗" width={500} priority />
+
+第五步，你需要在這個農場的邊界圍上四格高的牆壁，注意在農場的兩側，也就是地板的石磚比較厚的兩側，在兩格高的地方要各擺上 6 顆黑曜石，從甘蔗機外看黑曜石會靠牆壁的右側，你可以點開下圖放大圖片看清楚。如果你不希望農場的牆壁是透明的，或是你的玻璃短缺，你完全可以把玻璃換成其他方塊，甘蔗生長是不需要陽光的，所以你甚至可以把農場的屋頂也封起來，只是要小心農場內如果沒有光線會生怪。
+
+<Image src="/images/tutorial/farm/sugar_cane/wall.png" alt="批量收割式" width={500} priority />
+
+第六步，請在卸貨區那側建造如下圖的結構，這個會是飛行器的返回裝置。需要特別特別注意的是，紅石中繼器的延遲要調整到 2 刻，也就是放下中繼器後需要再對它點一次右鍵，否則會讓飛行器壞掉。
+
+<Image src="/images/tutorial/farm/sugar_cane/flying_machine_return.png" alt="飛行器返回裝置" width={500} priority />
+
+第七步，請在卸貨區對面那側建造如下圖的結構，這個是飛行器的啟動裝置，右側朝下的偵測器一看到下方的甘蔗長高後，就會發送紅石訊號啟動飛行器。請注意，這裡中繼器的延遲也需要調整到 2 刻。
+
+<Image src="/images/tutorial/farm/sugar_cane/flying_machine_activate.png" alt="飛行器啟動裝置" width={500} priority />
+
+第八步，在卸貨區對面那側擺上飛行器的本體，如果沒有出錯，那飛行器左翼的 6 個史萊姆方塊會剛好對到牆上的 6 個黑曜石。另外，這個飛行器兩翼的末端是不對稱的，左翼末端是一個面向牆壁的偵測器，右翼末端是單純的建築方塊。
+
+<Image src="/images/tutorial/farm/sugar_cane/flying_machine.png" alt="飛行器本體" width={500} priority />
+
+第九步，你需要在飛行器上依照下圖擺上兩個朝上的偵測器，因為角度比較刁鑽，你可以先在偵測器的側邊擺暫時方塊來幫忙，建議你的暫時方塊不要擺在偵測器的上方，不然你可能會在蓋到一半的時候誤啟飛行器。
+
+<Image src="/images/tutorial/farm/sugar_cane/flying_machine_observer.png" alt="飛行器偵測器" width={500} priority />
+
+最後，你只需要在卸貨區漏斗上的動力鐵軌放上漏斗礦車，這座農場就大功告成了！如果你剛剛略過第四步，記得把甘蔗種上去，不然是在蓋心酸的？
+
+<Image src="/images/tutorial/farm/sugar_cane/hopper_minecart.png" alt="畫龍點睛" width={500} priority />
+
+如果你想要檢查你的甘蔗機能不能正常運作，你可以在這個位置手動放上一個甘蔗來啟動偵測器，如果飛行器有順利啟動並返回原位，那一切就都沒問題了。如果中間出了差錯，就請一步步檢查哪裡蓋錯了，如果你真的走到這一步，嗯，加油。
+
+<Image src="/images/tutorial/farm/sugar_cane/check_working.png" alt="測試甘蔗機" width={500} priority />
+
+{/* 
 建築方塊	180
 紅石方塊	15
 鐵軌	164
@@ -68,13 +126,4 @@ import Notice from "@/components/article/Notice";
 黏性活塞	2
 偵測器	3
 建築方塊	1
-水桶 x2
-
-1.13 - 1.18 把樹葉換成半磚
-1.17 後可以把樹葉拿掉直接換成水源
-
-{/* <Image src="/images/tutorial/.png" alt="" width={500} priority /> */}
-
-單片可疊式甘蔗機雖然比較簡單好蓋，但它的缺點是每株甘蔗都需要額外兩格的面積來建造紅石機關，而且每格水源只和一株甘蔗相鄰，對於土地與水源的利用率都不是最好的。為了解決這些問題，這台利用飛行器批量收割的甘蔗機就這樣誕生了。
-
-這種甘蔗機的收割原理是透過飛行器飛過甘蔗田來收割甘蔗，掉落的甘蔗會被底下的漏斗礦車撿起並統一在儲存區卸貨。這台機器最大的優點是飛行器在閒置時會在側邊停放，所以就可以留下大片的空間來種植甘蔗，解決了土地與水源利用率不佳的問題。除此之外，中間的甘蔗田還可以根據需求沿著飛行器的飛行方向擴建，這裡提供的版本是剛好能放在一個區塊內的大小。
+水桶 x2 */}
