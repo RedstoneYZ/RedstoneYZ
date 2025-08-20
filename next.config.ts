@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import createMDX from "@next/mdx";
 import rehypeKatex from 'rehype-katex';
 import rehypePrismPlus from 'rehype-prism-plus';
 import { watchArticle, watchAuthor } from "./utils/watcher";
@@ -15,7 +16,8 @@ const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 }
 
-const withMDX = require('@next/mdx')({
+const withMDX = createMDX({
+  extension: /\.(md|mdx)$/,
   options: {
     rehypePlugins: [rehypeKatex, rehypePrismPlus]
   }
