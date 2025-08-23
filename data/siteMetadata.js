@@ -7,7 +7,7 @@ const siteMetadata = {
   language: "zh-TW",
   locale: "zh-TW",
   theme: "system",
-  siteUrl: "https://redstone-yz.vercel.app",
+  siteUrl: "https://redstoneyz.vercel.app",
   siteRepo: "https://github.com/RedstoneYZ/RedstoneYZ",
   siteLogo: "/images/logo/logo2-cherry-tree.png",
   socialBanner: "/images/twitter-card.png",

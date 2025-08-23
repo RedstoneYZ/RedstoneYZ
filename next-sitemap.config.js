@@ -1,5 +1,5 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://redstone-yz.vercel.app/',
+  siteUrl: 'https://redstoneyz.vercel.app/',
   generateRobotsTxt: true, 
 }
