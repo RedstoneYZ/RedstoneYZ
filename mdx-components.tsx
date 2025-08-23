@@ -2,6 +2,7 @@ import type { MDXComponents } from 'mdx/types'
 
 import { Image } from "@/components/article/Gallery";
 import Inventory from "@/components/article/Inventory";
+import Link from "@/components/Link";
 import Note from "@/components/article/Note";
 import Notice from "@/components/article/Notice";
 import Table from "@/components/article/Table";
@@ -21,6 +22,7 @@ const components = {
   ),
   Image,
   Inventory,
+  Link,
   Note,
   Notice,
   Table
