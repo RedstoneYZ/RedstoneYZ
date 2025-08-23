@@ -1,6 +1,5 @@
 import chokidar from "chokidar";
 import fs from "fs";
-import path from "path";
 import { Author } from "@/types";
 import strictEqual from "../strictEqual";
 import parseMetadata from "./parseMetadata";
@@ -42,7 +41,7 @@ function mutateEntry(author: Author) {
 }
 
 function deleteEntry(filePath: string) {
-  const route = filePath.split(path.sep);
+  const route = filePath.split(/[\\\/]/);
   const authorId = route[route.length - 2];
   const index = authors.findIndex(a => a.link === `/author/${authorId}`);
 
